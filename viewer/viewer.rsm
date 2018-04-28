@@ -1,0 +1,33 @@
+ResourceMaster v3.651   
+#C 2@1@0@0@
+#N 99@32@AZAazA___  _@AZAaza090___  _@@_@
+#FoHRD@rsm2out@HRD@hrd@@@[HRD-File@0@
+#FoC-Header@rsm2out@C-Header@rsh@@@[C-Header@0@
+#R 0@0@1@1@1@1@
+#M 00010100@0@7728@514@
+#T 0@1@MMENU@@23@@
+#O 3@32@ACC@@
+#O 4@32@FILE@@
+#O 5@32@EDIT@@
+#O 8@28@ABOUT@@
+#O 17@28@OPEN@@
+#O 18@28@CLOSE@@
+#O 20@28@QUIT@@
+#O 22@28@SETTINGS@@
+#T 1@2@SETTINGS@@21@@
+#O 8@28@FONT2@@
+#O 9@28@FONT3@@
+#O 10@28@FONT4@@
+#O 11@28@FONT5@@
+#O 12@28@FONT6@@
+#O 13@28@FONT7@@
+#O 14@28@FONT8@@
+#O 15@28@FONT9@@
+#O 16@28@FONT10@@
+#O 7@28@FONT1@@
+#O 19@20@SLIDBAR@@
+#O 20@20@SLIDER@@
+#O 18@27@DOWNARROW@@
+#O 17@27@UPARROW@@
+#S 0@4@FILEERR@@
+#c 22017@
