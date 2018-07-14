@@ -165,7 +165,7 @@ struct dialog_handler *create_dialog(short tree, exit_callback_func *ec, touchex
 		return NULL;
 	}
 
-	memset(dial, sizeof(struct dialog_handler), 0);
+	memset(dial, 0, sizeof(struct dialog_handler));
 	dial->tree = tree;
 	rsrc_gaddr(R_TREE, tree, &dial->dialog_object);
 
