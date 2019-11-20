@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <gem.h>
 #include "dialog.h"
+#include <stdlib.h>
 
 //#define DEBUG
 #ifdef DEBUG

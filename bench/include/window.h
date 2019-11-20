@@ -42,6 +42,10 @@ struct window
     void (*clear)(struct window *wi, short x, short y, short w, short h);
     void (*scroll)(struct window *wi);
     void (*timer)(struct window *wi);
+
+    short work_in[10];
+    short work_out[57];
+    VdiHdl vdi_handle;
 };
 
 /*

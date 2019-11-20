@@ -116,8 +116,8 @@ $(1)/objs/%.o:$(SRCDIR)/%.S
 $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
 	$(Q)echo "CC $$<"
-	$(Q)$(CC) $$(CFLAGS) -o $$@ $(LIBCMINI)/$(1)/startup.o $$($(1)_OBJS) -L$(LIBCMINI)/$(1) $(LIBS)
-	$(STRIP) $$@
+	$(Q)$(CC) $$(CFLAGS) --traditional -o $$@ $(LIBCMINI)/$(1)/startup.o $$($(1)_OBJS) -L$(LIBCMINI)/$(1) $(LIBS)
+	#$(STRIP) $$@
 endef
 $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))
 

@@ -179,6 +179,7 @@ struct window *create_window(short wi_kind, char *title)
     wi->left = wi->top = 0;		/* start display at top left corner of document */
     wi->doc_width = wi->doc_height = 0;
 
+    v_opnvwk(wi->work_in, &wi->vdi_handle, wi->work_out);
     wind_set_str(wi->handle, WF_NAME, title);
     wind_set_str(wi->handle, WF_INFO, "");
 
@@ -341,6 +342,7 @@ static long stop_timer(void)
 void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
 {
     GRECT t1, t2;
+    short vh = wi->vdi_handle;
 
     graf_mouse(M_OFF, 0);
     wind_update(true);
@@ -356,8 +358,7 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
     {
         if (rc_intersect(&t2, &t1))
         {
-            set_clipping(vdi_handle, t1.g_x, t1.g_y, t1.g_w, t1.g_h, 1);
-            // set_clipping(vdi_handle, gl_desk.g_x, gl_desk.g_y, gl_desk.g_x + gl_desk.g_w - 1, gl_desk.g_y + gl_desk.g_h - 1, 1);
+            set_clipping(vh, t1.g_x, t1.g_y, t1.g_w, t1.g_h, 1);
             if (wi->draw) wi->draw(wi, t1.g_x, t1.g_y, t1.g_w, t1.g_h);
         }
         wind_get(wi->handle, WF_NEXTXYWH, &t1.g_x, &t1.g_y, &t1.g_w, &t1.g_h);
@@ -375,15 +376,16 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
 static void clear_window(struct window *wi, short x, short y, short w, short h)
 {
     short temp[4];
+    short vh = wi->vdi_handle;
 
-    vsf_interior(vdi_handle, 1);
-    vsf_style(vdi_handle, 0);
-    vsf_color(vdi_handle, 0);
+    vsf_interior(vh, 1);
+    vsf_style(vh, 0);
+    vsf_color(vh, 0);
     temp[0] = x;
     temp[1] = y;
     temp[2] = x + w - 1;
     temp[3] = y + h - 1;
-    v_bar(vdi_handle, temp);  /* blank the interior */
+    v_bar(vh, temp);  /* blank the interior */
 }
 
 /*

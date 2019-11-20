@@ -202,6 +202,7 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
     short h;
     int i;
     short pxy[4];
+    short vh = wi->vdi_handle;
 
     struct cubewindow *cw = (struct cubewindow *) wi->priv;
 
@@ -213,9 +214,9 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
     /* first, clear it */
     if (wi->clear) wi->clear(wi, x, y, w, h);
 
-    vsl_color(vdi_handle, cw->line_color);
-    vsf_color(vdi_handle, cw->node_color);
-
+    vsl_color(vh, cw->line_color);
+    vsf_color(vh, cw->node_color);
+    vsl_width(vh, NODE_RADIUS);
     for (i = 0; i < NUM_EDGES; i++)
     {
         struct world_point *p0 = &cube[edges[i][0]];
@@ -225,14 +226,14 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
         pxy[1] = y + h / 2 + p0->y * 200 / (p0->z / 4 + 200);
         pxy[2] = x + w / 2 + p1->x * 200 / (p1->z / 4 + 200);
         pxy[3] = y + h / 2 + p1->y * 200 / (p1->z / 4 + 200);
-        v_pline(vdi_handle, 2, pxy);
+        v_pline(vh, 2, pxy);
     }
 
     for (i = 0; i < NUM_NODES; i++)
     {
         struct world_point *node = &cube[i];
 
-        v_circle(vdi_handle, x + w / 2 + node->x * 200 / (node->z / 4 + 200),
+        v_circle(vh, x + w / 2 + node->x * 200 / (node->z / 4 + 200),
                              y + h / 2 + node->y * 200 / (node->z / 4 + 200), NODE_RADIUS);
     }
     dbg("end");
