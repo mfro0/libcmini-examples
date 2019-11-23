@@ -29,6 +29,12 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short wh, sh
 static void timer_clockwindow(struct window *wi);
 static void delete_clockwindow(struct window *wi);
 
+static (*old_timer_handler)(void) = NULL;
+static short timer_handler()
+{
+    (* old_timer_handler)();
+}
+
 /*
  * create a new window and add it to the window list.
  */
@@ -54,6 +60,8 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->doc_height = 0;
         wi->x_fac = 1;
         wi->y_fac = 1;
+        short vh = wi->vdi_handle;
+        vex_timv(vh, timer_handler, &old_timer_handler, 50);
     }
 
     return wi;
@@ -99,10 +107,10 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
         pxy[3] = (rad - 2) * isin(ang) / SHRT_MAX;
 
         /* translate to position */
-        pxy[0] += wx + rad;
-        pxy[1] += wy + rad;
-        pxy[2] += wx + rad;
-        pxy[3] += wy + rad;
+        pxy[0] += wx + ww / 2;
+        pxy[1] += wy + wh / 2;
+        pxy[2] += wx + ww / 2;
+        pxy[3] += wy + wh / 2;
         vsl_color(vh, 1);
         vsl_width(vh, 1);
         v_pline(vh, 2, pxy);
