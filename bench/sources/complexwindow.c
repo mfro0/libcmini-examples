@@ -89,15 +89,16 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
     struct complexwindow *cw = (struct complexwindow *) wi->priv;
     short pxy[(12 + 1) * 2];
     int i;
+    short vh = wi->vdi_handle;
 
     wi->clear(wi, wx, wy, wh, ww);
-    vsf_style(vdi_handle, 8);
-    vsf_interior(vdi_handle, 1);
-    vsf_color(vdi_handle, cw->polygon_color);
-    v_ellipse(vdi_handle, wi->work.g_x + wi->work.g_w / 2,
-                      wi->work.g_y + wi->work.g_h / 2,
-                      wi->work.g_w / 2, wi->work.g_h / 2);
-    vsf_color(vdi_handle, cw->polygon_color + 1);
+    vsf_style(vh, 8);
+    vsf_interior(vh, 1);
+    vsf_color(vh, cw->polygon_color);
+    v_ellipse(vh, wi->work.g_x + wi->work.g_w / 2,
+                  wi->work.g_y + wi->work.g_h / 2,
+                  wi->work.g_w / 2, wi->work.g_h / 2);
+    vsf_color(vh, cw->polygon_color + 1);
     for (i = 0; i < 24; i += 2)
     {
         pxy[i] = cw->fillarea_pxy[i] * wi->work.g_w / 50 + wi->work.g_x;
@@ -106,14 +107,15 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
     pxy[24] = pxy[0];
     pxy[25] = pxy[1];
 
-    vsf_perimeter(vdi_handle, 1);
+    vsf_perimeter(vh, 1);
 
-    v_fillarea(vdi_handle, 12, pxy);
+    v_fillarea(vh, 12, pxy);
 
-    vsf_interior(vdi_handle, 0);
-    vsl_width(vdi_handle, 6);
-    vsf_color(vdi_handle, cw->polygon_color + 3);
-    v_pline(vdi_handle, 13, pxy);
+    vsf_interior(vh, 0);
+    vsl_width(vh, 6);
+    vsl_color(vh, 1);
+    vsf_color(vh, cw->polygon_color + 3);
+    v_pline(vh, 13, pxy);
 
 
     cw->polygon_color++;
