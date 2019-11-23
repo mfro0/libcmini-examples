@@ -4,6 +4,7 @@
 #include "window.h"
 #include "global.h"
 #include "complexwindow.h"
+#include <limits.h>
 #include "intmath.h"
 
 //#define DEBUG
@@ -142,8 +143,8 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
         /*
          * rotate
          */
-        xr = ((long) x * icos(ang)) / 32767 - ((long) y * isin(ang)) / 32767;
-        yr = ((long) x * isin(ang)) / 32767 + ((long) y * icos(ang)) / 32767;
+        xr = ((long) x * icos(ang)) / SHRT_MAX - ((long) y * isin(ang)) / SHRT_MAX;
+        yr = ((long) x * isin(ang)) / SHRT_MAX + ((long) y * icos(ang)) / SHRT_MAX;
 
         x = xr;
         y = yr;
@@ -185,7 +186,8 @@ static void timer_complexwindow(struct window *wi)
     //gw->ellipse_color %= 1 << gl_planes;
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
 
-    cw->rot_angle = (cw->rot_angle + 50) % 32767;   /* 5 degree steps */
+    cw->rot_angle = cw->rot_angle - 50;   /* 5 degree steps */
+    cw->rot_angle = cw->rot_angle < 0 ? 3600 + cw->rot_angle : cw->rot_angle;
     cw->polygon_color++;
     cw->polygon_color %= 7;
 }
