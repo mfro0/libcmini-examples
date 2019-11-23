@@ -4,6 +4,7 @@
 #include "window.h"
 #include "global.h"
 #include "complexwindow.h"
+#include "intmath.h"
 
 //#define DEBUG
 #ifdef DEBUG
@@ -19,8 +20,11 @@
 #endif /* DEBUG */
 
 struct complexwindow {
-    int fillarea_pxy[12 * 2];	/* 12 points to define a complex polygon */
+    short fillarea_pxy[12 * 2];	/* 12 points to define a complex polygon */
     short polygon_color;
+    short rot_angle;
+    short pxy_max_x;
+    short pxy_max_y;
 };
 
 static void draw_complex(struct window *wi, short wx, short wy, short wh, short ww);
@@ -34,7 +38,8 @@ struct window *create_complexwindow(short wi_kind, char *title)
 {
     struct window *wi;
     struct complexwindow *cw;
-    const int pxy[24] = {
+
+    const short pxy[24] = {
             5, 5,
             25, 20,
             45, 5,
@@ -49,9 +54,12 @@ struct window *create_complexwindow(short wi_kind, char *title)
             20, 25
     };
 
+
     wi = create_window(wi_kind, title);
     if (wi)
     {
+        int i;
+
         wi->wclass = COMPLEXWINDOW_CLASS;
         wi->draw = draw_complex;
         wi->del = delete_complexwindow;
@@ -67,8 +75,21 @@ struct window *create_complexwindow(short wi_kind, char *title)
         wi->x_fac = 1;
         wi->y_fac = 1;
 
-        memcpy(&cw->fillarea_pxy, pxy, 12 * 2 * sizeof(int));
+        memcpy(&cw->fillarea_pxy, pxy, 12 * 2 * sizeof(short));
+
+        /*
+         * calculate max extent
+         */
+        cw->pxy_max_x = 0;
+        cw->pxy_max_y = 0;
+
+        for (i = 0; i < 24; i++)
+        {
+            cw->pxy_max_x = cw->fillarea_pxy[i] > cw->pxy_max_x ? cw->fillarea_pxy[i] : cw->pxy_max_x;
+            cw->pxy_max_y = cw->fillarea_pxy[i + 1] > cw->pxy_max_y ? cw->fillarea_pxy[i + 1] : cw->pxy_max_y;
+        }
         cw->polygon_color = 1;
+        cw->rot_angle = 0;
     }
 
     return wi;
@@ -86,7 +107,8 @@ static void delete_complexwindow(struct window *wi)
  */
 static void draw_complex(struct window *wi, short wx, short wy, short wh, short ww)
 {
-    struct complexwindow *cw = (struct complexwindow *) wi->priv;
+    struct complexwindow *cw = wi->priv;
+    short *coords = cw->fillarea_pxy;
     short pxy[(12 + 1) * 2];
     int i;
     short vh = wi->vdi_handle;
@@ -99,11 +121,46 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
                   wi->work.g_y + wi->work.g_h / 2,
                   wi->work.g_w / 2, wi->work.g_h / 2);
     vsf_color(vh, cw->polygon_color + 1);
+
+    /*
+     * rotate polygon coordinates
+     */
     for (i = 0; i < 24; i += 2)
     {
-        pxy[i] = cw->fillarea_pxy[i] * wi->work.g_w / 50 + wi->work.g_x;
-        pxy[i + 1] = cw->fillarea_pxy[i + 1] * wi->work.g_h / 50 + wi->work.g_y;
+        short xr;
+        short yr;
+        short ang = cw->rot_angle;
+        short x = coords[i];
+        short y = coords[i + 1];
+
+        /*
+         * translate to origin
+         */
+        x -= cw->pxy_max_x / 2;
+        y -= cw->pxy_max_y / 2;
+
+        /*
+         * rotate
+         */
+        xr = ((long) x * icos(ang)) / 32767 - ((long) y * isin(ang)) / 32767;
+        yr = ((long) x * isin(ang)) / 32767 + ((long) y * icos(ang)) / 32767;
+
+        x = xr;
+        y = yr;
+
+        /* translate back */
+        x += cw->pxy_max_x / 2;
+        y += cw->pxy_max_y / 2;
+
+        /* scale to window */
+        x = x * wi->work.g_w / 50 + wi->work.g_x;
+        y = y * wi->work.g_h / 50 + wi->work.g_y;
+
+        pxy[i] = x;
+        pxy[i + 1] = y;
     }
+
+    /* we should not need this as it's v_fillarea()'s duty? */
     pxy[24] = pxy[0];
     pxy[25] = pxy[1];
 
@@ -116,10 +173,6 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
     vsl_color(vh, 1);
     vsf_color(vh, cw->polygon_color + 3);
     v_pline(vh, 13, pxy);
-
-
-    cw->polygon_color++;
-    if (cw->polygon_color > 8) cw->polygon_color = 0;
 }
 
 /*
@@ -127,10 +180,13 @@ static void draw_complex(struct window *wi, short wx, short wy, short wh, short 
  */
 static void timer_complexwindow(struct window *wi)
 {
-    // struct grafwindow *gw = (struct grafwindow *) wi->private;
+    struct complexwindow *cw = wi->priv;
     //gw->ellipse_color++;
     //gw->ellipse_color %= 1 << gl_planes;
-
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+
+    cw->rot_angle = (cw->rot_angle + 50) % 32767;   /* 5 degree steps */
+    cw->polygon_color++;
+    cw->polygon_color %= 7;
 }
 

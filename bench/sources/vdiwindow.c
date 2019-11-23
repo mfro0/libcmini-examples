@@ -121,7 +121,7 @@ static void draw_vdiwindow(struct window *wi, short wx, short wy, short ww, shor
     short y;
     short w;
     short h;
-
+    short vh = wi->vdi_handle;
     struct vdiwindow *vw = (struct vdiwindow *) wi->priv;
 
     /* get size of window's work area */
@@ -138,8 +138,8 @@ static void draw_vdiwindow(struct window *wi, short wx, short wy, short ww, shor
 
     for (i = 0; i < 16; i++)
     {
-        vsf_color(vdi_handle, i + vw->color);
-        v_circle(vdi_handle, x + xc, y + yc, r);
+        vsf_color(vh, i + vw->color);
+        v_circle(vh, x + xc, y + yc, r);
         xc += 2;
         yc -= 2;
         r -= 3;

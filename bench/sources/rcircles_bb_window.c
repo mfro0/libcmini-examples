@@ -227,14 +227,14 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
                 draw_circle32k(&rw->backbuffer, xc, yc, r, i + rw->color);
         }
         /* copy the back buffer to the front buffer */
-        vro_cpyfm(vdi_handle, S_ONLY, pxy, &src, &dst);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src, &dst);
 
         rw->new_turn = false;   /* reset flag to avoid unnecessary buffer redraws */
     }
     else
     {
         /* copy the back buffer to the front buffer */
-        vro_cpyfm(vdi_handle, S_ONLY, pxy, &src, &dst);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src, &dst);
     }
 }
 

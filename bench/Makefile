@@ -59,6 +59,7 @@ CSRCS=\
 	$(SRCDIR)/window.c\
 	$(SRCDIR)/global.c\
 	$(SRCDIR)/util.c\
+	$(SRCDIR)/intmath.c\
 	$(SRCDIR)/dialog.c\
 	$(SRCDIR)/resource.c\
 	$(SRCDIR)/grafwindow.c\

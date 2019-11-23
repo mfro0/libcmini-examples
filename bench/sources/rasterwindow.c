@@ -117,6 +117,7 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
     short y;
     short w;
     short h;
+    short vh = wi->vdi_handle;
 
     struct rasterwindow *rw = (struct rasterwindow *) wi->priv;
 
@@ -227,7 +228,7 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
 
         }
         /* copy the back buffer to the front buffer */
-        vro_cpyfm(vdi_handle, S_ONLY, pxy, &src, &dst);
+        vro_cpyfm(vh, S_ONLY, pxy, &src, &dst);
 
         rw->new_turn = false;   /* reset flag to avoid unnecessary buffer redraws */
     }

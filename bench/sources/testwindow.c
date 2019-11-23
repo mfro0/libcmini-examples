@@ -70,6 +70,7 @@ static void draw_testwindow(struct window *wi, short x, short y, short w, short 
     short bar_pxy[4] = { 0, 0, 99, 19 };
     int i;
     short wx, wy, ww, wh;
+    short vh = wi->vdi_handle;
 
     wind_get(wi->handle, WF_WORKXYWH, &wx, &wy, &ww, &wh);
 
@@ -87,12 +88,12 @@ static void draw_testwindow(struct window *wi, short x, short y, short w, short 
         scoords[2] += wx + i * 13;
         scoords[3] += wy + i * 20;
 
-        vsf_interior(vdi_handle, FIS_PATTERN);
-        vsf_style(vdi_handle, tw->pattern_type);
-        vsf_perimeter(vdi_handle, 1);
-        vsf_color(vdi_handle, G_BLACK);
+        vsf_interior(vh, FIS_PATTERN);
+        vsf_style(vh, tw->pattern_type);
+        vsf_perimeter(vh, 1);
+        vsf_color(vh, G_BLACK);
 
-        v_bar(vdi_handle, scoords);
+        v_bar(vh, scoords);
     }
 }
 

@@ -110,6 +110,7 @@ static void draw_rc_vdiwindow(struct window *wi, short wx, short wy, short ww, s
     short w;
     short h;
     short pxy[4];
+    short vh = wi->vdi_handle;
 
     struct rcircles_rc_vdiwindow *vdiw = (struct rcircles_rc_vdiwindow *) wi->priv;
     (void) vdiw;            /* avoid warning about unused variable */
@@ -124,19 +125,19 @@ static void draw_rc_vdiwindow(struct window *wi, short wx, short wy, short ww, s
     /* draw some filled circles */
     int xc = w / 2;
     int yc = h / 2;
-    int r = min(xc, yc);
     int i;
+    short r;
 
-    vs_clip(vdi_handle, 1, pxy);
+    vs_clip(vh, 1, pxy);
     for (i = 0; i < 16; i++)
     {
         xc = random(0, w);
         yc = random(0, h);
         r = random(0, min(w, h));
-        vsl_width(vdi_handle, random(1, 15));
-        vsl_ends(vdi_handle, SQUARE, SQUARE);
-        vsl_color(vdi_handle, random(0, 15));
-        v_arc(vdi_handle, x + xc, y + yc, r, 300, 3300);
+        vsl_width(vh, random(1, 15));
+        vsl_ends(vh, SQUARE, SQUARE);
+        vsl_color(vh, random(0, 15));
+        v_arc(vh, x + xc, y + yc, r, 300, 3300);
     }
 }
 
