@@ -1,4 +1,6 @@
 include/bench.h
+include/clockwindow.h
+include/clockwindow.h
 include/complexwindow.h
 include/dialog.h
 include/global.h
@@ -10,6 +12,8 @@ include/resource.h
 include/util.h
 include/window.h
 sources/bench.c
+sources/clockwindow.c
+sources/clockwindow.c
 sources/complexwindow.c
 sources/dialog.c
 sources/global.c

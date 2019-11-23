@@ -65,6 +65,7 @@ CSRCS=\
 	$(SRCDIR)/grafwindow.c\
 	$(SRCDIR)/testwindow.c\
 	$(SRCDIR)/complexwindow.c\
+	$(SRCDIR)/clockwindow.c\
 	$(SRCDIR)/rasterwindow.c\
 	$(SRCDIR)/rcircles_bb_window.c\
 	$(SRCDIR)/rcircles_vdi_window.c\

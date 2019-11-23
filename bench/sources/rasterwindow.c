@@ -179,6 +179,17 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
     dbg("height = %d, width = %d, wd_width = %d",
                  rw->backbuffer.height, rw->backbuffer.width, rw->backbuffer.wd_width);
 
+    pxy[0] = wx - x;
+    pxy[1] = wy - y;
+    pxy[2] = pxy[0] + ww - 1;
+    pxy[3] = pxy[1] + wh - 1;
+
+    pxy[4] = wx;
+    pxy[5] = wy;
+    pxy[6] = wx + ww - 1;
+    pxy[7] = wy + wh - 1;
+
+
     /*
      * only do an internal redraw if requested to do so, otherwise we assume we're
      * called during a rectangle list traversal and just need to copy buffers
@@ -199,16 +210,6 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
         int yc = rw->backbuffer.height / 2;
         int r = min(xc, yc);
         int i;
-
-        pxy[0] = wx - x;
-        pxy[1] = wy - y;
-        pxy[2] = pxy[0] + ww - 1;
-        pxy[3] = pxy[1] + wh - 1;
-
-        pxy[4] = wx;
-        pxy[5] = wy;
-        pxy[6] = wx + ww - 1;
-        pxy[7] = wy + wh - 1;
 
 
         set_clip(0, 0, rw->backbuffer.width, rw->backbuffer.height, true);
@@ -232,6 +233,10 @@ static void draw_rasterwindow(struct window *wi, short wx, short wy, short ww, s
 
         rw->new_turn = false;   /* reset flag to avoid unnecessary buffer redraws */
     }
+    else {
+        /* copy the back buffer to the front buffer */
+        vro_cpyfm(vh, S_ONLY, pxy, &src, &dst);
+    }
 }
 
 
@@ -247,7 +252,7 @@ static void timer_rasterwindow(struct window *wi)
         rw->new_turn = true;    /* signal drawing code that this is a new draw */
         do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
         rw->color += 1;
-        rw->color &= 15;    /* flip through the first 16 color indices */
+        rw->color &= 15;    /* cycle through the first 16 color indices */
     }
 }
 

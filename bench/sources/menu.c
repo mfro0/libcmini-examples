@@ -13,6 +13,7 @@
 #include "rasterwindow.h"
 #include "vdiwindow.h"
 #include "cubewindow.h"
+#include "clockwindow.h"
 #include "rcircles_bb_window.h"
 #include "rcircles_vdi_window.h"
 #include "dialog.h"
@@ -456,6 +457,16 @@ short handle_menu(OBJECT *menu, short title, short item)
 
                 case MMENU_MNCUBE:
                     wi = create_cubewindow(CUBEWINDOW_WINELEMENTS, "Cube");
+                    if (wi != NULL)
+                    {
+                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        window_open_pos_x += 20;
+                        window_open_pos_y += 20;
+                    }
+                    break;
+
+                case MMENU_MNCLOCK:
+                    wi = create_clockwindow(CLOCKWINDOW_WINELEMENTS, "Clock");
                     if (wi != NULL)
                     {
                         open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);

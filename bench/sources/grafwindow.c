@@ -67,16 +67,15 @@ static void delete_grafwindow(struct window *wi)
 static void draw_sample(struct window *wi, short wx, short wy, short wh, short ww)
 {
     struct grafwindow *gw = (struct grafwindow *) wi->priv;
+    short vh = wi->vdi_handle;
 
     wi->clear(wi, wx, wy, wh, ww);
-    vsf_style(vdi_handle, 8);
-    vsf_interior(vdi_handle, 1);
-    vsf_color(vdi_handle, gw->ellipse_color);
-    v_ellipse(vdi_handle, wi->work.g_x + wi->work.g_w / 2,
+    vsf_style(vh, FIS_PATTERN);
+    vsf_interior(vh, 1);
+    vsf_color(vh, gw->ellipse_color);
+    v_ellipse(vh, wi->work.g_x + wi->work.g_w / 2,
                       wi->work.g_y + wi->work.g_h / 2,
                       wi->work.g_w / 2, wi->work.g_h / 2);
-    gw->ellipse_color++;
-    if (gw->ellipse_color > 8) gw->ellipse_color = 0;
 }
 
 
@@ -85,6 +84,10 @@ static void draw_sample(struct window *wi, short wx, short wy, short wh, short w
  */
 static void timer_grafwindow(struct window *wi)
 {
+    struct grafwindow *gw = (struct grafwindow *) wi->priv;
+
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    gw->ellipse_color++;
+    gw->ellipse_color &= (1 << gl_nplanes) - 1;
 }
 

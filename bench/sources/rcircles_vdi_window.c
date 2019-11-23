@@ -123,8 +123,8 @@ static void draw_rc_vdiwindow(struct window *wi, short wx, short wy, short ww, s
     pxy[3] = wy + wh - 1;
 
     /* draw some filled circles */
-    int xc = w / 2;
-    int yc = h / 2;
+    int xc;
+    int yc;
     int i;
     short r;
 
