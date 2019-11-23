@@ -32,6 +32,7 @@ static void delete_clockwindow(struct window *wi);
 static (*old_timer_handler)(void) = NULL;
 static short timer_handler()
 {
+
     (* old_timer_handler)();
 }
 
