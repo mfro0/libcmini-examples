@@ -129,9 +129,7 @@ struct window *from_handle(short handle)
 }
 
 /* private function prototypes */
-static void clear_window(struct window *wi, short x, short wy, short ww, short wh);
 static void scroll_window(struct window *wi);
-static void size_window(struct window *wi, short x, short y, short w, short h);
 static void full_window(struct window *wi);
 
 /*
@@ -224,7 +222,7 @@ int foreach_window(wi_cb cb)
 /*
  * resize window. Coordinates are frame coordinates
  */
-static void size_window(struct window *wi, short x, short y, short w, short h)
+void size_window(struct window *wi, short x, short y, short w, short h)
 {
     if (w < MIN_WIDTH)
     {
@@ -360,7 +358,7 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
 /*
  * clear window contents (to background color white)
  */
-static void clear_window(struct window *wi, short x, short y, short w, short h)
+void clear_window(struct window *wi, short x, short y, short w, short h)
 {
     short temp[4];
     short vh = wi->vdi_handle;

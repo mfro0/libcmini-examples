@@ -8,6 +8,7 @@
 #include "clockwindow.h"
 #include <limits.h>
 #include "intmath.h"
+#include "util.h"
 
 #define DEBUG
 #ifdef DEBUG
@@ -33,6 +34,7 @@ static void timer_clockwindow(struct window *wi);
 static void delete_clockwindow(struct window *wi);
 static void open_clockwindow(struct window *wi, short x, short y, short w, short h);
 static void delete_clockwindow(struct window *wi);
+static void size_clockwindow(struct window *wi, short x, short y, short w, short h);
 
 /*
  * create a new window and add it to the window list.
@@ -51,6 +53,7 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->timer = timer_clockwindow;
         wi->opn = open_clockwindow;
         wi->del = delete_clockwindow;
+        wi->size = size_clockwindow;
         cw = malloc(sizeof(struct clockwindow));
         wi->priv = cw;
 
@@ -90,11 +93,6 @@ static void delete_clockwindow(struct window *wi)
     /* let the generic window code do the rest */
 
     delete_window(wi);
-}
-
-static short min(short a, short b)
-{
-    return a < b ? a : b;
 }
 
 static void draw_face(struct window *wi, short x, short y, short w, short h)
@@ -227,6 +225,49 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     graf_mouse(M_OFF, NULL);
     wind_update(BEG_UPDATE);
 
+    draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
+
+    wind_update(END_UPDATE);
+    graf_mouse(M_ON, NULL);
+}
+
+static void size_clockwindow(struct window *wi, short x, short y, short w, short h)
+{
+    struct clockwindow *cw = wi->priv;
+    short vh = wi->vdi_handle;
+
+    size_window(wi, x, y, w, h);
+
+    short pxy[8] = { wi->work.g_x, wi->work.g_y,
+                     wi->work.g_x + wi->work.g_w - 1,
+                     wi->work.g_y + wi->work.g_h - 1,
+                     0, 0, wi->work.g_w - 1, wi->work.g_h - 1 };
+
+
+    if (cw->face_buffer != NULL)
+        free(cw->face_buffer);
+    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes);
+    MFDB mfdb_src =
+    {
+        .fd_addr = NULL,
+    };
+    MFDB mfdb_dst =
+    {
+        .fd_addr = cw->face_buffer,
+        .fd_w = w,
+        .fd_h = h,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_stand = 0,
+        .fd_nplanes = gl_nplanes,
+        0, 0, 0
+    };
+
+    graf_mouse(M_OFF, NULL);
+    wind_update(BEG_UPDATE);
+
+    set_clipping(vh, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h, 1);
+    clear_window(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
 

@@ -58,7 +58,8 @@ extern void free_windows();
 extern struct window *create_window(short wi_kind, char *title);
 extern void delete_window(struct window *wi);
 extern void open_window(struct window *wi, short x, short y, short w, short h);
-
+void size_window(struct window *wi, short x, short y, short w, short h);
+void clear_window(struct window *wi, short x, short y, short w, short h);
 extern struct window *first_window();
 extern struct window *next_window();
 
