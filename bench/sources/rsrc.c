@@ -1,4 +1,4 @@
-#include "resource.h"
+#include "rsrc.h"
 #include "global.h"
 #include "util.h"
 

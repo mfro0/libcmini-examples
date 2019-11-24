@@ -8,7 +8,7 @@ include/grafwindow.h
 include/intmath.h
 include/menu.h
 include/portab.h
-include/resource.h
+include/rsrc.h
 include/util.h
 include/window.h
 sources/bench.c
@@ -21,7 +21,7 @@ sources/grafwindow.c
 sources/intmath.c
 sources/intmath.c
 sources/menu.c
-sources/resource.c
+sources/rsrc.c
 sources/timerfunc.S
 sources/util.c
 sources/window.c

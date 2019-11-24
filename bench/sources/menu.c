@@ -20,7 +20,6 @@
 #include "global.h"
 #include "util.h"
 #include "menu.h"
-#include "resource.h"
 
 // #define DEBUG
 #ifdef DEBUG
@@ -389,7 +388,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_grafwindow(GRAFWINDOW_WINELEMENTS, "Another Window");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 10;
                     }
@@ -399,7 +398,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_testwindow(TESTWINDOW_WINELEMENTS, "EmuTOS test window");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 10;
                     }
@@ -409,7 +408,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_complexwindow(COMPLEXWINDOW_WINELEMENTS, "Complex Window");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 10;
                     }
@@ -419,7 +418,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_rasterwindow(RASTERWINDOW_WINELEMENTS, "Rastered Window");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 10;
                     }
@@ -429,7 +428,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_vdiwindow(VDIWINDOW_WINELEMENTS, "VDI Window");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 10;
                     }
@@ -439,7 +438,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_circles_rasterwindow(CIRCLES_RASTERWINDOW_WINELEMENTS, "Random Circles");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 20;
                     }
@@ -449,7 +448,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_rc_vdiwindow(CIRCLES_VDIWINDOW_WINELEMENTS, "Random VDI Circles");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 20;
                     }
@@ -459,7 +458,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_cubewindow(CUBEWINDOW_WINELEMENTS, "Cube");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 20;
                     }
@@ -469,7 +468,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     wi = create_clockwindow(CLOCKWINDOW_WINELEMENTS, "Clock");
                     if (wi != NULL)
                     {
-                        open_window(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
                         window_open_pos_x += 20;
                         window_open_pos_y += 20;
                     }

@@ -7,10 +7,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "resource.h"
 #include "window.h"
 #include "bench.h"
 #include "menu.h"
+#include "rsrc.h"
 #include "util.h"
 #include "global.h"
 #include "dialog.h"

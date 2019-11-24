@@ -34,7 +34,7 @@ static bool initialized = false;
 void init_windows(void)
 {
     if (initialized) {
-        form_alert(1, "[1][Attempt for multiple initializations of window module][CANCEL]");
+        form_alert(1, "[3][Attempt for multiple initializations|of window module][CANCEL]");
         exit(1);
     }
     window_list = malloc(sizeof(struct window *) * max_windows);
@@ -171,6 +171,7 @@ struct window *create_window(short wi_kind, char *title)
 
     wi->draw = NULL;
     wi->del = delete_window;
+    wi->opn = open_window;
     wi->scroll = scroll_window;
     wi->clear = clear_window;
     wi->size = size_window;
@@ -233,11 +234,7 @@ static void size_window(struct window *wi, short x, short y, short w, short h)
     {
         h = MIN_HEIGHT;
     }
-    if (wi->word_aligned)
-    {
-        x += (x + 15) % 16;
-        wind_set(wi->handle, WF_WORKXYWH, x, y, w, h);
-    }
+
     wind_set(wi->handle, WF_CURRXYWH, x, y, w, h);
     wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
     if (wi->scroll) wi->scroll(wi); /* fix slider sizes and positions */
@@ -248,21 +245,10 @@ static void size_window(struct window *wi, short x, short y, short w, short h)
  */
 void open_window(struct window *wi, short x, short y, short w, short h)
 {
-    short offs = 0;
-
-    if (wi->word_aligned)
-    {
-       offs = x + 15 % 16;    /* align window work area to next word boundary */
-    }
-    x += offs;
-    wi->work.g_x = x;
-    wi->work.g_y = y;
-    wi->work.g_w = w;
-    wi->work.g_h = h;
-
     graf_growbox(/* desk_x + desk_w / 2 */ 10, /* desk_y + desk_h / 2 */ 10, gl_wbox, gl_hbox,
-                 wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-    wind_open(wi->handle, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+                 x, y, w, h);
+    wind_open(wi->handle, x, y, w, h);
+
     wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
     wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
 }

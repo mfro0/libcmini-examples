@@ -39,6 +39,7 @@ struct window
     void (*size)(struct window *wi, short x, short y, short w, short h);
     void (*draw)(struct window *wi, short x, short y, short w, short h);
     void (*del)(struct window *wi);
+    void (*opn)(struct window *wi, short x, short y, short w, short h);
     void (*clear)(struct window *wi, short x, short y, short w, short h);
     void (*scroll)(struct window *wi);
     void (*timer)(struct window *wi);

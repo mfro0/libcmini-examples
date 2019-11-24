@@ -25,11 +25,13 @@
 struct clockwindow {
     short pxy_max_x;
     short pxy_max_y;
+    void *face_buffer;
 };
 
 static void draw_clockwindow(struct window *wi, short wx, short wy, short wh, short ww);
 static void timer_clockwindow(struct window *wi);
 static void delete_clockwindow(struct window *wi);
+static void open_clockwindow(struct window *wi, short x, short y, short w, short h);
 
 void *old_timer_handler = NULL;
 extern void *timerfunc;
@@ -41,7 +43,6 @@ struct window *create_clockwindow(short wi_kind, char *title)
 {
     struct window *wi;
     struct clockwindow *cw;
-    short conv;
 
     wi = create_window(wi_kind, title);
     if (wi)
@@ -50,9 +51,11 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->draw = draw_clockwindow;
         wi->del = delete_clockwindow;
         wi->timer = timer_clockwindow;
-
+        wi->opn = open_clockwindow;
         cw = malloc(sizeof(struct clockwindow));
         wi->priv = cw;
+
+        cw->face_buffer = NULL;
 
         wi->top = 0;
         wi->left = 0;
@@ -60,7 +63,8 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->doc_height = 0;
         wi->x_fac = 1;
         wi->y_fac = 1;
-        short vh = wi->vdi_handle;
+
+        // short vh = wi->vdi_handle;
         // although this appears to work, we run into problems when opening multiple
         // clock windows (this locks up the machine)
         // vex_timv(vh, &timerfunc, &old_timer_handler, &conv);
@@ -72,9 +76,7 @@ struct window *create_clockwindow(short wi_kind, char *title)
 static void delete_clockwindow(struct window *wi)
 {
     short vh = wi->vdi_handle;
-    short interv;
 
-    void *oth = NULL;
 
     v_clsvwk(vh);
 
@@ -89,24 +91,23 @@ static short min(short a, short b)
     return a < b ? a : b;
 }
 
-/*
- * Draw a wall clock
- */
-static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, short wh)
+static void draw_face(struct window *wi, short x, short y, short w, short h)
 {
-    struct clockwindow *cw = wi->priv;
-    short vh = wi->vdi_handle;
-    short ang;
-    short rad = min(ww, wh) / 2;
     short minute;
+    short ang;
     short pxy[4];
-    time_t t = time(NULL);
-    struct tm *lt = localtime(&t);
+    short rad;
+    short vh = wi->vdi_handle;
 
-    printf("it is now %d:%d:%d", lt->tm_hour, lt->tm_min, lt->tm_sec);
-    wi->clear(wi, wx, wy, ww, wh);
+    rad = min(w, h) / 2;
+    /*
+     * draw the clock face
+     */
+
+    wi->clear(wi, x, y, w, h);
 
     /* an hour equals 60 minutes */
+
     for (minute = 0; minute < 60; minute++)
     {
         ang = minute * 3600L / 60L;
@@ -119,14 +120,25 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
         pxy[3] = (rad - 2) * isin(ang) / SHRT_MAX;
 
         /* translate to position */
-        pxy[0] += wx + ww / 2;
-        pxy[1] += wy + wh / 2;
-        pxy[2] += wx + ww / 2;
-        pxy[3] += wy + wh / 2;
+        pxy[0] += x + w / 2;
+        pxy[1] += y + h / 2;
+        pxy[2] += x + w / 2;
+        pxy[3] += y + h / 2;
         vsl_color(vh, 1);
         vsl_width(vh, 1);
         v_pline(vh, 2, pxy);
     }
+}
+
+static void draw_hands(struct window *wi)
+{
+    short ang;
+    time_t t = time(NULL);
+    struct tm *lt = localtime(&t);
+
+    short vh = wi->vdi_handle;
+    short rad = min(wi->work.g_w, wi->work.g_h) / 2;
+    short pxy[4];
 
     /* draw "long hand" - minutes */
     ang = ((lt->tm_min - 3) * 60L) * 3600L / 60;
@@ -136,10 +148,10 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
     /* translate to position */
-    pxy[0] += wx + ww / 2;
-    pxy[1] += wy + wh / 2;
-    pxy[2] += wx + ww / 2;
-    pxy[3] += wy + wh / 2;
+    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
+    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
 
     vsl_width(vh, 3);
     v_pline(vh, 2, pxy);
@@ -152,10 +164,10 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
     /* translate to position */
-    pxy[0] += wx + ww / 2;
-    pxy[1] += wy + wh / 2;
-    pxy[2] += wx + ww / 2;
-    pxy[3] += wy + wh / 2;
+    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
+    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
     vsl_width(vh, 3);
     v_pline(vh, 2, pxy);
 
@@ -167,12 +179,87 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
     /* translate to position */
-    pxy[0] += wx + ww / 2;
-    pxy[1] += wy + wh / 2;
-    pxy[2] += wx + ww / 2;
-    pxy[3] += wy + wh / 2;
+    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
+    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
     vsl_width(vh, 1);
     v_pline(vh, 2, pxy);
+}
+
+static void open_clockwindow(struct window *wi, short x, short y, short w, short h)
+{
+    open_window(wi, x, y, w, h);
+
+    struct clockwindow *cw = wi->priv;
+    short vh = wi->vdi_handle;
+
+    // printf("x=%d, y=%d, w=%d, h=%d\n", wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    short pxy[8] = { wi->work.g_x, wi->work.g_y,
+                     wi->work.g_x + wi->work.g_w - 1,
+                     wi->work.g_y + wi->work.g_h - 1,
+                     0, 0, wi->work.g_w - 1, wi->work.g_h - 1 };
+
+
+    if (cw->face_buffer != NULL)
+        free(cw->face_buffer);
+    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes);
+    MFDB mfdb_src = {
+        .fd_addr = NULL,
+    }, mfdb_dst = {
+        .fd_addr = cw->face_buffer,
+        .fd_w = w,
+        .fd_h = h,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_stand = 0,
+        .fd_nplanes = gl_nplanes,
+        0, 0, 0
+    };
+
+    graf_mouse(M_OFF, NULL);
+    wind_update(BEG_UPDATE);
+
+    draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
+
+    wind_update(END_UPDATE);
+    graf_mouse(M_ON, NULL);
+}
+
+/*
+ * Draw a wall clock
+ */
+static void draw_clockwindow(struct window *wi, short x, short y, short w, short h)
+{
+    short vh = wi->vdi_handle;
+    struct clockwindow *cw = wi->priv;
+
+    MFDB mfdb_dst = {
+        .fd_addr = NULL,
+    }, mfdb_src = {
+        .fd_addr = cw->face_buffer,
+        .fd_w = w,
+        .fd_h = h,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_stand = 0,
+        .fd_nplanes = gl_nplanes,
+        0, 0, 0
+    };
+    short pxy[8] = { 0, 0, wi->work.g_w - 1, wi->work.g_h - 1,
+                     wi->work.g_x, wi->work.g_y,
+                     wi->work.g_x + wi->work.g_w - 1,
+                     wi->work.g_y + wi->work.g_h - 1
+                     };
+
+    // wi->clear(wi, x, y, w, h);
+
+    graf_mouse(M_OFF, NULL);
+    wind_update(BEG_UPDATE);
+    vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
+    // draw_face(wi);
+    draw_hands(wi);
+    wind_update(END_UPDATE);
+    graf_mouse(M_ON, NULL);
 }
 
 
@@ -181,9 +268,6 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short ww, sh
  */
 static void timer_clockwindow(struct window *wi)
 {
-    extern long vex_counter;
-    struct clockwindow *cw = wi->priv;
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-    debug_printf("%d", vex_counter);
 }
 
