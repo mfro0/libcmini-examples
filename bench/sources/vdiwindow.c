@@ -10,15 +10,11 @@
 
 //#define DEBUG
 #ifdef DEBUG
-/*
- * Since writing directly somewhere to the screen would distort GEM, the escape sequences in debug_printf()
- * position the cursor on line 30, column 0, clear to end of line and write the debug message.
- * Make sure you don't add a newline after the message or the screen will be clobbered.
- * This way we have at least one single line to display diagnostic output.
- */
-#define debug_printf(format, arg...) do { printf("\033Y\36 \33lDEBUG (%s): " format, __FUNCTION__, ##arg); } while (0)
+#include "natfeats.h"
+#define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
 #else
-#define debug_printf(format, arg...) do { ; } while (0)
+#define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
 
 
@@ -58,7 +54,7 @@ struct window *create_vdiwindow(short wi_kind, char *title)
     struct window *wi = NULL;
     struct vdiwindow *vw;
 
-    debug_printf("start");
+    dbg("start");
 
     wi = create_window(wi_kind, title);
 
@@ -92,7 +88,7 @@ struct window *create_vdiwindow(short wi_kind, char *title)
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
-    debug_printf("finished");
+    dbg("finished");
 
     return wi;
 }
