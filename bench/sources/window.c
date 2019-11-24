@@ -51,6 +51,7 @@ void free_windows(void)
 
     for (i = 0; i < num_windows; i++)
     {
+        window_list[i]->del(window_list[i]);
         free(window_list[i]);
     }
     free(window_list);

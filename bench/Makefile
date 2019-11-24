@@ -26,7 +26,9 @@ endif
 
 DEPEND=depend
 
-LIBCMINI=../../libcmini/build
+LIBCMINI=../../libcmini
+LIBCMINI_LIB=$(LIBCMINI)/build
+
 INCLUDE=-I$(LIBCMINI)/include -I/usr/m68k-atari-mint/include -nostdlib
 LIBS=-lgem -lm -lcmini -nostdlib -lgcc
 CC=$(PREFIX)/bin/gcc
@@ -45,6 +47,8 @@ TEST_APP=$(APP)
 CFLAGS= \
 	-O2 \
 	-g \
+	-nostdinc \
+	-I/usr/lib/gcc/m68k-atari-mint/4.6.4/include \
 	-Wl,-Map,mapfile \
 	-Wall \
 	$(CHARSET_FLAGS)
@@ -75,6 +79,7 @@ CSRCS=\
 	$(SRCDIR)/natfeats.c
 
 ASRCS=\
+	$(SRCDIR)/timerfunc.S\
 	$(SRCDIR)/nkcc-gc.S \
 	$(SRCDIR)/nf_asm.S
 
@@ -94,8 +99,8 @@ mshort/$(APP):CFLAGS += -mshort
 m68020-60/mshort/$(APP): CFLAGS += -mcpu=68030 -mshort
 m5475/mshort/$(APP): CFLAGS += -mcpu=5475 -mshort
 
-ctest: include/patterns.h $(TEST_APP)
-all: include/patterns.h $(patsubst %,%/$(APP),$(TRGTDIRS))
+ctest: $(TEST_APP)
+all: $(patsubst %,%/$(APP),$(TRGTDIRS))
 
 $(DEPEND): $(ASRCS) $(CSRCS) include/patterns.h
 	-rm -f $(DEPEND)
@@ -118,20 +123,14 @@ $(1)/objs/%.o:$(SRCDIR)/%.S
 $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
 	$(Q)echo "CC $$<"
-	$(Q)$(CC) $$(CFLAGS) --traditional -o $$@ $(LIBCMINI)/$(1)/startup.o $$($(1)_OBJS) -L$(LIBCMINI)/$(1) $(LIBS)
+	$(Q)$(CC) $$(CFLAGS) --traditional -o $$@ $(LIBCMINI_LIB)/$(1)/startup.o $$($(1)_OBJS) -L$(LIBCMINI_LIB)/$(1) $(LIBS)
 	#$(STRIP) $$@
 endef
 $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))
 
-include/patterns.h: patgen
-	./patgen include/patterns.h
-
-patgen: native/patgen.c
-	$(NATIVECC) -o $@ $<
-
 clean:
 	@rm -f $(patsubst %,%/objs/*.o,$(TRGTDIRS)) $(patsubst %,%/$(APP),$(TRGTDIRS))
-	@rm -f $(DEPEND) mapfile patgen include/patterns.h
+	@rm -f $(DEPEND) mapfile include/patterns.h
 
 .PHONY: printvars
 printvars:

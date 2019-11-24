@@ -22,6 +22,7 @@ sources/intmath.c
 sources/intmath.c
 sources/menu.c
 sources/resource.c
+sources/timerfunc.S
 sources/util.c
 sources/window.c
 sources/rasterwindow.c
