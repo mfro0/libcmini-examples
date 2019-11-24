@@ -130,7 +130,6 @@ struct window *from_handle(short handle)
 
 /* private function prototypes */
 static void scroll_window(struct window *wi);
-static void full_window(struct window *wi);
 
 /*
  * create a new window and add it to the window list
@@ -287,7 +286,7 @@ static void scroll_window(struct window *wi)
         wind_set(wi->handle, WF_VSLSIZE, sl_vert, 0, 0, 0);
 }
 
-static void full_window(struct window *wi)
+void full_window(struct window *wi)
 {
     if (wi->fulled)
     {
@@ -305,6 +304,7 @@ static void full_window(struct window *wi)
                 &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
       wind_set(wi->handle, WF_CURRXYWH, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h);
     }
+    wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
     wi->fulled ^= 1;
 }
 

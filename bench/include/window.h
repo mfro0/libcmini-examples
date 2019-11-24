@@ -60,6 +60,8 @@ extern void delete_window(struct window *wi);
 extern void open_window(struct window *wi, short x, short y, short w, short h);
 void size_window(struct window *wi, short x, short y, short w, short h);
 void clear_window(struct window *wi, short x, short y, short w, short h);
+void full_window(struct window *wi);
+
 extern struct window *first_window();
 extern struct window *next_window();
 

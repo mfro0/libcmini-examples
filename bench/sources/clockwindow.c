@@ -35,6 +35,7 @@ static void delete_clockwindow(struct window *wi);
 static void open_clockwindow(struct window *wi, short x, short y, short w, short h);
 static void delete_clockwindow(struct window *wi);
 static void size_clockwindow(struct window *wi, short x, short y, short w, short h);
+static void full_clockwindow(struct window *wi);
 
 /*
  * create a new window and add it to the window list.
@@ -54,6 +55,7 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->opn = open_clockwindow;
         wi->del = delete_clockwindow;
         wi->size = size_clockwindow;
+        wi->full = full_clockwindow;
         cw = malloc(sizeof(struct clockwindow));
         wi->priv = cw;
 
@@ -275,6 +277,12 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
     graf_mouse(M_ON, NULL);
 }
 
+void full_clockwindow(struct window *wi)
+{
+    full_window(wi);
+
+    size_clockwindow(wi, wi->rect.g_x, wi->rect.g_y, wi->rect.g_w, wi->rect.g_h);
+}
 /*
  * Draw a wall clock
  */
