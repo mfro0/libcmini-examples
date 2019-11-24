@@ -32,9 +32,7 @@ static void draw_clockwindow(struct window *wi, short wx, short wy, short wh, sh
 static void timer_clockwindow(struct window *wi);
 static void delete_clockwindow(struct window *wi);
 static void open_clockwindow(struct window *wi, short x, short y, short w, short h);
-
-void *old_timer_handler = NULL;
-extern void *timerfunc;
+static void delete_clockwindow(struct window *wi);
 
 /*
  * create a new window and add it to the window list.
@@ -52,6 +50,7 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->del = delete_clockwindow;
         wi->timer = timer_clockwindow;
         wi->opn = open_clockwindow;
+        wi->del = delete_clockwindow;
         cw = malloc(sizeof(struct clockwindow));
         wi->priv = cw;
 
@@ -73,13 +72,20 @@ struct window *create_clockwindow(short wi_kind, char *title)
     return wi;
 }
 
+/*
+ * some housekeeping
+ * make sure the face_buffer memory gets freed before the window is deleted
+ */
 static void delete_clockwindow(struct window *wi)
 {
     short vh = wi->vdi_handle;
+    struct clockwindow *cw = wi->priv;
 
 
     v_clsvwk(vh);
 
+    if (cw->face_buffer)
+        free(cw->face_buffer);
     if (wi->priv) free(wi->priv);
     /* let the generic window code do the rest */
 
@@ -194,7 +200,6 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     struct clockwindow *cw = wi->priv;
     short vh = wi->vdi_handle;
 
-    // printf("x=%d, y=%d, w=%d, h=%d\n", wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     short pxy[8] = { wi->work.g_x, wi->work.g_y,
                      wi->work.g_x + wi->work.g_w - 1,
                      wi->work.g_y + wi->work.g_h - 1,
@@ -204,9 +209,12 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     if (cw->face_buffer != NULL)
         free(cw->face_buffer);
     cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes);
-    MFDB mfdb_src = {
+    MFDB mfdb_src =
+    {
         .fd_addr = NULL,
-    }, mfdb_dst = {
+    };
+    MFDB mfdb_dst =
+    {
         .fd_addr = cw->face_buffer,
         .fd_w = w,
         .fd_h = h,

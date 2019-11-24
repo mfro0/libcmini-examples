@@ -79,7 +79,6 @@ CSRCS=\
 	$(SRCDIR)/natfeats.c
 
 ASRCS=\
-	$(SRCDIR)/timerfunc.S\
 	$(SRCDIR)/nkcc-gc.S \
 	$(SRCDIR)/nf_asm.S
 
