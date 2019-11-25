@@ -201,7 +201,8 @@ struct window *top_window(void)
 }
 
 /*
- * do something (callback) to each window in the window list
+ * do something (callback) to each window in the window list. If the passed callback function
+ * pointer is NULL, nothing is done.
  */
 int foreach_window(wi_cb cb)
 {
@@ -230,6 +231,7 @@ void size_window(struct window *wi, short x, short y, short w, short h)
 
     wind_set(wi->handle, WF_CURRXYWH, x, y, w, h);
     wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
+    wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
     if (wi->scroll) wi->scroll(wi); /* fix slider sizes and positions */
 }
 

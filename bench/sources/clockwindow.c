@@ -262,6 +262,13 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     graf_mouse(M_ON, NULL);
 }
 
+/*
+ * beware: the coordinates passed are the *requested* size of the window frame,
+ * *not* the size of the work area.
+ * If calling the base class method, these coordinates migth be meaningless (as
+ * the function might have decided to deny or change this setting). The rect member
+ * of the window should have the correct coordinates, however.
+ */
 static void size_clockwindow(struct window *wi, short x, short y, short w, short h)
 {
     struct clockwindow *cw = wi->priv;
@@ -277,7 +284,7 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
 
     if (cw->face_buffer != NULL)
         free(cw->face_buffer);
-    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes * sizeof(short));
+    cw->face_buffer = malloc((wi->work.g_w + 15) / 16 * wi->work.g_h * gl_nplanes * sizeof(short));
     if (!cw->face_buffer)
         exit(1);
 
@@ -288,8 +295,8 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
     MFDB mfdb_dst =
     {
         .fd_addr = cw->face_buffer,
-        .fd_w = w,
-        .fd_h = h,
+        .fd_w = wi->work.g_w,
+        .fd_h = wi->work.g_h,
         .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8,
         .fd_stand = 0,
         .fd_nplanes = gl_nplanes,

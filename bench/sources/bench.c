@@ -364,7 +364,6 @@ static void multi(void)
             foreach_window(timer_cb);
         }
 
-
         else if (event & MU_BUTTON)
         {
             if (butdown)
