@@ -265,8 +265,8 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
 /*
  * beware: the coordinates passed are the *requested* size of the window frame,
  * *not* the size of the work area.
- * If calling the base class method, these coordinates migth be meaningless (as
- * the function might have decided to deny or change this setting). The rect member
+ * If calling the base class method, these coordinates might even be totally meaningless (as
+ * the function might have decided to deny or change the requested size). The rect member
  * of the window should have the correct coordinates, however.
  */
 static void size_clockwindow(struct window *wi, short x, short y, short w, short h)
@@ -276,10 +276,17 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
 
     size_window(wi, x, y, w, h);
 
-    short pxy[8] = { wi->work.g_x, wi->work.g_y,
-                     wi->work.g_x + wi->work.g_w - 1,
-                     wi->work.g_y + wi->work.g_h - 1,
-                     0, 0, wi->work.g_w - 1, wi->work.g_h - 1 };
+    short pxy[8] =
+    {
+        wi->work.g_x,
+        wi->work.g_y,
+        wi->work.g_x + wi->work.g_w - 1,
+        wi->work.g_y + wi->work.g_h - 1,
+        0,
+        0,
+        wi->work.g_w - 1,
+        wi->work.g_h - 1
+    };
 
 
     if (cw->face_buffer != NULL)
