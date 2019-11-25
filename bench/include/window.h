@@ -52,26 +52,26 @@ struct window
 /*
  * global variables
  */
-extern void init_windows();
-extern void free_windows();
+void init_windows(void);
+void free_windows(void);
 
-extern struct window *create_window(short wi_kind, char *title);
-extern void delete_window(struct window *wi);
-extern void open_window(struct window *wi, short x, short y, short w, short h);
+struct window *create_window(short wi_kind, char *title);
+void delete_window(struct window *wi);
+void open_window(struct window *wi, short x, short y, short w, short h);
 void size_window(struct window *wi, short x, short y, short w, short h);
 void clear_window(struct window *wi, short x, short y, short w, short h);
 void full_window(struct window *wi);
 
-extern struct window *first_window();
-extern struct window *next_window();
+struct window *first_window();
+struct window *next_window();
 
-extern void send_redraw(struct window *wi, short x, short y, short w, short h);
-extern void do_redraw(struct window *wi, short xc, short yc, short wc, short hc);
-extern struct window *from_handle(short handle);
-extern struct window *top_window(void);
+void send_redraw(struct window *wi, short x, short y, short w, short h);
+void do_redraw(struct window *wi, short xc, short yc, short wc, short hc);
+struct window *from_handle(short handle);
+struct window *top_window(void);
 
 typedef int (*wi_cb)(struct window *wi);
-extern int foreach_window(wi_cb cb);
+int foreach_window(wi_cb cb);
 
 #define MIN_WIDTH  (10 * gl_wbox)
 #define MIN_HEIGHT (10 * gl_hbox)

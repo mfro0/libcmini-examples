@@ -25,6 +25,9 @@ struct clockwindow {
     void *face_buffer;
 };
 
+/*
+ * local function prototypes
+ */
 static void draw_clockwindow(struct window *wi, short wx, short wy, short wh, short ww);
 static void timer_clockwindow(struct window *wi);
 static void delete_clockwindow(struct window *wi);
@@ -41,10 +44,14 @@ struct window *create_clockwindow(short wi_kind, char *title)
     struct window *wi;
     struct clockwindow *cw;
 
+    /* call base 'class' constructor */
     wi = create_window(wi_kind, title);
+
     if (wi)
     {
         wi->wclass = CLOCKWINDOW_CLASS;
+
+        /* override base methods */
         wi->draw = draw_clockwindow;
         wi->del = delete_clockwindow;
         wi->timer = timer_clockwindow;
@@ -52,6 +59,8 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->del = delete_clockwindow;
         wi->size = size_clockwindow;
         wi->full = full_clockwindow;
+
+        /* extend base class */
         cw = malloc(sizeof(struct clockwindow));
         wi->priv = cw;
 
@@ -63,11 +72,6 @@ struct window *create_clockwindow(short wi_kind, char *title)
         wi->doc_height = 0;
         wi->x_fac = 1;
         wi->y_fac = 1;
-
-        // short vh = wi->vdi_handle;
-        // although this appears to work, we run into problems when opening multiple
-        // clock windows (this locks up the machine)
-        // vex_timv(vh, &timerfunc, &old_timer_handler, &conv);
     }
 
     return wi;
@@ -88,11 +92,15 @@ static void delete_clockwindow(struct window *wi)
     if (cw->face_buffer)
         free(cw->face_buffer);
     if (wi->priv) free(wi->priv);
+
     /* let the generic window code do the rest */
 
     delete_window(wi);
 }
 
+/*
+ * draw a clock face within the window we just created
+ */
 static void draw_face(struct window *wi, short x, short y, short w, short h)
 {
     short minute;
@@ -102,9 +110,6 @@ static void draw_face(struct window *wi, short x, short y, short w, short h)
     short vh = wi->vdi_handle;
 
     rad = min(w, h) / 2;
-    /*
-     * draw the clock face
-     */
 
     wi->clear(wi, x, y, w, h);
 
@@ -116,6 +121,7 @@ static void draw_face(struct window *wi, short x, short y, short w, short h)
 
         /* rotate indicator into place */
         short min5 = minute % 5 == 0;       /* each full 5 minute gets a standout indicator */
+
         pxy[0] = (min5 ? rad - 20 : rad - 10) * icos(ang) / SHRT_MAX;
         pxy[1] = (min5 ? rad - 20 : rad - 10) * isin(ang) / SHRT_MAX;
         pxy[2] = (rad - 2) * icos(ang) / SHRT_MAX;
@@ -126,26 +132,34 @@ static void draw_face(struct window *wi, short x, short y, short w, short h)
         pxy[1] += y + h / 2;
         pxy[2] += x + w / 2;
         pxy[3] += y + h / 2;
+
+        /* draw */
         vsl_color(vh, 1);
         vsl_width(vh, 1);
         v_pline(vh, 2, pxy);
     }
 }
 
+/*
+ * draw the clock hands
+ */
 static void draw_hands(struct window *wi)
 {
-    short ang;
+    /*
+     * get time from OS
+     */
     time_t t = time(NULL);
     struct tm *lt = localtime(&t);
 
+    short ang;
     short vh = wi->vdi_handle;
     short rad = min(wi->work.g_w, wi->work.g_h) / 2;
     short pxy[4];
 
-    /* draw "long hand" - minutes */
-    ang = ((lt->tm_min - 3) * 60L) * 3600L / 60;
-    pxy[0] = (rad - 25) * icos(ang) / SHRT_MAX;
-    pxy[1] = (rad - 25) * isin(ang) / SHRT_MAX;
+    /* "long hand" - minutes */
+    ang = ((lt->tm_min) * 60L) * 3600L / 60;
+    pxy[0] = (rad - 15) * icos(ang) / SHRT_MAX;
+    pxy[1] = (rad - 15) * isin(ang) / SHRT_MAX;
     pxy[2] = -10 * icos(ang) / SHRT_MAX;
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
@@ -160,8 +174,8 @@ static void draw_hands(struct window *wi)
 
     /* draw "short hand" - hours */
     ang = (lt->tm_hour * 60L + lt->tm_min) * 3600L / 60;
-    pxy[0] = (rad - 20) * icos(ang) / SHRT_MAX;
-    pxy[1] = (rad - 20) * isin(ang) / SHRT_MAX;
+    pxy[0] = (rad - 25) * icos(ang) / SHRT_MAX;
+    pxy[1] = (rad - 25) * isin(ang) / SHRT_MAX;
     pxy[2] = -10 * icos(ang) / SHRT_MAX;
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
@@ -170,6 +184,7 @@ static void draw_hands(struct window *wi)
     pxy[1] += wi->work.g_y + wi->work.g_h / 2;
     pxy[2] += wi->work.g_x + wi->work.g_w / 2;
     pxy[3] += wi->work.g_y + wi->work.g_h / 2;
+
     vsl_width(vh, 3);
     v_pline(vh, 2, pxy);
 
@@ -185,26 +200,43 @@ static void draw_hands(struct window *wi)
     pxy[1] += wi->work.g_y + wi->work.g_h / 2;
     pxy[2] += wi->work.g_x + wi->work.g_w / 2;
     pxy[3] += wi->work.g_y + wi->work.g_h / 2;
+
     vsl_width(vh, 1);
     v_pline(vh, 2, pxy);
 }
 
+/*
+ * we override the "open" function to to copy away the image of the clock face.
+ * We then only need to blit it on redraws (at least until the window does not
+ * get resized) instead of doing the expensive redraw each update
+ */
 static void open_clockwindow(struct window *wi, short x, short y, short w, short h)
 {
-    open_window(wi, x, y, w, h);
+    open_window(wi, x, y, w, h);    /* call "base class method" */
 
     struct clockwindow *cw = wi->priv;
     short vh = wi->vdi_handle;
 
-    short pxy[8] = { wi->work.g_x, wi->work.g_y,
-                     wi->work.g_x + wi->work.g_w - 1,
-                     wi->work.g_y + wi->work.g_h - 1,
-                     0, 0, wi->work.g_w - 1, wi->work.g_h - 1 };
+    short pxy[8] =
+    {
+        wi->work.g_x,                       /* source and ... */
+        wi->work.g_y,
+        wi->work.g_x + wi->work.g_w - 1,
+        wi->work.g_y + wi->work.g_h - 1,
+        0,                                  /* ... destination coordinates for the image save blit */
+        0,
+        wi->work.g_w - 1,
+        wi->work.g_h - 1
+    };
 
 
-    if (cw->face_buffer != NULL)
+    if (cw->face_buffer != NULL)            /* free old image buffer if required */
         free(cw->face_buffer);
-    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes);
+
+    cw->face_buffer = malloc((w + 15) / 16 * gl_nplanes * sizeof(short) * h);
+    if (!cw->face_buffer)
+        exit(1);
+
     MFDB mfdb_src =
     {
         .fd_addr = NULL,
@@ -214,7 +246,7 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
         .fd_addr = cw->face_buffer,
         .fd_w = w,
         .fd_h = h,
-        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8,
         .fd_stand = 0,
         .fd_nplanes = gl_nplanes,
         0, 0, 0
@@ -245,7 +277,10 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
 
     if (cw->face_buffer != NULL)
         free(cw->face_buffer);
-    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes);
+    cw->face_buffer = malloc((w + 15) / 16 * h * gl_nplanes * sizeof(short));
+    if (!cw->face_buffer)
+        exit(1);
+
     MFDB mfdb_src =
     {
         .fd_addr = NULL,
@@ -255,7 +290,7 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
         .fd_addr = cw->face_buffer,
         .fd_w = w,
         .fd_h = h,
-        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8,
         .fd_stand = 0,
         .fd_nplanes = gl_nplanes,
         0, 0, 0
@@ -287,21 +322,30 @@ static void draw_clockwindow(struct window *wi, short x, short y, short w, short
     short vh = wi->vdi_handle;
     struct clockwindow *cw = wi->priv;
 
-    MFDB mfdb_dst = {
+    MFDB mfdb_dst =
+    {
         .fd_addr = NULL,
-    }, mfdb_src = {
+    };
+    MFDB mfdb_src =
+    {
         .fd_addr = cw->face_buffer,
         .fd_w = w,
         .fd_h = h,
-        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8 * gl_nplanes,
+        .fd_wdwidth = (wi->work.g_w + 15) / sizeof(short) / 8,
         .fd_stand = 0,
         .fd_nplanes = gl_nplanes,
         0, 0, 0
     };
-    short pxy[8] = { 0, 0, wi->work.g_w - 1, wi->work.g_h - 1,
-                     wi->work.g_x, wi->work.g_y,
-                     wi->work.g_x + wi->work.g_w - 1,
-                     wi->work.g_y + wi->work.g_h - 1
+    short pxy[8] =
+    {
+        0,
+        0,
+        wi->work.g_w - 1,
+        wi->work.g_h - 1,
+        wi->work.g_x,
+        wi->work.g_y,
+        wi->work.g_x + wi->work.g_w - 1,
+        wi->work.g_y + wi->work.g_h - 1
                      };
 
     // wi->clear(wi, x, y, w, h);
