@@ -1,8 +1,8 @@
 #ifndef _DIALOG_H_
 #define _DIALOG_H_
 
-extern void init_dialogs();
-extern void free_dialogs();
+void init_dialogs();
+void free_dialogs();
 
 typedef short (init_callback_func)(OBJECT *dialog);
 typedef short (exit_callback_func)(OBJECT *dialog, short exit_button);
@@ -19,9 +19,9 @@ struct dialog_handler
     void (*dialog_do)(struct dialog_handler *dial);
 };
 
-extern void add_dialog(struct dialog_handler *dial);
-extern void delete_dialog(struct dialog_handler *dial);
-extern struct dialog_handler *from_treeindex(short tree);
-extern struct dialog_handler *create_dialog(short tree, init_callback_func *ic, exit_callback_func *ec, touchexit_callback_func *te);
+void add_dialog(struct dialog_handler *dial);
+void delete_dialog(struct dialog_handler *dial);
+struct dialog_handler *from_treeindex(short tree);
+struct dialog_handler *create_dialog(short tree, init_callback_func *ic, exit_callback_func *ec, touchexit_callback_func *te);
 
 #endif /* _DIALOG_H_ */

@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <gem.h>
 #include <osbind.h>
-#include "portab.h"
 
 struct window
 {

@@ -1,5 +1,4 @@
 #include <gem.h>
-#include "portab.h"
 #include <stdlib.h>
 #include <osbind.h>
 #include <stdio.h>

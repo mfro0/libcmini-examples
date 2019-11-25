@@ -7,7 +7,6 @@ include/global.h
 include/grafwindow.h
 include/intmath.h
 include/menu.h
-include/portab.h
 include/rsrc.h
 include/util.h
 include/window.h

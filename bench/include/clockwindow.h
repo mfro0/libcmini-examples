@@ -5,7 +5,7 @@
 #include "window.h"
 #include <time.h>
 
-extern struct window *create_clockwindow(short wi_kind, char *title);
+struct window *create_clockwindow(short wi_kind, char *title);
 
 #define CLOCKWINDOW_WINELEMENTS SIZER|MOVER|FULLER|CLOSER|NAME|INFO
 #define CLOCKWINDOW_CLASS	0x47111236

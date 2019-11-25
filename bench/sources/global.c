@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "global.h"
 #include "window.h"
-#include "portab.h"
 
 //#define DEBUG
 #ifdef DEBUG

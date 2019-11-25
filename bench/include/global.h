@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "portab.h"
 #include "window.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

@@ -28,11 +28,11 @@ static inline int max(int a, int b)
     return (a > b ? a : b);
 }
 
-extern short init_util(void);
-extern short free_util(void);
-extern short open_vwork(short work_out[]);
-extern void set_clipping(short handle, short x, short y, short w, short h, short on);
-extern void fix_menu(OBJECT *tree);
+short init_util(void);
+short free_util(void);
+short open_vwork(short work_out[]);
+void set_clipping(short handle, short x, short y, short w, short h, short on);
+void fix_menu(OBJECT *tree);
 
 #endif /* _UTIL_H_ */
 

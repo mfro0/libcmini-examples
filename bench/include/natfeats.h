@@ -37,39 +37,39 @@ int CDECL detect_nf(void);
  * detect & initialize native features
  * returns zero for fail
  */
-extern int nf_init(void);
+int nf_init(void);
 
 /**
  * print string to emulator console
  * returns number of chars output
  */
-extern long nf_print(const char *text);
-extern int nf_printf(const char *fmt, ...);
+long nf_print(const char *text);
+int nf_printf(const char *fmt, ...);
 
 /**
  * invoke emulator debugger
  * (Hatari specific, can be used e.g. in asserts)
  */
-extern long nf_debugger(void);
+long nf_debugger(void);
 
 /**
  * set emulator fastforward mode on (1) or off (0)
  * (Hatari specific)
  * returns previous value
  */
-extern long nf_fastforward(long enabled);
+long nf_fastforward(long enabled);
 
 /**
  * terminate the execution of the emulation if possible
  * (runs in supervisor mode)
  */
-extern void nf_shutdown(void);
+void nf_shutdown(void);
 
 /**
  * terminate the execution of the emulation with exit code
  * (Hatari specific, can be used e.g. for determining test-case success)
  */
-extern void nf_exit(long exitval);
+void nf_exit(long exitval);
 
 #endif /* _NATFEAT_H */
 #endif // NATFEATS_H
