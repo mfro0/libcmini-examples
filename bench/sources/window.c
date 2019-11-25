@@ -303,6 +303,7 @@ void full_window(struct window *wi)
       wind_set(wi->handle, WF_CURRXYWH, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h);
     }
     wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
+    wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
     wi->fulled ^= 1;
 }
 
@@ -356,17 +357,17 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
  */
 void clear_window(struct window *wi, short x, short y, short w, short h)
 {
-    short temp[4];
+    short pxy[4];
     short vh = wi->vdi_handle;
 
     vsf_interior(vh, 1);
     vsf_style(vh, 0);
     vsf_color(vh, 0);
-    temp[0] = x;
-    temp[1] = y;
-    temp[2] = x + w - 1;
-    temp[3] = y + h - 1;
-    v_bar(vh, temp);  /* blank the interior */
+    pxy[0] = x;
+    pxy[1] = y;
+    pxy[2] = x + w - 1;
+    pxy[3] = y + h - 1;
+    v_bar(vh, pxy);  /* blank the interior */
 }
 
 /*
