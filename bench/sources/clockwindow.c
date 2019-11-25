@@ -19,12 +19,6 @@
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
 
-struct clockwindow {
-    short pxy_max_x;
-    short pxy_max_y;
-    void *face_buffer;
-};
-
 /*
  * local function prototypes
  */
@@ -145,11 +139,8 @@ static void draw_face(struct window *wi, short x, short y, short w, short h)
  */
 static void draw_hands(struct window *wi)
 {
-    /*
-     * get time from OS
-     */
-    time_t t = time(NULL);
-    struct tm *lt = localtime(&t);
+    struct clockwindow *cw = wi->priv;
+    struct tm *lt = &cw->prev;
 
     short ang;
     short vh = wi->vdi_handle;
@@ -257,7 +248,7 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
 
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-
+    draw_hands(wi);
     wind_update(END_UPDATE);
     graf_mouse(M_ON, NULL);
 }
@@ -317,7 +308,7 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
     clear_window(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-
+    draw_hands(wi);
     wind_update(END_UPDATE);
     graf_mouse(M_ON, NULL);
 }
@@ -379,6 +370,19 @@ static void draw_clockwindow(struct window *wi, short x, short y, short w, short
  */
 static void timer_clockwindow(struct window *wi)
 {
-    do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    struct clockwindow *cw = wi->priv;
+    struct tm *prev = &cw->prev;
+    /* if the time didn't change since the last timer-driven draw, we do not need to redraw the clock */
+    /*
+     * get time from OS
+     */
+    time_t t = time(NULL);
+    struct tm *lt = localtime(&t);
+
+    if (!(lt->tm_hour == prev->tm_hour && lt->tm_min == prev->tm_min && lt->tm_sec == prev->tm_sec))
+    {
+        *prev = *lt;
+        do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+    }
 }
 
