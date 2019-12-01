@@ -3,6 +3,7 @@ include/clockwindow.h
 include/clockwindow.h
 include/complexwindow.h
 include/dialog.h
+include/fontwindow.h
 include/global.h
 include/grafwindow.h
 include/intmath.h
@@ -15,6 +16,7 @@ sources/clockwindow.c
 sources/clockwindow.c
 sources/complexwindow.c
 sources/dialog.c
+sources/fontwindow.c
 sources/global.c
 sources/grafwindow.c
 sources/intmath.c

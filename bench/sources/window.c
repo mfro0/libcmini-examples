@@ -375,16 +375,7 @@ void clear_window(struct window *wi, short x, short y, short w, short h)
  */
 void send_redraw(struct window *wi, short x, short y, short w, short h)
 {
-    short msg[8];
-
-    msg[0] = WM_REDRAW;
-    msg[1] = ap_id;
-    msg[2] = 0;
-    msg[3] = wi->handle;
-    msg[4] = x;
-    msg[5] = y;
-    msg[6] = w;
-    msg[7] = h;
+    short msg[8] = { WM_REDRAW, ap_id, 0, wi->handle, x, y, w, h };
 
     appl_write(ap_id, sizeof(msg), msg);
 }

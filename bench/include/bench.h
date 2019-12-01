@@ -14,11 +14,12 @@
 #define MMENU_MNVDI      23  /* STRING in Baum MMENU */
 #define MMENU_MNCUBE     24  /* STRING in Baum MMENU */
 #define MMENU_MNCLOCK    25  /* STRING in Baum MMENU */
-#define MMENU_MCLOSE     26  /* STRING in Baum MMENU */
-#define MMENU_MQUIT      29  /* STRING in Baum MMENU */
-#define MMENU_WINOPTS    30  /* BOX in Baum MMENU */
-#define MMENU_MPREFS     31  /* STRING in Baum MMENU */
-#define MMENU_COLORS     33  /* STRING in Baum MMENU */
+#define MNU_FONTWIN      26  /* STRING in Baum MMENU */
+#define MMENU_MCLOSE     27  /* STRING in Baum MMENU */
+#define MMENU_MQUIT      30  /* STRING in Baum MMENU */
+#define MMENU_WINOPTS    31  /* BOX in Baum MMENU */
+#define MMENU_MPREFS     32  /* STRING in Baum MMENU */
+#define MMENU_COLORS     34  /* STRING in Baum MMENU */
 
 #define PREFS            1   /* Formular/Dialog */
 #define PREF_OK          1   /* BUTTON in Baum PREFS */

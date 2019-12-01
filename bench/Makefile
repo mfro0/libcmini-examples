@@ -75,6 +75,7 @@ CSRCS=\
 	$(SRCDIR)/rcircles_vdi_window.c\
 	$(SRCDIR)/vdiwindow.c\
 	$(SRCDIR)/cubewindow.c \
+	$(SRCDIR)/fontwindow.c \
 	\
 	$(SRCDIR)/natfeats.c
 
