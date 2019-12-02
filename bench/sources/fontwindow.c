@@ -30,6 +30,39 @@ static void delete_fontwindow(struct window *wi);
 static void size_fontwindow(struct window *wi, short x, short y, short w, short h);
 static void full_fontwindow(struct window *wi);
 
+static bool gdos_available;
+
+void init_fontwindow(void)
+{
+    static bool initialized = false;
+    short add_fonts = 0;
+
+    if (!initialized)
+    {
+        int i;
+
+        initialized = true;
+        if (!vq_gdos())
+        {
+            form_alert(2, "[No GDOS installed][OK]");
+            gdos_available = 0;
+        }
+        else
+        {
+            add_fonts = vst_load_fonts(vdi_handle, 0);
+            gdos_available = 1;
+        }
+
+        for (i = 0; i < add_fonts + 2; i++)
+        {
+            char name[32];
+
+            vqt_name(vdi_handle, i, name);
+            dbg("font %d=\"%s\"\n", i, name);
+        }
+    }
+}
+
 /*
  * create a new window and add it to the window list.
  */
@@ -88,29 +121,6 @@ static void delete_fontwindow(struct window *wi)
 
 static void open_fontwindow(struct window *wi, short x, short y, short w, short h)
 {
-    struct fontwindow *fw = wi->priv;
-    short vh = wi->vdi_handle;
-    int i;
-
-    if (!vq_gdos())
-    {
-        form_alert(2, "[No GDOS installed][OK]");
-        fw->gdos_available = 0;
-    }
-    else
-    {
-        fw->add_fonts = vst_load_fonts(vh, 0);
-        fw->gdos_available = 1;
-    }
-
-    for (i = 0; i < fw->add_fonts + 2; i++)
-    {
-        char name[32];
-
-        vqt_name(vh, i, name);
-        dbg("font %d=\"%s\"\n", i, name);
-    }
-
     open_window(wi, x, y, w, h);    /* call "base class method" */
 
     graf_mouse(M_OFF, NULL);
