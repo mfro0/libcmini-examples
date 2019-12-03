@@ -13,6 +13,7 @@
 #include "util.h"
 #include "global.h"
 #include "dialog.h"
+#include "fontwindow.h"
 
 //#define DEBUG
 #ifdef DEBUG

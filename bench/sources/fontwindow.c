@@ -31,11 +31,11 @@ static void size_fontwindow(struct window *wi, short x, short y, short w, short 
 static void full_fontwindow(struct window *wi);
 
 static bool gdos_available;
+static short add_fonts = 0;
 
-void init_fontwindow(void)
+void init_fontwindow(struct window *wi)
 {
     static bool initialized = false;
-    short add_fonts = 0;
 
     if (!initialized)
     {
@@ -44,12 +44,13 @@ void init_fontwindow(void)
         initialized = true;
         if (!vq_gdos())
         {
-            form_alert(2, "[No GDOS installed][OK]");
+            form_alert(2, "[1][No GDOS installed][OK]");
             gdos_available = 0;
         }
         else
         {
-            add_fonts = vst_load_fonts(vdi_handle, 0);
+            add_fonts = vst_load_fonts(wi->vdi_handle, 0);
+            dbg("loaded %d additional fonts\n", add_fonts);
             gdos_available = 1;
         }
 
@@ -81,7 +82,7 @@ struct window *create_fontwindow(short wi_kind, char *title)
         /* override base methods */
         wi->draw = draw_fontwindow;
         wi->del = delete_fontwindow;
-        wi->timer = timer_fontwindow;
+        // wi->timer = timer_fontwindow;
         wi->opn = open_fontwindow;
         wi->del = delete_fontwindow;
         wi->size = size_fontwindow;
@@ -176,11 +177,28 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 {
     short vh = wi->vdi_handle;
     struct fontwindow *fw = wi->priv;
+    short i;
 
     graf_mouse(M_OFF, NULL);
     wind_update(BEG_UPDATE);
 
+    init_fontwindow(wi);
     wi->clear(wi, x, y, w, h);
+
+    for (i = 0; i < add_fonts; i++)
+    {
+        char name[32];
+        short ch_w, ch_h, ce_w, ce_h;
+        short fntindex;
+
+        fntindex = vqt_name(vh, i, name);
+        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        y += ce_h;
+        vst_font(vh, fntindex);
+        v_gtext(vh, x, y, name);
+        if (y > h)
+            break;
+    }
     // vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
 
     wind_update(END_UPDATE);
