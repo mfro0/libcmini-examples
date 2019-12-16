@@ -1,3 +1,4 @@
+VERBOSE=yes
 ifneq (yes,$(VERBOSE))
     Q=@
 else
@@ -49,6 +50,7 @@ CFLAGS= \
 	-g \
 	-nostdinc \
 	-I/usr/lib/gcc/m68k-atari-mint/4.6.4/include \
+	-DFORCE_GEMLIB_UDEF \
 	-Wl,-Map,mapfile \
 	-Wall \
 	$(CHARSET_FLAGS)
@@ -124,7 +126,7 @@ $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
 	$(Q)echo "CC $$<"
 	$(Q)$(CC) $$(CFLAGS) --traditional -o $$@ $(LIBCMINI_LIB)/$(1)/startup.o $$($(1)_OBJS) -L$(LIBCMINI_LIB)/$(1) $(LIBS)
-	#$(STRIP) $$@
+	$(Q)$(STRIP) $$@
 endef
 $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))
 
