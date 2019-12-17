@@ -184,6 +184,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 
     init_fontwindow(wi);
     wi->clear(wi, x, y, w, h);
+    vst_color(vh, G_BLACK);
 
     for (i = 0; i < add_fonts; i++)
     {
