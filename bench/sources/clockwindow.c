@@ -10,7 +10,7 @@
 #include "intmath.h"
 #include "util.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -147,24 +147,11 @@ static void draw_hands(struct window *wi)
     short rad = min(wi->work.g_w, wi->work.g_h) / 2;
     short pxy[4];
 
-    /* "long hand" - minutes */
-    ang = ((lt->tm_min) * 60L) * 3600L / 60;
-    pxy[0] = (rad - 15) * icos(ang) / SHRT_MAX;
-    pxy[1] = (rad - 15) * isin(ang) / SHRT_MAX;
-    pxy[2] = -10 * icos(ang) / SHRT_MAX;
-    pxy[3] = -10 * isin(ang) / SHRT_MAX;
-
-    /* translate to position */
-    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
-    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
-    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
-    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
-
-    vsl_width(vh, 3);
-    v_pline(vh, 2, pxy);
+    dbg("%02d:%02d:%02d\n", lt->tm_hour, lt->tm_min, lt->tm_sec);
 
     /* draw "short hand" - hours */
-    ang = (lt->tm_hour * 60L + lt->tm_min) * 3600L / 60;
+    ang = (((lt->tm_hour % 12) * 3600L + lt->tm_min * 3600L / 60) / 12 + 2700) % 3600;
+    dbg("hours ang=%d\n", ang);
     pxy[0] = (rad - 25) * icos(ang) / SHRT_MAX;
     pxy[1] = (rad - 25) * isin(ang) / SHRT_MAX;
     pxy[2] = -10 * icos(ang) / SHRT_MAX;
@@ -179,8 +166,26 @@ static void draw_hands(struct window *wi)
     vsl_width(vh, 3);
     v_pline(vh, 2, pxy);
 
+    /* "long hand" - minutes */
+    ang = (lt->tm_min * 3600L / 60 + 2700) % 3600;
+    dbg("minutes ang=%d\n", ang);
+    pxy[0] = (rad - 15) * icos(ang) / SHRT_MAX;
+    pxy[1] = (rad - 15) * isin(ang) / SHRT_MAX;
+    pxy[2] = -10 * icos(ang) / SHRT_MAX;
+    pxy[3] = -10 * isin(ang) / SHRT_MAX;
+
+    /* translate to position */
+    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
+    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
+
+    vsl_width(vh, 3);
+    v_pline(vh, 2, pxy);
+
     /* draw "light hand" - seconds */
-    ang = (lt->tm_sec) * 3600L / 60;
+    ang = (lt->tm_sec * 3600L / 60 + 2700) % 3600;
+    dbg("seconds ang=%d\n", ang);
     pxy[0] = (rad - 20) * icos(ang) / SHRT_MAX;
     pxy[1] = (rad - 20) * isin(ang) / SHRT_MAX;
     pxy[2] = -10 * icos(ang) / SHRT_MAX;
