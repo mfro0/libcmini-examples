@@ -65,17 +65,17 @@ static void add_window(struct window *wi)
 
     if (num_windows > max_windows - 1)
     {
-      struct window **new_stack;
+        struct window **new_stack;
 
-      new_stack = malloc(sizeof(struct window *) * max_windows * 2);
+        new_stack = malloc(sizeof(struct window *) * max_windows * 2);
 
-      for (i = 0; i < max_windows; i++)
-      {
-        new_stack[i] = window_list[i];
-      }
-      free(window_list);
-      window_list = new_stack;
-      max_windows *= 2;
+        for (i = 0; i < max_windows; i++)
+        {
+            new_stack[i] = window_list[i];
+        }
+        free(window_list);
+        window_list = new_stack;
+        max_windows *= 2;
     }
     window_list[num_windows++] = wi;
 }
@@ -116,10 +116,10 @@ struct window *from_handle(short handle)
 
     for (i = 0; i < num_windows; i++)
     {
-      if (window_list[i]->handle == handle)
-      {
-        return window_list[i];
-      }
+        if (window_list[i]->handle == handle)
+        {
+            return window_list[i];
+        }
     }
     return NULL;
 }
@@ -288,19 +288,19 @@ void full_window(struct window *wi)
 {
     if (wi->fulled)
     {
-      wind_calc(WC_WORK, wi->kind, wi->old.g_x, wi->old.g_y,
-                wi->old.g_w, wi->old.g_h,
-                &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
-      wind_set(wi->handle, WF_CURRXYWH, wi->old.g_x, wi->old.g_y, wi->old.g_w, wi->old.g_h);
+        wind_calc(WC_WORK, wi->kind, wi->old.g_x, wi->old.g_y,
+                  wi->old.g_w, wi->old.g_h,
+                  &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
+        wind_set(wi->handle, WF_CURRXYWH, wi->old.g_x, wi->old.g_y, wi->old.g_w, wi->old.g_h);
     }
     else
     {
-      wind_calc(WC_BORDER, wi->kind, wi->work.g_x, wi->work.g_y,
-                wi->work.g_w, wi->work.g_h,
-                &wi->old.g_x, &wi->old.g_y, &wi->old.g_w, &wi->old.g_h);
-      wind_calc(WC_WORK, wi->kind, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h,
-                &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
-      wind_set(wi->handle, WF_CURRXYWH, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h);
+        wind_calc(WC_BORDER, wi->kind, wi->work.g_x, wi->work.g_y,
+                  wi->work.g_w, wi->work.g_h,
+                  &wi->old.g_x, &wi->old.g_y, &wi->old.g_w, &wi->old.g_h);
+        wind_calc(WC_WORK, wi->kind, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h,
+                  &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
+        wind_set(wi->handle, WF_CURRXYWH, gl_desk.g_x, gl_desk.g_y, gl_desk.g_w, gl_desk.g_h);
     }
     wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
     wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);

@@ -12,18 +12,18 @@ struct window
     long kind;
     bool word_aligned;
 
-    GRECT rect;			/* current WF_SIZE */
-    GRECT work;			/* = WF_WORKAREA */
-    GRECT old;			/* previous rect */
+    GRECT rect;         /* current WF_SIZE */
+    GRECT work;         /* = WF_WORKAREA */
+    GRECT old;          /* previous rect */
 
-    long left;		/* start of viewing rect in document */
+    long left;          /* start of viewing rect in document */
     long top;
 
     long doc_width;
     long doc_height;
 
-    long x_fac;		/* conversion factor document units <-> pixels in x */
-    long y_fac;		/* conversion factor document units <-> pixels in y */
+    long x_fac;         /* conversion factor document units <-> pixels in x */
+    long y_fac;         /* conversion factor document units <-> pixels in y */
 
     int open;
     int topped;

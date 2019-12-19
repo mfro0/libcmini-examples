@@ -10,7 +10,7 @@
 #include "intmath.h"
 #include "util.h"
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -356,14 +356,14 @@ static void draw_clockwindow(struct window *wi, short x, short y, short w, short
         wi->work.g_y,
         wi->work.g_x + wi->work.g_w - 1,
         wi->work.g_y + wi->work.g_h - 1
-                     };
+    };
 
     // wi->clear(wi, x, y, w, h);
 
     graf_mouse(M_OFF, NULL);
     wind_update(BEG_UPDATE);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-    // draw_face(wi);
+
     draw_hands(wi);
     wind_update(END_UPDATE);
     graf_mouse(M_ON, NULL);
