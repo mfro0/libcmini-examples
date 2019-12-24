@@ -179,6 +179,11 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     struct fontwindow *fw = wi->priv;
     short i;
 
+    short wx = wi->work.g_x;
+    short wy = wi->work.g_y;
+    short ww = wi->work.g_w;
+    short wh = wi->work.g_h;
+
     graf_mouse(M_OFF, NULL);
     wind_update(BEG_UPDATE);
 
@@ -186,18 +191,22 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     wi->clear(wi, x, y, w, h);
     vst_color(vh, G_BLACK);
 
-    for (i = 0; i < add_fonts; i++)
+    for (i = 0; i < add_fonts + 2; i++)
     {
         char name[32];
         short ch_w, ch_h, ce_w, ce_h;
         short fntindex;
+        short hor, vert;
 
         fntindex = vqt_name(vh, i, name);
-        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
-        y += ce_h;
+        vst_alignment(vh, TA_LEFT, TA_TOP, &hor, &vert);
+        // vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        vst_arbpt(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        dbg("%s: ch_w=%d ch_h=%d ce_w=%d ce_h=%d\n", name, ch_w, ch_h, ce_w, ce_h);
         vst_font(vh, fntindex);
-        v_gtext(vh, x, y, name);
-        if (y > h)
+        v_gtext(vh, wx, wy, name);
+        wy += ce_h + 2;
+        if (wy > wi->work.g_y + wh)
             break;
     }
     // vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
