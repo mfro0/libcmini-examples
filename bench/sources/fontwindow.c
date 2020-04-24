@@ -10,6 +10,8 @@
 #include "intmath.h"
 #include "util.h"
 
+#include <gemx.h>
+
 #define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
@@ -200,13 +202,17 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 
         fntindex = vqt_name(vh, i, name);
         vst_alignment(vh, TA_LEFT, TA_TOP, &hor, &vert);
-        // vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
-        vst_arbpt(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        if (hor != TA_LEFT || vert != TA_TOP)
+            dbg("did not get alignment we were asking for: hor (should be %d) = %d\n,"
+                "vert (should be %d) = %d\n", TA_LEFT, hor, TA_TOP, vert);
+        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        //vst_point(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
         dbg("%s: ch_w=%d ch_h=%d ce_w=%d ce_h=%d\n", name, ch_w, ch_h, ce_w, ce_h);
         vst_font(vh, fntindex);
-        v_gtext(vh, wx, wy, name);
-        wy += ce_h + 2;
-        if (wy > wi->work.g_y + wh)
+        // v_gtext(vh, wx, wy, name);
+        v_ftext(vh, wx, wy, name);
+        wy += 20;
+        if (wy > y + h)
             break;
     }
     // vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
