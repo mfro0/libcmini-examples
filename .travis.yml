@@ -29,7 +29,7 @@ before_install:
 - unix2dos --version
 - lftp --version
 script:
-- export LIBCMINI_RELEASE = - $(curl -s https://api.github.com/repos/mfro0/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
+- export LIBCMINI_RELEASE=-$(curl -s https://api.github.com/repos/mfro0/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
 - wget ${LIBCMINI_RELEASE}
 - make clean
 - make all
