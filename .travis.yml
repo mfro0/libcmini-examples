@@ -30,7 +30,7 @@ before_install:
 - lftp --version
 script:
 - export LIBCMINI_RELEASE=-$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
-- wget https://github.com/freemint/libcmini/releases/libcmini/releases/${LIBCMINI_RELEASE}/libcmini-${LIBCMINI_RELEASE}.tar.gz
+- wget ${LIBCMINI_RELEASE} -o libcmini.tar.gz
 - make clean
 - make all
 - make release
