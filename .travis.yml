@@ -29,8 +29,8 @@ before_install:
 - unix2dos --version
 - lftp --version
 script:
-- export LIBCMINI_RELEASE=-$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
-- wget -${LIBCMINI_RELEASE} -o libcmini.tar.gz
+- export LIBCMINI_RELEASE=$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
+- wget ${LIBCMINI_RELEASE} -o libcmini.tar.gz
 - make clean
 - make all
 - make release
