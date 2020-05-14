@@ -71,6 +71,7 @@ CSRCS=\
 	$(SRCDIR)/grafwindow.c\
 	$(SRCDIR)/testwindow.c\
 	$(SRCDIR)/complexwindow.c\
+	$(SRCDIR)/bezierwindow.c\
 	$(SRCDIR)/clockwindow.c\
 	$(SRCDIR)/rasterwindow.c\
 	$(SRCDIR)/rcircles_bb_window.c\

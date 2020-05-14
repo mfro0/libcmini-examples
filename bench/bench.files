@@ -1,4 +1,5 @@
 include/bench.h
+include/bezierwindow.h
 include/clockwindow.h
 include/clockwindow.h
 include/complexwindow.h
@@ -12,6 +13,7 @@ include/rsrc.h
 include/util.h
 include/window.h
 sources/bench.c
+sources/bezierwindow.c
 sources/clockwindow.c
 sources/clockwindow.c
 sources/complexwindow.c

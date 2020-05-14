@@ -10,6 +10,7 @@
 #include "grafwindow.h"
 #include "testwindow.h"
 #include "complexwindow.h"
+#include "bezierwindow.h"
 #include "rasterwindow.h"
 #include "vdiwindow.h"
 #include "cubewindow.h"
@@ -403,6 +404,16 @@ short handle_menu(OBJECT *menu, short title, short item)
 
                 case MMENU_MNCOMPLE:
                     wi = create_complexwindow(COMPLEXWINDOW_WINELEMENTS, "Complex Window");
+                    if (wi != NULL)
+                    {
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        window_open_pos_x += 20;
+                        window_open_pos_y += 10;
+                    }
+                    break;
+
+                case BEZIERWIN:
+                    wi = create_bezierwindow(BEZIERWINDOW_WINELEMENTS, "Bezier Window");
                     if (wi != NULL)
                     {
                         wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);

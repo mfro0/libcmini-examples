@@ -8,18 +8,19 @@
 #define MMENU_MNGRAFWI   17  /* STRING in Baum MMENU */
 #define MMENU_MTEST      18  /* STRING in Baum MMENU */
 #define MMENU_MNCOMPLE   19  /* STRING in Baum MMENU */
-#define MMENU_MNBACKB    20  /* STRING in Baum MMENU */
-#define MMENU_RCIRCLES   21  /* STRING in Baum MMENU */
-#define MMENU_NVDIRC     22  /* STRING in Baum MMENU */
-#define MMENU_MNVDI      23  /* STRING in Baum MMENU */
-#define MMENU_MNCUBE     24  /* STRING in Baum MMENU */
-#define MMENU_MNCLOCK    25  /* STRING in Baum MMENU */
-#define MNU_FONTWIN      26  /* STRING in Baum MMENU */
-#define MMENU_MCLOSE     27  /* STRING in Baum MMENU */
-#define MMENU_MQUIT      30  /* STRING in Baum MMENU */
-#define MMENU_WINOPTS    31  /* BOX in Baum MMENU */
-#define MMENU_MPREFS     32  /* STRING in Baum MMENU */
-#define MMENU_COLORS     34  /* STRING in Baum MMENU */
+#define BEZIERWIN        20  /* STRING in Baum MMENU */
+#define MMENU_MNBACKB    21  /* STRING in Baum MMENU */
+#define MMENU_RCIRCLES   22  /* STRING in Baum MMENU */
+#define MMENU_NVDIRC     23  /* STRING in Baum MMENU */
+#define MMENU_MNVDI      24  /* STRING in Baum MMENU */
+#define MMENU_MNCUBE     25  /* STRING in Baum MMENU */
+#define MMENU_MNCLOCK    26  /* STRING in Baum MMENU */
+#define MNU_FONTWIN      27  /* STRING in Baum MMENU */
+#define MMENU_MCLOSE     28  /* STRING in Baum MMENU */
+#define MMENU_MQUIT      31  /* STRING in Baum MMENU */
+#define MMENU_WINOPTS    32  /* BOX in Baum MMENU */
+#define MMENU_MPREFS     33  /* STRING in Baum MMENU */
+#define MMENU_COLORS     35  /* STRING in Baum MMENU */
 
 #define PREFS            1   /* Formular/Dialog */
 #define PREF_OK          1   /* BUTTON in Baum PREFS */
