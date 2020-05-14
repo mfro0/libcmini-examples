@@ -18,8 +18,8 @@
 #endif /* DEBUG */
 
 struct bezierwindow {
-    short bezarea_pxy[13 * 2];	/* 12 points to define a complex polygon */
-    char bez[13];
+    short bezarea_pxy[13 * 2];	/* 12 points to define a "bezier-shaped potato" */
+    char bez[13];               /* the point-type flags array */
     short num_pts;
     short polygon_color;
     short rot_angle;
@@ -44,14 +44,14 @@ struct window *create_bezierwindow(short wi_kind, char *title)
         40, 35,
         35, 40,
         20, 40,
-         5, 40,
+        5, 40,
         0, 35,
         0, 20,
-        0,  5,
-         5, 0,
+        0, 5,
+        5, 0,
         20, 0,
         35, 0,
-        40, 5,
+        40, 10,
         40, 20
     };
 
@@ -113,7 +113,7 @@ static void delete_bezierwindow(struct window *wi)
 }
 
 /*
- * Draw Filled Ellipse
+ * Draw our "bezier shaped potato"
  */
 static void draw_bezier(struct window *wi, short wx, short wy, short wh, short ww)
 {
@@ -152,8 +152,8 @@ static void draw_bezier(struct window *wi, short wx, short wy, short wh, short w
         y = yr;
 
         /* translate back */
-        x += bw->pxy_max_x / 2;
-        y += bw->pxy_max_y / 2;
+        x += bw->pxy_max_x / 2 + 5;
+        y += bw->pxy_max_y / 2 + 5;
 
         /* scale to window */
         x = x * wi->work.g_w / 50 + wi->work.g_x;
@@ -165,13 +165,13 @@ static void draw_bezier(struct window *wi, short wx, short wy, short wh, short w
 
     vsf_perimeter(vh, 1);
 
-    vsl_width(vh, 10);
+    vsl_width(vh, 20);
     vsl_color(vh, bw->polygon_color);
     vsf_color(vh, bw->polygon_color + 3);
 
     short ext[4], totpts, totmvs;
 
-    v_bez(vh, bw->num_pts, pxy, bw->bez, ext, &totpts, &totmvs);
+    v_bez_fill(vh, bw->num_pts, pxy, bw->bez, ext, &totpts, &totmvs);
     dbg("ext=(%d, %d, %d, %d), totpts=%d, totmvs=%d\r\n",
         ext[0], ext[1], ext[2], ext[3],
         totpts, totmvs);
@@ -189,6 +189,6 @@ static void timer_bezierwindow(struct window *wi)
     cw->rot_angle = cw->rot_angle - 50;   /* 5 degree steps */
     cw->rot_angle = cw->rot_angle < 0 ? 3600 + cw->rot_angle : cw->rot_angle;
     cw->polygon_color++;
-    cw->polygon_color %= 7;
+    cw->polygon_color %= 8;
 }
 

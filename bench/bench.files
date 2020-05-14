@@ -14,6 +14,7 @@ include/util.h
 include/window.h
 sources/bench.c
 sources/bezierwindow.c
+sources/bezierwindow.c
 sources/clockwindow.c
 sources/clockwindow.c
 sources/complexwindow.c
