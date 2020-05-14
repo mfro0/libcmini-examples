@@ -124,13 +124,6 @@ static void draw_bezier(struct window *wi, short wx, short wy, short wh, short w
     short vh = wi->vdi_handle;
 
     wi->clear(wi, wx, wy, wh, ww);
-    vsf_style(vh, 8);
-    vsf_interior(vh, 1);
-    vsf_color(vh, bw->polygon_color);
-    v_ellipse(vh, wi->work.g_x + wi->work.g_w / 2,
-                  wi->work.g_y + wi->work.g_h / 2,
-                  wi->work.g_w / 2, wi->work.g_h / 2);
-    vsf_color(vh, bw->polygon_color + 1);
 
     /*
      * rotate polygon coordinates
@@ -172,13 +165,13 @@ static void draw_bezier(struct window *wi, short wx, short wy, short wh, short w
 
     vsf_perimeter(vh, 1);
 
-    vsl_width(vh, 6);
-    vsl_color(vh, 1);
+    vsl_width(vh, 10);
+    vsl_color(vh, bw->polygon_color);
     vsf_color(vh, bw->polygon_color + 3);
 
     short ext[4], totpts, totmvs;
 
-    v_bez_fill(vh, bw->num_pts, pxy, bw->bez, ext, &totpts, &totmvs);
+    v_bez(vh, bw->num_pts, pxy, bw->bez, ext, &totpts, &totmvs);
     dbg("ext=(%d, %d, %d, %d), totpts=%d, totmvs=%d\r\n",
         ext[0], ext[1], ext[2], ext[3],
         totpts, totmvs);
@@ -190,8 +183,7 @@ static void draw_bezier(struct window *wi, short wx, short wy, short wh, short w
 static void timer_bezierwindow(struct window *wi)
 {
     struct bezierwindow *cw = wi->priv;
-    //gw->ellipse_color++;
-    //gw->ellipse_color %= 1 << gl_planes;
+
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
 
     cw->rot_angle = cw->rot_angle - 50;   /* 5 degree steps */
