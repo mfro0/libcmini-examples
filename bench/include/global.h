@@ -26,6 +26,7 @@ extern short ptsout[128];	/* storage wasted for idiotic bindings */
 
 extern short work_in[11];	/* Input to GSX parameter array */
 extern short work_out[57];	/* Output from GSX parameter array */
+short ext_out[57];
 extern short pxyarray[10];	/* input poshort array */
 
 extern short ap_id;
