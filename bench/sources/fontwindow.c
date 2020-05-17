@@ -58,9 +58,10 @@ void init_fontwindow(struct window *wi)
 
         for (i = 0; i < add_fonts + 2; i++)
         {
-            char name[32];
+            char name[33];
 
             vqt_name(vdi_handle, i, name);
+            name[32] = '\0';
             dbg("font %d=\"%s\"\n", i, name);
         }
     }
@@ -195,12 +196,13 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 
     for (i = 0; i < add_fonts + 2; i++)
     {
-        char name[32];
+        char name[33];
         short ch_w, ch_h, ce_w, ce_h;
         short fntindex;
         short hor, vert;
 
         fntindex = vqt_name(vh, i, name);
+        name[32] = '\0';
         vst_alignment(vh, TA_LEFT, TA_TOP, &hor, &vert);
         if (hor != TA_LEFT || vert != TA_TOP)
             dbg("did not get alignment we were asking for: hor (should be %d) = %d\n,"
