@@ -15,7 +15,7 @@
 #include "dialog.h"
 #include "fontwindow.h"
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -353,7 +353,7 @@ static void multi(void)
                     break;
 
                 default:
-                    printf("unhandled event %x\n", msgbuff[0]);
+                    dbg("unhandled event %x\n", msgbuff[0]);
                     break;
             } /* switch (msgbuff[0]) */
         }
