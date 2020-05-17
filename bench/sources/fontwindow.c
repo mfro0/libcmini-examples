@@ -37,14 +37,13 @@ static bool gdos_available;
 
 void init_fontwindow(struct window *wi)
 {
-    static bool initialized = false;
     struct fontwindow *fi = wi->priv;
 
-    if (!initialized)
+    if (! fi->gdos_initialised)
     {
         int i;
 
-        initialized = true;
+        fi->gdos_initialised = true;
         if (!vq_gdos())
         {
             form_alert(2, "[1][No GDOS installed][OK]");
@@ -54,7 +53,7 @@ void init_fontwindow(struct window *wi)
         {
             fi->add_fonts = vst_load_fonts(wi->vdi_handle, 0);
             dbg("loaded %d additional fonts\n", fi->add_fonts);
-            gdos_available = 1;
+            fi->gdos_available = 1;
         }
 
         if (fi->font_info != NULL)
@@ -107,6 +106,8 @@ struct window *create_fontwindow(short wi_kind, char *title)
         wi->priv = fw;
 
         fw->font_info = NULL;
+        fw->gdos_initialised = false;
+        fw->gdos_available = false;
 
         wi->top = 0;
         wi->left = 0;

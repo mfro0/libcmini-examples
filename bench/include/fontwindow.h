@@ -17,6 +17,7 @@ struct finfo
 
 struct fontwindow
 {
+    bool gdos_initialised;
     bool gdos_available;
     int add_fonts;
     struct finfo *font_info;
