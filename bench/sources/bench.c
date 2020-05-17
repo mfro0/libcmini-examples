@@ -282,27 +282,27 @@ static void multi(void)
                     switch (msgbuff[4])
                     {
                         case WA_UPPAGE:
-                            wi->top -= wi->work.g_h / wi->y_fac;
+                            wi->top -= wi->work.g_h;
                             break;
 
                         case WA_DNPAGE:
-                            wi->top += wi->work.g_h / wi->y_fac;
+                            wi->top += wi->work.g_h;
                             break;
 
                         case WA_UPLINE:
-                            wi->top--;
+                            wi->top -= wi->y_fac;
                             break;
 
                         case WA_DNLINE:
-                            wi->top++;
+                            wi->top += wi->x_fac;
                             break;
 
                         case WA_LFPAGE:
-                            wi->left -= wi->doc_width - wi->work.g_w / wi->x_fac;
+                            wi->left -= (wi->doc_width - wi->work.g_w);
                             break;
 
                         case WA_RTPAGE:
-                            wi->left += wi->doc_width - wi->work.g_w / wi->x_fac;
+                            wi->left += (wi->doc_width - wi->work.g_w);
                             break;
 
                         case WA_LFLINE:
@@ -322,6 +322,7 @@ static void multi(void)
                     {
                         wi->left = wi->doc_width - wi->work.g_w / wi->x_fac;
                     }
+
                     if (wi->left < 0) wi->left = 0;
                     if (wi->scroll) wi->scroll(wi);
                     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);

@@ -60,6 +60,7 @@ void open_window(struct window *wi, short x, short y, short w, short h);
 void size_window(struct window *wi, short x, short y, short w, short h);
 void clear_window(struct window *wi, short x, short y, short w, short h);
 void full_window(struct window *wi);
+void scroll_window(struct window *wi);
 
 struct window *first_window();
 struct window *next_window();

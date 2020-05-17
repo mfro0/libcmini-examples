@@ -124,9 +124,6 @@ struct window *from_handle(short handle)
     return NULL;
 }
 
-/* private function prototypes */
-static void scroll_window(struct window *wi);
-
 /*
  * create a new window and add it to the window list
  */
@@ -251,7 +248,7 @@ void open_window(struct window *wi, short x, short y, short w, short h)
 /*
  * scroll window contents according to its slider settings
  */
-static void scroll_window(struct window *wi)
+void scroll_window(struct window *wi)
 {
     short xpos;
     short ypos;
