@@ -30,7 +30,7 @@ static inline int max(int a, int b)
 
 short init_util(void);
 short free_util(void);
-short open_vwork(short work_out[]);
+short open_vwork(short work_out[], short ext_out[]);
 void set_clipping(short handle, short x, short y, short w, short h, short on);
 void fix_menu(OBJECT *tree);
 

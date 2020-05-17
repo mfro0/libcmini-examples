@@ -15,7 +15,7 @@
 #include "dialog.h"
 #include "fontwindow.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -68,8 +68,10 @@ int main(int argc, char *argv[])
     phys_handle = graf_handle(&gl_wchar, &gl_hchar, &gl_wbox, &gl_hbox);
     wind_get_grect(0, WF_WORKXYWH, &gl_desk);
     graf_mouse(ARROW, 0x0L);
-    vdi_handle = open_vwork(work_out);
+    vdi_handle = open_vwork(work_out, ext_out);
 
+    dbg("%dx%d resolution in %d planes\r\n",
+        work_out[0], work_out[1], gl_nplanes);
     init_global();
     init_util();
     init_windows();
