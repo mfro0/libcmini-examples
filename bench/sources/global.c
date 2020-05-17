@@ -15,7 +15,7 @@ short vdi_handle;    		/* virtual workstation handle */
 
 short work_in[11];   		/* Input to GSX parameter array */
 short work_out[57];  		/* Output from GSX parameter array */
-
+short ext_out[57];
 short ap_id;
 
 short window_open_pos_x;

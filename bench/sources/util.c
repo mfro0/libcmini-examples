@@ -33,7 +33,7 @@ short free_util(void)
 static short handle;
 static USERBLK menu_blk;
 
-short open_vwork(short work_out[])
+short open_vwork(short work_out[], short ext_out[])
 {
     short vdi_handle;
     int i;
@@ -42,8 +42,8 @@ short open_vwork(short work_out[])
     for (i = 0; i < 10; work_in[i++] = 1);
     work_in[10] = 2;
     v_opnvwk(work_in, &vdi_handle, work_out);
-    vq_extnd(vdi_handle, 1, work_out);
-    gl_nplanes = work_out[4];
+    vq_extnd(vdi_handle, 1, ext_out);
+    gl_nplanes = ext_out[4];
 
     return vdi_handle;
 }
@@ -104,8 +104,9 @@ static short draw_menuline(PARMBLK *p)
 static void init_userdef(void)
 {
     short work_out[57];
+    short ext_out[57];
 
-    handle = open_vwork(work_out);
+    handle = open_vwork(work_out, ext_out);
     menu_blk.ub_parm = 0;
     menu_blk.ub_code = draw_menuline;
 }
