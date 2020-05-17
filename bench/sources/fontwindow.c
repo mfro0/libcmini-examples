@@ -270,7 +270,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
         /* save new doc width if larger than set value */
         wi->doc_width = fnt_extend[2] - fnt_extend[0] > wi->doc_width ? fnt_extend[2] - fnt_extend[0] : wi->doc_width;
 
-        if (wy - yoffs >= wi->work.g_y && wy - yoffs <= wi->work.g_y + wi->work.g_h - 1)
+        if (wy - yoffs + (fnt_extend[5] - fnt_extend[1]) >= wi->work.g_y && wy - yoffs <= wi->work.g_y + wi->work.g_h - 1)
             v_ftext(vh, wx - xoffs, wy - yoffs, fw->font_info[i].font_name);
         wy += fnt_extend[5] - fnt_extend[1];
     }
