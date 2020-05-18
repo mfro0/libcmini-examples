@@ -29,10 +29,7 @@ before_install:
 - unix2dos --version
 - lftp --version
 script:
-- export LIBCMINI_RELEASE=$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
-- mkdir -p ../libcmini/build
-- wget ${LIBCMINI_RELEASE} -O ../libcmini/build/libcmini.tar.gz
-- pushd ../libcmini/build; tar xvf libcmini.tar.gz; popd
+- pushd ..; git clone https://github.com/freemint/libcmini; cd libcmini; make all -j; popd
 - make clean
 - VERBOSE=yes make all
 before_deploy: 
