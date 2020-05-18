@@ -32,7 +32,7 @@ script:
 - export LIBCMINI_RELEASE=$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
 - mkdir -p ../libcmini/build
 - wget ${LIBCMINI_RELEASE} -O ../libcmini/build/libcmini.tar.gz
-- cd ../libcmini/build; tar xvf libcmini.tar.gz
+- pushd ../libcmini/build; tar xvf libcmini.tar.gz; popd
 - make clean
 - make all
 - make release
