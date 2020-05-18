@@ -34,8 +34,7 @@ script:
 - wget ${LIBCMINI_RELEASE} -O ../libcmini/build/libcmini.tar.gz
 - pushd ../libcmini/build; tar xvf libcmini.tar.gz; popd
 - make clean
-- make all
-- make release
+- VERBOSE=yes make all
 before_deploy: 
 deploy:
   provider: releases
