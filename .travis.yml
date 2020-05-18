@@ -31,9 +31,9 @@ before_install:
 script:
 - export LIBCMINI_RELEASE=$(curl -s https://api.github.com/repos/freemint/libcmini/releases/latest | jq -r '.assets[].browser_download_url')
 - mkdir -p ../libcmini/build
-- wget ${LIBCMINI_RELEASE} -o ../libcmini/libcmini.tar.gz
+- wget ${LIBCMINI_RELEASE} -O ../libcmini/libcmini.tar.gz
 - ls -l ..
-- cd ../libcmini; tar xvzf libcmini.tar.gz
+- cd ../libcmini/build; tar xvf libcmini.tar.gz
 - make clean
 - make all
 - make release
