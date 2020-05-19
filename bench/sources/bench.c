@@ -15,7 +15,7 @@
 #include "dialog.h"
 #include "fontwindow.h"
 
-// #define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -224,25 +224,25 @@ static int timer_cb(struct window *wi)
 }
 
 /*
- *  dispatches all accessory tasks
+ *  AES event dispatcher
  */
 static void multi(void)
 {
     short event;
     short keystate;
     short keyreturn;
-    long msec = 80;
+    short mbreturn;
+    long msec = 100;
     struct window *wi = NULL;
 
     do
     {
-        event = evnt_multi(MU_MESAG /* | MU_BUTTON */ | MU_KEYBD | MU_TIMER,
-                        1, 1, butdown,
+        event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD | MU_TIMER,
+                        0x103, 3, butdown,
                         0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0,
-                        msgbuff, msec, &mx, &my, &ret, &keystate, &keyreturn, &ret);
+                        msgbuff, msec, &mx, &my, &mbreturn, &keystate, &keyreturn, &ret);
 
-        wind_update(true);
 
         if (event & MU_MESAG)
         {
@@ -283,34 +283,42 @@ static void multi(void)
                     {
                         case WA_UPPAGE:
                             wi->top -= wi->work.g_h;
+                            dbg("WA_UPPAGE\r\n");
                             break;
 
                         case WA_DNPAGE:
                             wi->top += wi->work.g_h;
+                            dbg("WA_DNPAGE\r\n");
                             break;
 
                         case WA_UPLINE:
                             wi->top -= wi->y_fac;
+                            dbg("WA_UPLINE\r\n");
                             break;
 
                         case WA_DNLINE:
                             wi->top += wi->x_fac;
+                            dbg("WA_DNLINE\r\n");
                             break;
 
                         case WA_LFPAGE:
                             wi->left -= (wi->doc_width - wi->work.g_w);
+                            dbg("WA_LEFT\r\n");
                             break;
 
                         case WA_RTPAGE:
                             wi->left += (wi->doc_width - wi->work.g_w);
+                            dbg("WI_RTPAGE\r\n");
                             break;
 
                         case WA_LFLINE:
                             wi->left--;
+                            dbg("WA_LFLINE\r\n");
                             break;
 
                         case WA_RTLINE:
                             wi->left++;
+                            dbg("WA_RTLINE\r\n");
                             break;
                     } /* switch */
                     if (wi->top > wi->doc_height - wi->work.g_h / wi->y_fac)
@@ -335,6 +343,7 @@ static void multi(void)
                     {
                         wi->scroll(wi);
                     }
+                    dbg("WM_HSLID\r\n");
                     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
                     break;
 
@@ -344,6 +353,7 @@ static void multi(void)
                     {
                         wi->scroll(wi);
                     }
+                    dbg("WM_VSLID\r\n");
                     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
                     break;
 
@@ -369,6 +379,7 @@ static void multi(void)
 
         else if (event & MU_BUTTON)
         {
+            dbg("button event 0x%x\r\n", mbreturn);
             if (butdown)
             {
                 butdown = 0;
@@ -389,6 +400,5 @@ static void multi(void)
                 menu_tnormal(gl_menu, title, true);
             }
         }
-        wind_update(false);
     } while (!quit);
 }
