@@ -326,7 +326,6 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
     short vh = wi->vdi_handle;
 
     graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
 
     Supexec(start_timer);
 
@@ -345,7 +344,6 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
     sprintf(wi->info, "Time for redraw: %ld ms", Supexec(stop_timer) * 5);
     wind_set_str(wi->handle, WF_INFO, wi->info);
 
-    wind_update(END_UPDATE);
     graf_mouse(M_ON, NULL);
 }
 

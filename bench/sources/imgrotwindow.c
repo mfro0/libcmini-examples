@@ -226,7 +226,6 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
         pxy[0], pxy[1], pxy[2], pxy[3],
         pxy[4], pxy[5], pxy[6], pxy[7]);
 
-    vs_clip(vh, 0, (short[4]) {0, 0, 0, 0});
     vro_cpyfm(vh, S_ONLY,
               pxy,
               &icon_mfdb, &dst);

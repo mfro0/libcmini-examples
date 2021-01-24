@@ -245,14 +245,8 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     };
 
 
-    graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
-
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-    draw_hands(wi);
-    wind_update(END_UPDATE);
-    graf_mouse(M_ON, NULL);
 }
 
 /*
@@ -302,16 +296,11 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
         0, 0, 0
     };
 
-    graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
-
     set_clipping(vh, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h, 1);
     clear_window(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
     draw_hands(wi);
-    wind_update(END_UPDATE);
-    graf_mouse(M_ON, NULL);
 }
 
 void full_clockwindow(struct window *wi)
@@ -356,13 +345,8 @@ static void draw_clockwindow(struct window *wi, short x, short y, short w, short
 
     // wi->clear(wi, x, y, w, h);
 
-    graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-
     draw_hands(wi);
-    wind_update(END_UPDATE);
-    graf_mouse(M_ON, NULL);
 }
 
 

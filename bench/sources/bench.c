@@ -243,6 +243,7 @@ static void multi(void)
                         0, 0, 0, 0, 0,
                         msgbuff, msec, &mx, &my, &mbreturn, &keystate, &keyreturn, &ret);
 
+        wind_update(BEG_UPDATE);
 
         if (event & MU_MESAG)
         {
@@ -400,5 +401,6 @@ static void multi(void)
                 menu_tnormal(gl_menu, title, true);
             }
         }
+        wind_update(END_UPDATE);
     } while (!quit);
 }

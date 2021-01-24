@@ -106,9 +106,6 @@ void dialog_do(struct dialog_handler *dial)
     short exit_obj;
     bool end_dialog = false;
 
-    wind_update(BEG_UPDATE);
-    wind_update(BEG_MCTRL);
-
     form_center(dial->dialog_object, &x, &y, &w, &h);
 
     form_dial(FMD_GROW, 10, 10, 10, 10, x, y, w, h);
@@ -138,9 +135,6 @@ void dialog_do(struct dialog_handler *dial)
 
     form_dial(FMD_FINISH, x, y, w, h, x, y, w, h);
     form_dial(FMD_SHRINK, 10, 10, 10, 10, x, y, w, h);
-
-    wind_update(END_UPDATE);
-    wind_update(END_MCTRL);
 
     dial->dialog_object[exit_obj].ob_state &= ~OS_SELECTED;
 }

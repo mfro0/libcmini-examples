@@ -240,9 +240,6 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 
     yoffs = (long) (wi->doc_height - wi->work.g_h) * vslpos / 1000;
 
-    graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
-
     init_fontwindow(wi);
     wi->clear(wi, x, y, w, h);
     vst_color(vh, G_BLACK);
@@ -270,9 +267,6 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     }
     wi->doc_height = wy - wi->work.g_y;
     wi->scroll(wi);
-
-    wind_update(END_UPDATE);
-    graf_mouse(M_ON, NULL);
 }
 
 
