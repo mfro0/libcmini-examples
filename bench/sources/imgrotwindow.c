@@ -19,24 +19,6 @@
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
 
-#ifdef NOT_USED
-/*
- * return the smaller of two values
- */
-static inline int min(int a, int b)
-{
-    return (a < b ? a : b);
-}
-
-/*
- * return the larger of two values
- */
-static inline int max(int a, int b)
-{
-    return (a > b ? a : b);
-}
-#endif /* NOT_USED */
-
 /* private data for this window type */
 struct imgrotwindow
 {
@@ -287,35 +269,3 @@ void yshear(short *pos, double angle)
 
 }
 
-
-#ifdef NOT_USED
-void xshear(short shear, short width, short height)
-{
-    short skew;
-    short skewi;
-    short skewf;
-    short pixel;
-    short x, y;
-    short oleft, left;
-
-    short P[20][20];
-
-    for (y= 0; y < height; y++)
-    {
-        skew = shear * (y + 0.5);
-        skewi = floor(skew);
-        skewf = frac(skew);  /* = skew - skewi */
-        oleft = 0;
-        for (x = 0; x < width; x++)
-        {
-            pixel = P(width - x, y);
-            left = pixmult(pixel, skewf);
-            /* pixel - left = right */
-            pixel = pixel - left + oleft;
-            P[width - x + skewi][y] = pixel;
-            oleft = left;
-        }
-        P[skewi][y] = oleft;
-    }
-}
-#endif /* NOT_USED */
