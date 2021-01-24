@@ -69,6 +69,7 @@ CSRCS=\
 	$(SRCDIR)/dialog.c\
 	$(SRCDIR)/rsrc.c\
 	$(SRCDIR)/grafwindow.c\
+	$(SRCDIR)/offscreen.c\
 	$(SRCDIR)/testwindow.c\
 	$(SRCDIR)/complexwindow.c\
 	$(SRCDIR)/bezierwindow.c\
@@ -79,6 +80,7 @@ CSRCS=\
 	$(SRCDIR)/vdiwindow.c\
 	$(SRCDIR)/cubewindow.c \
 	$(SRCDIR)/fontwindow.c \
+	$(SRCDIR)/imgrotwindow.c \
 	\
 	$(SRCDIR)/natfeats.c
 
@@ -127,7 +129,7 @@ $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
 	$(Q)echo "CC $$<"
 	$(Q)$(CC) $$(CFLAGS) --traditional -o $$@ $(LIBCMINI_LIB)/crt0.o $$($(1)_OBJS) -L$(LIBCMINI_LIB)/$(1) $(LIBS)
-	$(Q)$(STRIP) $$@
+	#$(Q)$(STRIP) $$@
 endef
 $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))
 

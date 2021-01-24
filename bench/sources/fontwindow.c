@@ -141,14 +141,7 @@ static void open_fontwindow(struct window *wi, short x, short y, short w, short 
 {
     open_window(wi, x, y, w, h);    /* call "base class method" */
 
-    graf_mouse(M_OFF, NULL);
-    wind_update(BEG_UPDATE);
-
-
     // vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
-
-    wind_update(END_UPDATE);
-    graf_mouse(M_ON, NULL);
 }
 
 /*

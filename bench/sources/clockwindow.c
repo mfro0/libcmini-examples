@@ -116,8 +116,8 @@ static void draw_face(struct window *wi, short x, short y, short w, short h)
         /* rotate indicator into place */
         short min5 = minute % 5 == 0;       /* each full 5 minute gets a standout indicator */
 
-        pxy[0] = (min5 ? rad - 20 : rad - 10) * icos(ang) / SHRT_MAX;
-        pxy[1] = (min5 ? rad - 20 : rad - 10) * isin(ang) / SHRT_MAX;
+        pxy[0] = (min5 ? rad - 18 : rad - 10) * icos(ang) / SHRT_MAX;
+        pxy[1] = (min5 ? rad - 18 : rad - 10) * isin(ang) / SHRT_MAX;
         pxy[2] = (rad - 2) * icos(ang) / SHRT_MAX;
         pxy[3] = (rad - 2) * isin(ang) / SHRT_MAX;
 
@@ -152,8 +152,8 @@ static void draw_hands(struct window *wi)
     /* draw "short hand" - hours */
     ang = (((lt->tm_hour % 12) * 3600L + lt->tm_min * 3600L / 60) / 12 + 2700) % 3600;
     dbg("hours ang=%d\n", ang);
-    pxy[0] = (rad - 25) * icos(ang) / SHRT_MAX;
-    pxy[1] = (rad - 25) * isin(ang) / SHRT_MAX;
+    pxy[0] = (rad - 35) * icos(ang) / SHRT_MAX;
+    pxy[1] = (rad - 35) * isin(ang) / SHRT_MAX;
     pxy[2] = -10 * icos(ang) / SHRT_MAX;
     pxy[3] = -10 * isin(ang) / SHRT_MAX;
 
@@ -163,16 +163,16 @@ static void draw_hands(struct window *wi)
     pxy[2] += wi->work.g_x + wi->work.g_w / 2;
     pxy[3] += wi->work.g_y + wi->work.g_h / 2;
 
-    vsl_width(vh, 3);
+    vsl_width(vh, 5);
     v_pline(vh, 2, pxy);
 
     /* "long hand" - minutes */
     ang = (lt->tm_min * 3600L / 60 + 2700) % 3600;
     dbg("minutes ang=%d\n", ang);
-    pxy[0] = (rad - 15) * icos(ang) / SHRT_MAX;
-    pxy[1] = (rad - 15) * isin(ang) / SHRT_MAX;
-    pxy[2] = -10 * icos(ang) / SHRT_MAX;
-    pxy[3] = -10 * isin(ang) / SHRT_MAX;
+    pxy[0] = (rad - 25) * icos(ang) / SHRT_MAX;
+    pxy[1] = (rad - 25) * isin(ang) / SHRT_MAX;
+    pxy[2] = -15 * icos(ang) / SHRT_MAX;
+    pxy[3] = -15 * isin(ang) / SHRT_MAX;
 
     /* translate to position */
     pxy[0] += wi->work.g_x + wi->work.g_w / 2;
@@ -225,11 +225,7 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
         wi->work.g_h - 1
     };
 
-
-    if (cw->face_buffer != NULL)            /* free old image buffer if required */
-        free(cw->face_buffer);
-
-    cw->face_buffer = malloc((w + 15) / 16 * gl_nplanes * sizeof(short) * h);
+    cw->face_buffer = realloc(cw->face_buffer, (w + 15) / 16 * gl_nplanes * sizeof(short) * h);
     if (!cw->face_buffer)
         exit(1);
 
@@ -247,6 +243,7 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
         .fd_nplanes = gl_nplanes,
         0, 0, 0
     };
+
 
     graf_mouse(M_OFF, NULL);
     wind_update(BEG_UPDATE);
@@ -285,9 +282,8 @@ static void size_clockwindow(struct window *wi, short x, short y, short w, short
     };
 
 
-    if (cw->face_buffer != NULL)
-        free(cw->face_buffer);
-    cw->face_buffer = malloc((wi->work.g_w + 15) / 16 * wi->work.g_h * gl_nplanes * sizeof(short));
+    /* realloc clock face buffer */
+    cw->face_buffer = realloc(cw->face_buffer, (wi->work.g_w + 15) / 16 * wi->work.g_h * gl_nplanes * sizeof(short));
     if (!cw->face_buffer)
         exit(1);
 

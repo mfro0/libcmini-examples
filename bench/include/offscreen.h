@@ -1,0 +1,9 @@
+#ifndef OFFSCREEN_H
+#define OFFSCREEN_H
+
+struct window *create_offscreenwindow(short wi_kind, char *title);
+
+#define OFFWINDOW_WINELEMENTS SIZER|MOVER|HSLIDE|VSLIDE|UPARROW|DNARROW|LFARROW|RTARROW|FULLER|CLOSER|NAME|INFO
+#define OFFWINDOW_CLASS	0x2349L
+
+#endif // OFFSCREEN_H

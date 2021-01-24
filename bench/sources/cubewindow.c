@@ -40,8 +40,6 @@ struct window *create_cubewindow(short wi_kind, char *title)
     struct window *wi = NULL;
     struct cubewindow *cw;
 
-    dbg("start");
-
     wi = create_window(wi_kind, title);
 
     if (wi != NULL)
@@ -80,8 +78,6 @@ struct window *create_cubewindow(short wi_kind, char *title)
         wi->y_fac = gl_hchar;	/* height of one character */
 
     }
-    dbg("finished");
-
     return wi;
 }
 

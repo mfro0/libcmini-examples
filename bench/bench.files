@@ -7,8 +7,10 @@ include/dialog.h
 include/fontwindow.h
 include/global.h
 include/grafwindow.h
+include/imgrotwindow.h
 include/intmath.h
 include/menu.h
+include/offscreen.h
 include/rsrc.h
 include/util.h
 include/window.h
@@ -22,9 +24,11 @@ sources/dialog.c
 sources/fontwindow.c
 sources/global.c
 sources/grafwindow.c
+sources/imgrotwindow.c
 sources/intmath.c
 sources/intmath.c
 sources/menu.c
+sources/offscreen.c
 sources/rsrc.c
 sources/util.c
 sources/window.c

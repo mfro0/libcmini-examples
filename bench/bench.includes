@@ -1,5 +1,6 @@
 .
 include
+../../libcmini/include
 /usr/m68k-atari-mint/include
 /opt/cross-mint/m68k-atari-mint/include
 c:\opt\cygwin\opt\cross-mint\m68k-atari-mint\include

@@ -40,8 +40,6 @@ struct window *create_rasterwindow(short wi_kind, char *title)
     struct window *wi = NULL;
     struct rasterwindow *rw;
 
-    dbg("start");
-
     wi = create_window(wi_kind, title);
 
     if (wi != NULL)
@@ -76,8 +74,6 @@ struct window *create_rasterwindow(short wi_kind, char *title)
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
-    dbg("finished");
-
     return wi;
 }
 
