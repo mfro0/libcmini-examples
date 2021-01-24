@@ -10,7 +10,7 @@
 #include "bench.h"
 #include <math.h>
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -118,7 +118,8 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         iw->icon = NULL;
         do {
             dbg("found depth %d\r\n", icon->num_planes);
-            if (icon->num_planes <= gl_nplanes)
+            if (icon->num_planes <= gl_nplanes
+                    && icon->num_planes > src_mfdb.fd_nplanes)
             {
                 src_mfdb.fd_addr = icon->col_data;
                 src_mfdb.fd_nplanes = icon->num_planes;
@@ -127,7 +128,10 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             }
             icon = icon->next_res;
         } while (icon != NULL);
-        if (iw->icon == NULL)
+
+        dbg("selected icon of depth %d\r\n", src_mfdb.fd_nplanes);
+
+        if (iw->iconblk == NULL)
         {
             form_alert(1, "[1][No suitable color icon found][CANCEL]");
             exit(1);
@@ -209,7 +213,6 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     short wicon = iw->iconblk->monoblk.ib_wicon;
     short hicon = iw->iconblk->monoblk.ib_hicon;
-    dbg("wicon=%d, hicon=%d\r\n", wicon, hicon);
 
     icon_mfdb.fd_addr = iw->icon->col_data;
 
@@ -221,10 +224,6 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
         x + w / 2 + wicon / 2 - 1,
         y + h / 2 + hicon / 2 - 1
     };
-
-    dbg("\r\npxy= %d, %d, %d, %d \r\n    %d, %d, %d, %d\r\n",
-        pxy[0], pxy[1], pxy[2], pxy[3],
-        pxy[4], pxy[5], pxy[6], pxy[7]);
 
     vro_cpyfm(vh, S_ONLY,
               pxy,
