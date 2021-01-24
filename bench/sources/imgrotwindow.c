@@ -40,7 +40,8 @@ static inline int max(int a, int b)
 /* private data for this window type */
 struct imgrotwindow
 {
-    CICONBLK *icon;
+    CICONBLK *iconblk;
+    CICON *icon;
     short angle;
     short *bitmap;
 };
@@ -48,7 +49,7 @@ struct imgrotwindow
 static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
-static void clear_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
+
 static MFDB icon_mfdb;
 
 /*
@@ -71,7 +72,6 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         wi->draw = draw_imgrotwindow;
         wi->del = delete_imgrotwindow;
         wi->timer = timer_imgrotwindow;
-        wi->clear = clear_imgrotwindow;
         wi->word_aligned = true;
 
         iw = malloc(sizeof(struct imgrotwindow));
@@ -101,46 +101,52 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             exit(1);
         }
 
-        CICONBLK *icn = dlg[COLICON].ob_spec.ciconblk;
-        CICON *icns = icn->mainlist;
+        CICONBLK *iconblk = dlg[COLICON].ob_spec.ciconblk;
+        CICON *icon = iconblk->mainlist;
 
         MFDB src_mfdb =
         {
-            .fd_w = icn->monoblk.ib_wicon,
-            .fd_h = icn->monoblk.ib_hicon,
-            .fd_wdwidth = (icn->monoblk.ib_wicon + 15) / sizeof(short) / 8,
+            .fd_w = iconblk->monoblk.ib_wicon,
+            .fd_h = iconblk->monoblk.ib_hicon,
+            .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
             .fd_stand = 1,
             .fd_r1 = 0,
             .fd_r2 = 0,
             .fd_r3 = 0
         };
 
+        iw->icon = NULL;
         do {
-            dbg("found depth %d\r\n", icns->num_planes);
-            if (icns->num_planes <= gl_nplanes)
+            dbg("found depth %d\r\n", icon->num_planes);
+            if (icon->num_planes <= gl_nplanes)
             {
-                src_mfdb.fd_addr = icns->col_data;
-                src_mfdb.fd_nplanes = icns->num_planes;
+                src_mfdb.fd_addr = icon->col_data;
+                src_mfdb.fd_nplanes = icon->num_planes;
+                iw->iconblk = iconblk;
+                iw->icon = icon;
             }
-            icns = icns->next_res;
-        } while (icns != NULL);
-
-        iw->icon = icn;
+            icon = icon->next_res;
+        } while (icon != NULL);
+        if (iw->icon == NULL)
+        {
+            form_alert(1, "[1][No suitable color icon found][CANCEL]");
+            exit(1);
+        }
 
         /*
          * now create a device dependent bitmap from raster
          */
-        iw->bitmap = malloc((icn->monoblk.ib_wicon + 15) / sizeof(short) / 8 *
-                             icn->monoblk.ib_hicon * gl_nplanes);
+        iw->bitmap = malloc((iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8 *
+                             iconblk->monoblk.ib_hicon * gl_nplanes);
         if (iw->bitmap != NULL)
         {
 
             MFDB dst =
             {
                 .fd_addr = iw->bitmap,        /* screen */
-                .fd_w = icn->monoblk.ib_wicon,
-                .fd_h = icn->monoblk.ib_hicon,
-                .fd_wdwidth = (icn->monoblk.ib_wicon + 15) / sizeof(short) / 8,
+                .fd_w = iconblk->monoblk.ib_wicon,
+                .fd_h = iconblk->monoblk.ib_hicon,
+                .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
                 .fd_stand = 0,
                 .fd_nplanes = gl_nplanes,
                 .fd_r1 = 0,
@@ -149,7 +155,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             };
             icon_mfdb = dst;
 
-            vr_trnfm(vh, &src_mfdb, &icon_mfdb);
+            //vr_trnfm(vh, &src_mfdb, &icon_mfdb);
         }
         else
         {
@@ -201,9 +207,11 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     /* draw our (possibly rotated) icon */
     MFDB dst = { 0 };
 
-    short wicon = iw->icon->monoblk.ib_wicon;
-    short hicon = iw->icon->monoblk.ib_hicon;
+    short wicon = iw->iconblk->monoblk.ib_wicon;
+    short hicon = iw->iconblk->monoblk.ib_hicon;
     dbg("wicon=%d, hicon=%d\r\n", wicon, hicon);
+
+    icon_mfdb.fd_addr = iw->icon->col_data;
 
     short pxy[8] =
     {
@@ -281,23 +289,7 @@ void yshear(short *pos, double angle)
 
 }
 
-/*
- * clear window contents (to background color black)
- */
-void clear_imgrotwindow(struct window *wi, short x, short y, short w, short h)
-{
-    short pxy[4];
-    short vh = wi->vdi_handle;
 
-    vsf_interior(vh, 1);
-    vsf_style(vh, 0);
-    vsf_color(vh, G_BLACK);
-    pxy[0] = x;
-    pxy[1] = y;
-    pxy[2] = x + w - 1;
-    pxy[3] = y + h - 1;
-    v_bar(vh, pxy);  /* blank the interior */
-}
 #ifdef NOT_USED
 void xshear(short shear, short width, short height)
 {
