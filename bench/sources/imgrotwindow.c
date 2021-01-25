@@ -26,13 +26,12 @@ struct imgrotwindow
     CICON *icon;
     short angle;
     short *bitmap;
+    MFDB icon_mfdb;
 };
 
 static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
-
-static MFDB icon_mfdb;
 
 /*
  * create a new window and add it to the window list.
@@ -97,6 +96,9 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             .fd_r3 = 0
         };
 
+        /*
+         * find the icon data from the available color depths in the CICONBLK that fits best
+         */
         iw->icon = NULL;
         do {
             dbg("found depth %d\r\n", icon->num_planes);
@@ -119,35 +121,22 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             exit(1);
         }
 
-        /*
-         * now create a device dependent bitmap from raster
-         */
-        iw->bitmap = malloc((iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8 *
-                             iconblk->monoblk.ib_hicon * gl_nplanes);
-        if (iw->bitmap != NULL)
-        {
 
-            MFDB dst =
-            {
-                .fd_addr = iw->bitmap,        /* screen */
-                .fd_w = iconblk->monoblk.ib_wicon,
-                .fd_h = iconblk->monoblk.ib_hicon,
-                .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
-                .fd_stand = 0,
-                .fd_nplanes = gl_nplanes,
-                .fd_r1 = 0,
-                .fd_r2 = 0,
-                .fd_r3 = 0
-            };
-            icon_mfdb = dst;
-
-            //vr_trnfm(vh, &src_mfdb, &icon_mfdb);
-        }
-        else
+        MFDB dst =
         {
-            form_alert(2, "[1][Could not allocate bitmap memory][CANCEL]");
-            exit(1);
-        }
+            .fd_addr = iw->icon->col_data,
+            .fd_w = iconblk->monoblk.ib_wicon,
+            .fd_h = iconblk->monoblk.ib_hicon,
+            .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
+            .fd_stand = 0,
+            .fd_nplanes = gl_nplanes,
+            .fd_r1 = 0,
+            .fd_r2 = 0,
+            .fd_r3 = 0
+        };
+        iw->icon_mfdb = dst;
+
+
     }
 
     return wi;
@@ -196,8 +185,9 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     short wicon = iw->iconblk->monoblk.ib_wicon;
     short hicon = iw->iconblk->monoblk.ib_hicon;
 
-    icon_mfdb.fd_addr = iw->icon->col_data;
-
+    /*
+     * center icon into window's work area
+     */
     short pxy[8] =
     {
         0, 0, wicon - 1, hicon - 1,
@@ -209,7 +199,7 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     vro_cpyfm(vh, S_ONLY,
               pxy,
-              &icon_mfdb, &dst);
+              &iw->icon_mfdb, &dst);
 }
 
 
@@ -250,21 +240,20 @@ void matrix_vector_mult(const double **mat, const double *vec, double *result, i
 }
 
 /*
- * calculates a shearing operation of the pixel at coordinates pos by angle
+ * shearing of image src to dst around angle in x-direction
+ * center point at (x, y)
+ * angle is in 10ths of degrees (0-3600)
  */
-void xshear(short *pos, double angle)
+void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
 {
-    double ret[2];
-    const double mat[][2] = { { 1, -tan(angle / 2) }, { 0, 1 }};
-    const double dpos[] = { (double) pos[0], (double) pos[1] };
-
-    matrix_vector_mult(mat, dpos, ret, 2, 2);
 }
 
 /*
- * calculates a shearing operation of pixel at pos by angle
+ * shearing of image src to dst around angle in y-direction
+ * center point at (x, y)
+ * angle is in 10ths of degrees (0-3600)
  */
-void yshear(short *pos, double angle)
+void yshear(MFDB *src, MFDB *dst, short x, short y, short angle)
 {
 
 }
