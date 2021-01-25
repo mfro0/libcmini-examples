@@ -100,3 +100,10 @@ short icos(short angle)
     return isin(angle);
 }
 
+/*
+ * Icos - Return integer tan between -32767 and 32767.
+ */
+short itan(short angle)
+{
+    return isin(angle) / icos(angle);
+}
