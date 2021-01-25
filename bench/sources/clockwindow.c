@@ -245,8 +245,13 @@ static void open_clockwindow(struct window *wi, short x, short y, short w, short
     };
 
 
+    /*
+     * make sure mouse pointer does not appear on the face copy
+     */
+    graf_mouse(M_OFF, 0);
     draw_face(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
     vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
+    graf_mouse(M_ON, 0);
 }
 
 /*
