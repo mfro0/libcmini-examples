@@ -255,6 +255,10 @@ void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
  */
 void yshear(MFDB *src, MFDB *dst, short x, short y, short angle)
 {
+    double ret[2];
+    const double mat[][2] = { { 1, 0 }, {sin(angle), 1 } };
+    const double dpos[] = { (double) pos[0], (double) pos[1] };
 
+    matrix_vector_mult(mat, dpos, ret, 2, 2);
 }
 
