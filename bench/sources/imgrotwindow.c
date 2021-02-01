@@ -5,12 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include "imgrotwindow.h"
+#include "intmath.h"
 #include "bench.h"
 #include <math.h>
 
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -32,6 +34,8 @@ struct imgrotwindow
 static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
+
+static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle);
 
 /*
  * create a new window and add it to the window list.
@@ -200,6 +204,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     vro_cpyfm(vh, S_ONLY,
               pxy,
               &iw->icon_mfdb, &dst);
+
+    yshear(wi, &iw->icon_mfdb, &dst, iw->icon_mfdb.fd_w / 2, iw->icon_mfdb.fd_h / 2, 150);
 }
 
 
@@ -246,19 +252,40 @@ void matrix_vector_mult(const double **mat, const double *vec, double *result, i
  */
 void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
 {
+    /*
+     * Algorithm:
+     * we construct an imaginary line through the center point with the
+     * supplied angle. We then shift rasterline by rasterline by the
+     * horizontal distance to the x coordinate of the center point left or right
+     */
 }
 
 /*
  * shearing of image src to dst around angle in y-direction
  * center point at (x, y)
  * angle is in 10ths of degrees (0-3600)
+ *
+ * Algorithm:
+ * we construct an imaginary line through the supplied center point with the
+ * given angle relative to horizontal. We then shift rastercolumn by rastercolumn
+ * by the vertical distance to the y coordinate of the center point up or down
  */
-void yshear(MFDB *src, MFDB *dst, short x, short y, short angle)
+static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle)
 {
-    double ret[2];
-    const double mat[][2] = { { 1, 0 }, {sin(angle), 1 } };
-    const double dpos[] = { (double) pos[0], (double) pos[1] };
+    short pxy[4];       /* end coordinates of the imaginary line */
 
-    matrix_vector_mult(mat, dpos, ret, 2, 2);
+    pxy[0] = (src->fd_w - x) * icos(angle) / SHRT_MAX;
+    pxy[1] = (src->fd_h - y) * isin(angle) / SHRT_MAX;
+
+    pxy[2] = -x * icos(angle) / SHRT_MAX;
+    pxy[3] = -y * isin(angle) / SHRT_MAX;
+
+    dbg("x=%d, y=%d, pxy = (%d, %d)(%d, %d)\r\n", x, y, pxy[0], pxy[1], pxy[2], pxy[3]);
+    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
+    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
+    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
+
+    v_pline(vdi_handle, 2, pxy);
 }
 

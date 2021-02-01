@@ -68,7 +68,7 @@ void init_fontwindow(struct window *wi)
 
         for (i = 0; i < fi->add_fonts + 2; i++)
         {
-            fi->font_info[i].font_index = vqt_name(vdi_handle, i, fi->font_info[i].font_name);
+            fi->font_info[i].font_index = vqt_name(wi->vdi_handle, i, fi->font_info[i].font_name);
             fi->font_info[i].font_name[32] = '\0';
 
             dbg("font %d (index %d)=\"%s\"\n", i, fi->font_info[i].font_index, fi->font_info[i].font_name);

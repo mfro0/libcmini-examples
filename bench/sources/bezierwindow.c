@@ -189,6 +189,6 @@ static void timer_bezierwindow(struct window *wi)
     cw->rot_angle = cw->rot_angle - 50;   /* 5 degree steps */
     cw->rot_angle = cw->rot_angle < 0 ? 3600 + cw->rot_angle : cw->rot_angle;
     cw->polygon_color++;
-    cw->polygon_color %= 8;
+    cw->polygon_color %= 256;
 }
 

@@ -2,6 +2,7 @@
 #include <mintbind.h>
 #include <string.h>
 #include <error.h>
+#include <math.h>
 #include "dragdrop.h"
 
 //#define DEBUG
@@ -57,8 +58,8 @@ short ddopen(short ddnam, char *preferext)
     short fd;
     char outbuf[DD_EXTSIZE + 1];
 
-    pipename[18] = ddnam & 0x00ff;
-    pipename[17] = (ddnam & 0xff00) >> 8;
+    pipename[18] = (char) (ddnam & 0x00ff);
+    pipename[17] = (char) ((ddnam & 0xff00) >> 8);
 
     fd = Fopen(pipename, 2);
 
@@ -67,7 +68,7 @@ short ddopen(short ddnam, char *preferext)
         outbuf[0] = DD_OK;
         strncpy(outbuf+1, preferext, DD_EXTSIZE);
 
-        oldpipesig = Psignal(SIGPIPE, SIG_IGN);
+        oldpipesig = (void *) Psignal(SIGPIPE, SIG_IGN);
 
         if (Fwrite(fd, (long) DD_EXTSIZE + 1, outbuf) != DD_EXTSIZE + 1)
         {
