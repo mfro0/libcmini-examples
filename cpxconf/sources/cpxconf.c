@@ -161,7 +161,7 @@ static short cpx_call(GRECT *rect)
                     cpx = (*xcpb->Get_Head_Node)();
                 }
                 rs_object[NCPX].ob_state &= ~OS_SELECTED;
-                objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
                 break;
 
             case PCPX:
@@ -183,7 +183,7 @@ static short cpx_call(GRECT *rect)
                 }
 
                 rs_object[PCPX].ob_state &= ~OS_SELECTED;
-                objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
                 break;
 
             case BSAVE:

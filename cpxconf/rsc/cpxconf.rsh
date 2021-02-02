@@ -89,7 +89,7 @@ OBJECT FAR rs_object[] =
          1,       -1,       -1, G_BUTTON          ,   /* Object 2 BSAVE */
   SELECTABLE|EXIT, NORMAL, (LONG)"Save",
   0x0001, 0x0001, 0x0008, 0x0001,
-         6, BOK             , BCANCEL         , G_BOX             ,   /* Object 3  */
+  CPXBOX          , BOK             , BCANCEL         , G_BOX             ,   /* Object 3  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x000A, 0x0808, 0x0016, 0x0802,
   BCANCEL         ,       -1,       -1, G_BUTTON          ,   /* Object 4 BOK */
@@ -98,7 +98,7 @@ OBJECT FAR rs_object[] =
          3,       -1,       -1, G_BUTTON          ,   /* Object 5 BCANCEL */
   SELECTABLE|EXIT, NORMAL, (LONG)"Cancel",
   0x000C, 0x0001, 0x0008, 0x0001,
-        11, CPXICON         , NCPX            , G_BOX             ,   /* Object 6  */
+        11, CPXICON         , NCPX            , G_BOX             ,   /* Object 6 CPXBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0200, 0x041F, 0x0202,
   PCPX            ,       -1,       -1, G_IMAGE           ,   /* Object 7 CPXICON */
@@ -110,16 +110,16 @@ OBJECT FAR rs_object[] =
   NCPX            ,       -1,       -1, G_FTEXT           ,   /* Object 9 CPXNAME */
   EDITABLE, NORMAL, (LONG)&rs_tedinfo[0],
   0x000A, 0x0900, 0x0612, 0x0001,
-         6,       -1,       -1, G_BOXCHAR         ,   /* Object 10 NCPX */
+  CPXBOX          ,       -1,       -1, G_BOXCHAR         ,   /* Object 10 NCPX */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x041D, 0x0000, 0x0002, 0x0202,
-        13,       12,       12, G_BOX             ,   /* Object 11  */
+  COLORBOX        ,       12,       12, G_BOX             ,   /* Object 11  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0702, 0x041F, 0x0001,
         11,       -1,       -1, G_TEXT            ,   /* Object 12  */
   NONE, NORMAL, (LONG)&rs_tedinfo[1],
   0x000B, 0x0000, 0x000B, 0x0001,
-        22,       14, ICNCOL          , G_BOX             ,   /* Object 13  */
+        22,       14, ICNCOL          , G_BOX             ,   /* Object 13 COLORBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A03, 0x041F, 0x0D02,
         15,       -1,       -1, G_TEXT            ,   /* Object 14  */
@@ -137,7 +137,7 @@ OBJECT FAR rs_object[] =
   TXTCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 NTXTCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
-        13, PICNCOL         , NICNCOL         , G_BOXTEXT         ,   /* Object 19 ICNCOL */
+  COLORBOX        , PICNCOL         , NICNCOL         , G_BOXTEXT         ,   /* Object 19 ICNCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[5],
   0x0612, 0x0801, 0x000A, 0x0001,
   NICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 20 PICNCOL */
