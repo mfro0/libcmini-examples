@@ -97,12 +97,10 @@ static short cpx_call(GRECT *rect)
 
 
     cpx = (*xcpb->Get_Head_Node)();
+    objc_draw(&rs_object[CPXCONF], ROOT, MAX_DEPTH,
+              rect->g_x, rect->g_y, rect->g_w, rect->g_h);
     do
     {
-        strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 14);
-        memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
-              48 * sizeof(short));
-
         /*
         * Sit around waiting for a message
         */
@@ -161,6 +159,9 @@ static short cpx_call(GRECT *rect)
                     cpx = (*xcpb->Get_Head_Node)();
                 }
                 rs_object[NCPX].ob_state &= ~OS_SELECTED;
+                strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 14);
+                memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
+                      48 * sizeof(short));
                 objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
                 break;
 
@@ -168,12 +169,13 @@ static short cpx_call(GRECT *rect)
                 /* find and display previous CPX's attributes */
                 ccpx = cpx;
 
+                /* if we are at the beginning, the previous one is the last one */
                 if (cpx == (*xcpb->Get_Head_Node)())
                 {
                     while (cpx->next != NULL)
                         cpx = cpx->next;
                 }
-                else
+                else    /* else it's the one that's next pointer points to us */
                 {
                     cpx = (*xcpb->Get_Head_Node)();
                     while (cpx->next != ccpx)
@@ -183,7 +185,16 @@ static short cpx_call(GRECT *rect)
                 }
 
                 rs_object[PCPX].ob_state &= ~OS_SELECTED;
+                strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 14);
+                memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
+                      48 * sizeof(short));
                 objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                break;
+
+            case NICNCOL:
+            case PICNCOL:
+            case NTXTCOL:
+            case PTXTCOL:
                 break;
 
             case BSAVE:
