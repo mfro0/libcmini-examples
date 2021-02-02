@@ -4,6 +4,7 @@
 #include <gem.h>
 
 #include <stdint.h>
+#include "cpxhead.h"
 
 typedef struct
 {
@@ -30,14 +31,26 @@ typedef struct
     void (*cpx_close)(bool flag);
 } CPXINFO;
 
+
+typedef struct cpxnode
+{
+    char fname[14];
+    short vacant;
+    short SkipRshFix;
+    long *baseptr;
+    struct cpxnode *next;
+    CPXHEAD cpxhead;
+
+} CPXNODE;
+
 typedef struct
 {
     short handle;
     short booting;
     short reserved;
     short SkipRshFix;
-    void *reserve1;
-    void *reserve2;
+    CPXNODE * (*Get_Head_Node)(void);       /* undocumented, but required for cpxconf. COPS has it, so it's probably safe to use */
+    short (*Save_Header)(CPXNODE *ptr);     /* see above */
 
     void (*rsh_fix)(short num_objs, short num_frstr, short num_frimg, short num_tree,
                     OBJECT *rs_object, TEDINFO *rs_tedinfo, char **rs_strings, ICONBLK *rs_iconblk,

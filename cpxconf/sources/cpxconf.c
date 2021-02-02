@@ -1,6 +1,6 @@
 /* */
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cpxdata.h"
+
 
 /*
  * cpxconf.c
@@ -80,6 +81,8 @@ static short cpx_call(GRECT *rect)
     char *p;
     short flags, drive, quit = 0;
 
+    CPXNODE *cpx, *ccpx;
+
     TEDINFO *ted;
 
     dbg("rect = %d, %d, %d, %d\r\n", rect->g_x, rect->g_y, rect->g_w, rect->g_h);
@@ -93,8 +96,13 @@ static short cpx_call(GRECT *rect)
     disable_flag_buttons();
 
 
+    cpx = (*xcpb->Get_Head_Node)();
     do
     {
+        strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 14);
+        memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
+              48 * sizeof(short));
+
         /*
         * Sit around waiting for a message
         */
@@ -145,6 +153,39 @@ static short cpx_call(GRECT *rect)
 
         switch(button)
         {
+            case NCPX:
+                /* find and display next CPX's attributes */
+                cpx = cpx->next;
+                if (cpx == NULL)        /* wrap around */
+                {
+                    cpx = (*xcpb->Get_Head_Node)();
+                }
+                rs_object[NCPX].ob_state &= ~OS_SELECTED;
+                objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                break;
+
+            case PCPX:
+                /* find and display previous CPX's attributes */
+                ccpx = cpx;
+
+                if (cpx == (*xcpb->Get_Head_Node)())
+                {
+                    while (cpx->next != NULL)
+                        cpx = cpx->next;
+                }
+                else
+                {
+                    cpx = (*xcpb->Get_Head_Node)();
+                    while (cpx->next != ccpx)
+                    {
+                        cpx = cpx->next;
+                    }
+                }
+
+                rs_object[PCPX].ob_state &= ~OS_SELECTED;
+                objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                break;
+
             case BSAVE:
             case BOK:
                 flags = get_flag_buttons();

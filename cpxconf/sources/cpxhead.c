@@ -1,29 +1,5 @@
 #include <stdint.h>
-
-typedef struct
-{
-    uint16_t magic;                     /* Magic constant = 100   */
-
-    struct
-    {
-        uint16_t reserved : 13;     /* Reserved                */
-        uint16_t resident :  1;     /* RAM-resident if set     */
-        uint16_t bootinit :  1;     /* Boot initialize if set  */
-        uint16_t setonly  :  1;     /* Set-only CPX if set     */
-
-    } flags;
-
-    int32_t cpx_id;                 /* Unique CPX ID                   */
-    uint16_t cpx_version;           /* CPX version number              */
-    int8_t i_text[14];              /* Icon text                       */
-    uint16_t sm_icon[48];           /* Icon bitmap (32*24 pixel)       */
-    uint16_t i_color;               /* Icon colour                     */
-    int8_t title_text[18];          /* Name of the CPX (16 chars. max) */
-    uint16_t t_color;               /* Text colour                     */
-    int8_t buffer[64];              /* Non-volatile buffer             */
-    int8_t reserved[306];           /* Reserved                        */
-
-} CPXHEAD;
+#include "cpxhead.h"
 
 const CPXHEAD header =
 {

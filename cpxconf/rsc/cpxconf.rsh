@@ -1,7 +1,8 @@
 /* GEM Resource C Source */
 
 #include <portab.h>
-#include "cpxconf.h"
+#include <aes.h>
+#include "CPXCONF.H"
 
 #if !defined(WHITEBAK)
 #define WHITEBAK    0x0040
@@ -58,17 +59,17 @@ TEDINFO FAR rs_tedinfo[] =
 };
 
 WORD FAR RSBB0DATA[] =
-{ 0xFFFF, 0xFFFF, 0x8000, 0x0001,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
-  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD,
+{ 0xFFFF, 0xFFFF, 0x8000, 0x0001, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
+  0xBFFF, 0xFFFD, 0xBFFF, 0xFFFD, 
   0x8000, 0x0001, 0xFFFF, 0xFFFF
 };
 
@@ -77,7 +78,7 @@ BITBLK FAR rs_bitblk[] =
 };
 
 OBJECT FAR rs_object[] =
-{
+{ 
   /******** Tree 0 CPXCONF ****************************************************/
         -1,        1,       22, G_BOX             ,   /* Object 0  */
   NONE, NORMAL, (LONG)0x00FF1141L,
@@ -104,13 +105,13 @@ OBJECT FAR rs_object[] =
   NONE, NORMAL, (LONG)&rs_bitblk[0],
   0x0003, 0x0500, 0x0004, 0x0801,
   CPXNAME         ,       -1,       -1, G_BOXCHAR         ,   /* Object 8 PCPX */
-  NONE, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0002, 0x0202,
   NCPX            ,       -1,       -1, G_FTEXT           ,   /* Object 9 CPXNAME */
   EDITABLE, NORMAL, (LONG)&rs_tedinfo[0],
   0x000A, 0x0900, 0x0612, 0x0001,
          6,       -1,       -1, G_BOXCHAR         ,   /* Object 10 NCPX */
-  NONE, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x041D, 0x0000, 0x0002, 0x0202,
         13,       12,       12, G_BOX             ,   /* Object 11  */
   NONE, NORMAL, (LONG)0x00FF1101L,
@@ -123,37 +124,37 @@ OBJECT FAR rs_object[] =
   0x0200, 0x0A03, 0x041F, 0x0D02,
         15,       -1,       -1, G_TEXT            ,   /* Object 14  */
   NONE, NORMAL, (LONG)&rs_tedinfo[2],
-  0x0501, 0x0100, 0x000B, 0x0001,
+  0x0301, 0x0300, 0x000B, 0x0001,
   TXTCOL          ,       -1,       -1, G_TEXT            ,   /* Object 15  */
   NONE, NORMAL, (LONG)&rs_tedinfo[3],
-  0x0301, 0x0701, 0x000B, 0x0001,
+  0x0301, 0x0801, 0x000B, 0x0001,
   ICNCOL          , PTXTCOL         , NTXTCOL         , G_BOXTEXT         ,   /* Object 16 TXTCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[4],
   0x0612, 0x0500, 0x000A, 0x0001,
   NTXTCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 17 PTXTCOL */
-  NONE, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0203, 0x0001,
   TXTCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 NTXTCOL */
-  SELECTABLE|TOUCHEXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
         13, PICNCOL         , NICNCOL         , G_BOXTEXT         ,   /* Object 19 ICNCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[5],
   0x0612, 0x0801, 0x000A, 0x0001,
   NICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 20 PICNCOL */
-  NONE, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0203, 0x0001,
   ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 21 NICNCOL */
-  NONE, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
          0,       23, RESPUP          , G_BOX             ,   /* Object 22  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A06, 0x041F, 0x0C01,
   RESPUP          ,       -1,       -1, G_TEXT            ,   /* Object 23  */
   NONE, NORMAL, (LONG)&rs_tedinfo[6],
-  0x0301, 0x0800, 0x000D, 0x0001,
+  0x0501, 0x0600, 0x000D, 0x0001,
         22,       -1,       -1, G_BUTTON          ,   /* Object 24 RESPUP */
-  SELECTABLE|LASTOB|TOUCHEXIT, SHADOWED, (LONG)"No",
-  0x0713, 0x0500, 0x0008, 0x0001
+  SELECTABLE|EXIT|LASTOB, SHADOWED, (LONG)"No",
+  0x0713, 0x0600, 0x0008, 0x0001
 };
 
 OBJECT FAR *rs_trindex[] =
