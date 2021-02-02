@@ -1,0 +1,14 @@
+Makefile
+include/cpxdata.h
+rsc/cpxconf.dfn
+rsc/cpxconf.h
+rsc/cpxconf.hrd
+rsc/cpxconf.rh
+rsc/cpxconf.rsc
+rsc/cpxconf.rsh
+rsc/cpxconf.rso
+rsc/portab.h
+sources/cpx_preinit.c
+sources/cpxconf.c
+sources/cpxhead.c
+sources/cpxstart.S
