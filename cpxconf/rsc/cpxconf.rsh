@@ -28,10 +28,14 @@
 #define STATE15 0x8000
 
 TEDINFO FAR rs_tedinfo[] =
-{ "________________",
+{ "0123456789012345",
   "________________",
   "XXXXXXXXXXXXXXXX",
   IBM  , 0, TE_LEFT , 0x1180, 0, -1, 17, 17,
+  "12345678901234",
+  "\0",
+  "\0",
+  SMALL, 0, TE_CNTR , 0x1180, 0, -1, 15, 1,
   "CPX Options",
   "\0",
   "\0",
@@ -80,7 +84,7 @@ BITBLK FAR rs_bitblk[] =
 OBJECT FAR rs_object[] =
 { 
   /******** Tree 0 CPXCONF ****************************************************/
-        -1,        1,       22, G_BOX             ,   /* Object 0  */
+        -1,        1,       23, G_BOX             ,   /* Object 0  */
   NONE, NORMAL, (LONG)0x00FF1141L,
   0x0000, 0x0000, 0x0020, 0x000B,
          3, BSAVE           , BSAVE           , G_BOX             ,   /* Object 1  */
@@ -98,61 +102,64 @@ OBJECT FAR rs_object[] =
          3,       -1,       -1, G_BUTTON          ,   /* Object 5 BCANCEL */
   SELECTABLE|EXIT, NORMAL, (LONG)"Cancel",
   0x000C, 0x0001, 0x0008, 0x0001,
-        11, CPXICON         , NCPX            , G_BOX             ,   /* Object 6 CPXBOX */
+        12, CPXICON         , CPXITEXT        , G_BOX             ,   /* Object 6 CPXBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
-  0x0200, 0x0200, 0x041F, 0x0202,
+  0x0200, 0x0200, 0x041F, 0x0402,
   PCPX            ,       -1,       -1, G_IMAGE           ,   /* Object 7 CPXICON */
   NONE, NORMAL, (LONG)&rs_bitblk[0],
-  0x0003, 0x0500, 0x0004, 0x0801,
+  0x0405, 0x0100, 0x0004, 0x0801,
   CPXNAME         ,       -1,       -1, G_BOXCHAR         ,   /* Object 8 PCPX */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
-  0x0000, 0x0000, 0x0002, 0x0202,
+  0x0000, 0x0000, 0x0002, 0x0402,
   NCPX            ,       -1,       -1, G_FTEXT           ,   /* Object 9 CPXNAME */
   EDITABLE, NORMAL, (LONG)&rs_tedinfo[0],
-  0x000A, 0x0900, 0x0612, 0x0001,
-  CPXBOX          ,       -1,       -1, G_BOXCHAR         ,   /* Object 10 NCPX */
+  0x010D, 0x0B00, 0x0310, 0x0101,
+  CPXITEXT        ,       -1,       -1, G_BOXCHAR         ,   /* Object 10 NCPX */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
-  0x041D, 0x0000, 0x0002, 0x0202,
-  COLORBOX        ,       12,       12, G_BOX             ,   /* Object 11  */
-  NONE, NORMAL, (LONG)0x00FF1101L,
-  0x0200, 0x0702, 0x041F, 0x0001,
-        11,       -1,       -1, G_TEXT            ,   /* Object 12  */
+  0x041D, 0x0000, 0x0002, 0x0402,
+  CPXBOX          ,       -1,       -1, G_TEXT            ,   /* Object 11 CPXITEXT */
   NONE, NORMAL, (LONG)&rs_tedinfo[1],
+  0x0202, 0x0901, 0x040A, 0x0A00,
+        14, COLORBOX        , COLORBOX        , G_BOX             ,   /* Object 12  */
+  NONE, NORMAL, (LONG)0x00FF1101L,
+  0x0200, 0x0802, 0x041F, 0x0001,
+        12,       -1,       -1, G_TEXT            ,   /* Object 13 COLORBOX */
+  NONE, NORMAL, (LONG)&rs_tedinfo[2],
   0x000B, 0x0000, 0x000B, 0x0001,
-        22,       14, ICNCOL          , G_BOX             ,   /* Object 13 COLORBOX */
+        23,       15, PICNCOL         , G_BOX             ,   /* Object 14  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A03, 0x041F, 0x0D02,
-        15,       -1,       -1, G_TEXT            ,   /* Object 14  */
-  NONE, NORMAL, (LONG)&rs_tedinfo[2],
-  0x0301, 0x0300, 0x000B, 0x0001,
   TXTCOL          ,       -1,       -1, G_TEXT            ,   /* Object 15  */
   NONE, NORMAL, (LONG)&rs_tedinfo[3],
-  0x0301, 0x0801, 0x000B, 0x0001,
-  ICNCOL          , PTXTCOL         , NTXTCOL         , G_BOXTEXT         ,   /* Object 16 TXTCOL */
+  0x0301, 0x0300, 0x000B, 0x0001,
+  PTXTCOL         ,       -1,       -1, G_TEXT            ,   /* Object 16 TXTCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[4],
-  0x0612, 0x0500, 0x000A, 0x0001,
-  NTXTCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 17 PTXTCOL */
-  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
-  0x0000, 0x0000, 0x0203, 0x0001,
-  TXTCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 NTXTCOL */
-  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
-  0x0007, 0x0000, 0x0203, 0x0001,
-  COLORBOX        , PICNCOL         , NICNCOL         , G_BOXTEXT         ,   /* Object 19 ICNCOL */
+  0x0301, 0x0801, 0x000B, 0x0001,
+  PICNCOL         , NTXTCOL         , ICNCOL          , G_BOXTEXT         ,   /* Object 17 PTXTCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[5],
-  0x0612, 0x0801, 0x000A, 0x0001,
-  NICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 20 PICNCOL */
+  0x0612, 0x0500, 0x000A, 0x0001,
+  ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 NTXTCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0203, 0x0001,
-  ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 21 NICNCOL */
+  PTXTCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 19 ICNCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
-         0,       23, RESPUP          , G_BOX             ,   /* Object 22  */
+        14, NICNCOL         ,       22, G_BOXTEXT         ,   /* Object 20 PICNCOL */
+  NONE, NORMAL, (LONG)&rs_tedinfo[6],
+  0x0612, 0x0801, 0x000A, 0x0001,
+        22,       -1,       -1, G_BOXCHAR         ,   /* Object 21 NICNCOL */
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
+  0x0000, 0x0000, 0x0203, 0x0001,
+  PICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 22  */
+  SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
+  0x0007, 0x0000, 0x0203, 0x0001,
+         0, RESPUP          ,       25, G_BOX             ,   /* Object 23  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A06, 0x041F, 0x0C01,
-  RESPUP          ,       -1,       -1, G_TEXT            ,   /* Object 23  */
-  NONE, NORMAL, (LONG)&rs_tedinfo[6],
+        25,       -1,       -1, G_TEXT            ,   /* Object 24 RESPUP */
+  NONE, NORMAL, (LONG)&rs_tedinfo[7],
   0x0501, 0x0600, 0x000D, 0x0001,
-        22,       -1,       -1, G_BUTTON          ,   /* Object 24 RESPUP */
+        23,       -1,       -1, G_BUTTON          ,   /* Object 25  */
   SELECTABLE|EXIT|LASTOB, SHADOWED, (LONG)"No",
   0x0713, 0x0600, 0x0008, 0x0001
 };

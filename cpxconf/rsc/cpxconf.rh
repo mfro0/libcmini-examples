@@ -13,8 +13,8 @@ EXTERN OBJECT   *rs_trindex[];
 #define NUM_BB    1
 #define NUM_IB    0
 #define NUM_CIB   0
-#define NUM_TI    7
+#define NUM_TI    8
 #define NUM_FRSTR 0
 #define NUM_FRIMG 0
-#define NUM_OBS   25
+#define NUM_OBS   26
 #define NUM_TREE  1
