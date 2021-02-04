@@ -1,6 +1,6 @@
 /* */
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -98,15 +98,23 @@ static short cpx_call(GRECT *rect)
 
     cpx = (*xcpb->Get_Head_Node)();
 
-    short element = ROOT;
+    short color;
+
     do
     {
+        dbg("t_color=%x, i_color=%x\r\n", cpx->cpxhead.t_color, cpx->cpxhead.i_color);
+
+        /*
+         * set dialog object values from current CPX header
+         */
         strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 18);
-        strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
-        rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
         rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+
         rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
         rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+
+        strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
+        rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
 
         memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
               48 * sizeof(short));
@@ -114,7 +122,7 @@ static short cpx_call(GRECT *rect)
         sprintf(rs_object[TXTCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.t_color >> 12);
         sprintf(rs_object[ICNCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.i_color >> 12);
 
-        objc_draw(rs_object, element, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+        objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
         /*
         * Sit around waiting for a message
         */
@@ -173,9 +181,6 @@ static short cpx_call(GRECT *rect)
                     cpx = (*xcpb->Get_Head_Node)();
                 }
                 rs_object[NCPX].ob_state &= ~OS_SELECTED;
-
-                element = ROOT;
-
                 break;
 
             case PCPX:
@@ -196,16 +201,39 @@ static short cpx_call(GRECT *rect)
                         cpx = cpx->next;
                     }
                 }
-
-
-                element = ROOT;
-
+                rs_object[PCPX].ob_state &= ~OS_SELECTED;
                 break;
 
             case NICNCOL:
+                color = cpx->cpxhead.i_color >> 12;
+                color += 1;
+                color &= 15;
+                cpx->cpxhead.i_color = (cpx->cpxhead.i_color & ~ (0xf << 12)) | (color << 12);
+                rs_object[NICNCOL].ob_state &= ~OS_SELECTED;
+                break;
+
             case PICNCOL:
+                color = cpx->cpxhead.i_color >> 12;
+                color -= 1;
+                color &= 15;
+                cpx->cpxhead.i_color = (cpx->cpxhead.i_color & ~ (0xf << 12)) | (color << 12);
+                rs_object[PICNCOL].ob_state &= ~OS_SELECTED;
+                break;
+
             case NTXTCOL:
+                color = cpx->cpxhead.t_color >> 12;
+                color += 1;
+                color &= 15;
+                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 12)) | (color << 12);
+                rs_object[NTXTCOL].ob_state &= ~OS_SELECTED;
+                break;
+
             case PTXTCOL:
+                color = cpx->cpxhead.t_color >> 12;
+                color -= 1;
+                color &= 15;
+                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 12)) | (color << 12);
+                rs_object[PTXTCOL].ob_state &= ~OS_SELECTED;
                 break;
 
             case BSAVE:

@@ -18,3 +18,11 @@
 #define PICNCOL          21  /* BOXCHAR in Baum CPXCONF */
 #define NICNCOL          22  /* BOXCHAR in Baum CPXCONF */
 #define RESPUP           25  /* BUTTON in Baum CPXCONF */
+
+#define PUPSTRIN         1   /* Formular/Dialog */
+#define PUPYES           1   /* STRING in Baum PUPSTRING */
+#define PUPNO            2   /* STRING in Baum PUPSTRING */
+
+#define PUPS             0   /* Freier String */
+
+#define PUPSN            1   /* Freier String */
