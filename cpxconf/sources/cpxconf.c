@@ -98,19 +98,23 @@ static short cpx_call(GRECT *rect)
 
     cpx = (*xcpb->Get_Head_Node)();
 
-    strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 18);
-    strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
-    rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
-    rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
-    rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
-    rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
-
-    memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
-          48 * sizeof(short));
-    objc_draw(&rs_object[CPXCONF], ROOT, MAX_DEPTH,
-              rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+    short element = ROOT;
     do
     {
+        strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 18);
+        strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
+        rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
+        rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+        rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
+        rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+
+        memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
+              48 * sizeof(short));
+
+        sprintf(rs_object[TXTCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.t_color >> 12);
+        sprintf(rs_object[ICNCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.i_color >> 12);
+
+        objc_draw(rs_object, element, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
         /*
         * Sit around waiting for a message
         */
@@ -170,16 +174,8 @@ static short cpx_call(GRECT *rect)
                 }
                 rs_object[NCPX].ob_state &= ~OS_SELECTED;
 
-                strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 18);
-                strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
-                rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
-                rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
-                rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
-                rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+                element = ROOT;
 
-                memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
-                      48 * sizeof(short));
-                objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
                 break;
 
             case PCPX:
@@ -201,17 +197,9 @@ static short cpx_call(GRECT *rect)
                     }
                 }
 
-                rs_object[PCPX].ob_state &= ~OS_SELECTED;
-                strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 16);
-                strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
-                rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
-                rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
-                rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
-                rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
 
-                memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
-                      48 * sizeof(short));
-                objc_draw(rs_object, CPXBOX, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+                element = ROOT;
+
                 break;
 
             case NICNCOL:
@@ -222,6 +210,7 @@ static short cpx_call(GRECT *rect)
 
             case BSAVE:
             case BOK:
+
                 flags = get_flag_buttons();
                 if (flags >= 0)
                 {

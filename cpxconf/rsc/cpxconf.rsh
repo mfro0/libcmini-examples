@@ -120,47 +120,47 @@ OBJECT FAR rs_object[] =
   CPXBOX          ,       -1,       -1, G_TEXT            ,   /* Object 11 CPXITEXT */
   NONE, NORMAL, (LONG)&rs_tedinfo[1],
   0x0202, 0x0901, 0x040A, 0x0A00,
-        14, COLORBOX        , COLORBOX        , G_BOX             ,   /* Object 12  */
+  COLORBOX        ,       13,       13, G_BOX             ,   /* Object 12  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0802, 0x041F, 0x0001,
-        12,       -1,       -1, G_TEXT            ,   /* Object 13 COLORBOX */
+        12,       -1,       -1, G_TEXT            ,   /* Object 13  */
   NONE, NORMAL, (LONG)&rs_tedinfo[2],
   0x000B, 0x0000, 0x000B, 0x0001,
-        23,       15, PICNCOL         , G_BOX             ,   /* Object 14  */
+        23,       15, ICNCOL          , G_BOX             ,   /* Object 14 COLORBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A03, 0x041F, 0x0D02,
-  TXTCOL          ,       -1,       -1, G_TEXT            ,   /* Object 15  */
+        16,       -1,       -1, G_TEXT            ,   /* Object 15  */
   NONE, NORMAL, (LONG)&rs_tedinfo[3],
   0x0301, 0x0300, 0x000B, 0x0001,
-  PTXTCOL         ,       -1,       -1, G_TEXT            ,   /* Object 16 TXTCOL */
+  TXTCOL          ,       -1,       -1, G_TEXT            ,   /* Object 16  */
   NONE, NORMAL, (LONG)&rs_tedinfo[4],
   0x0301, 0x0801, 0x000B, 0x0001,
-  PICNCOL         , NTXTCOL         , ICNCOL          , G_BOXTEXT         ,   /* Object 17 PTXTCOL */
+  ICNCOL          , PTXTCOL         , NTXTCOL         , G_BOXTEXT         ,   /* Object 17 TXTCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[5],
   0x0612, 0x0500, 0x000A, 0x0001,
-  ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 NTXTCOL */
+  NTXTCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 18 PTXTCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0203, 0x0001,
-  PTXTCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 19 ICNCOL */
+  TXTCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 19 NTXTCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
-        14, NICNCOL         ,       22, G_BOXTEXT         ,   /* Object 20 PICNCOL */
+  COLORBOX        , PICNCOL         , NICNCOL         , G_BOXTEXT         ,   /* Object 20 ICNCOL */
   NONE, NORMAL, (LONG)&rs_tedinfo[6],
   0x0612, 0x0801, 0x000A, 0x0001,
-        22,       -1,       -1, G_BOXCHAR         ,   /* Object 21 NICNCOL */
+  NICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 21 PICNCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\004' << 24)|0x00FF1100L,
   0x0000, 0x0000, 0x0203, 0x0001,
-  PICNCOL         ,       -1,       -1, G_BOXCHAR         ,   /* Object 22  */
+  ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 22 NICNCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
-         0, RESPUP          ,       25, G_BOX             ,   /* Object 23  */
+         0,       24, RESPUP          , G_BOX             ,   /* Object 23  */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A06, 0x041F, 0x0C01,
-        25,       -1,       -1, G_TEXT            ,   /* Object 24 RESPUP */
+  RESPUP          ,       -1,       -1, G_TEXT            ,   /* Object 24  */
   NONE, NORMAL, (LONG)&rs_tedinfo[7],
   0x0501, 0x0600, 0x000D, 0x0001,
-        23,       -1,       -1, G_BUTTON          ,   /* Object 25  */
-  SELECTABLE|EXIT|LASTOB, SHADOWED, (LONG)"No",
+        23,       -1,       -1, G_BUTTON          ,   /* Object 25 RESPUP */
+  SELECTABLE|LASTOB|TOUCHEXIT, SHADOWED, (LONG)"No",
   0x0713, 0x0600, 0x0008, 0x0001
 };
 
