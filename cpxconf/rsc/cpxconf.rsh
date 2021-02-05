@@ -82,8 +82,8 @@ BITBLK FAR rs_bitblk[] =
 };
 
 BYTE FAR *rs_frstr[] =
-{ "\0",
-  "\0"
+{ " Yes  ",
+  " No   "
 };
 
 OBJECT FAR rs_object[] =
@@ -165,22 +165,10 @@ OBJECT FAR rs_object[] =
   NONE, NORMAL, (LONG)&rs_tedinfo[7],
   0x0501, 0x0600, 0x000D, 0x0001,
         23,       -1,       -1, G_BUTTON          ,   /* Object 25 RESPUP */
-  SELECTABLE|LASTOB|TOUCHEXIT, SHADOWED, (LONG)"No",
-  0x0713, 0x0600, 0x0008, 0x0001,
-  
-  /******** Tree 1 PUPSTRIN ****************************************************/
-        -1, PUPYES          , PUPNO           , G_BOX             ,   /* Object 0  */
-  NONE, NORMAL, (LONG)0x00001100L,
-  0x0000, 0x0000, 0x0034, 0x0009,
-  PUPNO           ,       -1,       -1, G_STRING          ,   /* Object 1 PUPYES */
-  NONE, NORMAL, (LONG)" Yes  ",
-  0x0000, 0x0000, 0x0006, 0x0001,
-         0,       -1,       -1, G_STRING          ,   /* Object 2 PUPNO */
-  LASTOB, NORMAL, (LONG)" No   ",
-  0x0000, 0x0001, 0x0006, 0x0001
+  SELECTABLE|LASTOB|TOUCHEXIT, SHADOWED, (LONG)"   No   ",
+  0x0713, 0x0600, 0x0008, 0x0001
 };
 
 OBJECT FAR *rs_trindex[] =
-{ &rs_object[0],   /* Tree  0 CPXCONF          */
-  &rs_object[26]    /* Tree  1 PUPSTRIN         */
+{ &rs_object[0]    /* Tree  0 CPXCONF          */
 };

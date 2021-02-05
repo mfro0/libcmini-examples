@@ -42,48 +42,18 @@
  */
 static XCPB *xcpb;      /* XControl Parameter Block */
 
-static struct           /* program header */
-{
-    short magic;
-    long dummy[5];
-    unsigned long flags;
-} header;
-
-#define HEADER_MAGIC 0x601a
-#define FASTLOAD_FLAG 0x00000001UL
-#define PROGLOAD_FLAG 0x00000002UL
-#define MEMALLOC_FLAG 0x00000004UL
-#define FLAG_MASK  (FASTLOAD_FLAG|PROGLOAD_FLAG|MEMALLOC_FLAG)
-
-static char pathname[140];   /* for fsel_exinput() */
-
 /*
-* function prototypes
-*/
-static short cpx_call(GRECT *rect);
-CPXINFO *cpx_init(XCPB * Xcpb);
-static void disable_flag_buttons(void);
-static void enable_flag_buttons(short flags);
-static short get_flag_buttons(void);
-static short read_program_header(char *filename);
-static void write_program_header(char *filename);
-
-
-/*
-* cpx_call - the main CPX driver entry point. We spend most of our time
-* in here dispatching the events from Xform_do which it doesn't want to
-* handle itself.
-*/
+ * cpx_call - the main CPX driver entry point. We spend most of our time
+ * in here dispatching the events from Xform_do which it doesn't want to
+ * handle itself.
+ */
 static short cpx_call(GRECT *rect)
 {
     short msg[8];
-    short button, rc;
-    char *p;
-    short flags, drive, quit = 0;
+    short button;
+    short quit = 0;
 
     CPXNODE *cpx, *ccpx;
-
-    TEDINFO *ted;
 
     dbg("rect = %d, %d, %d, %d\r\n", rect->g_x, rect->g_y, rect->g_w, rect->g_h);
 
@@ -92,9 +62,6 @@ static short cpx_call(GRECT *rect)
     */
     rs_object[CPXCONF].ob_x = rect->g_x;
     rs_object[CPXCONF].ob_y = rect->g_y;
-
-    disable_flag_buttons();
-
 
     cpx = (*xcpb->Get_Head_Node)();
 
@@ -110,12 +77,13 @@ static short cpx_call(GRECT *rect)
         strncpy(rs_object[CPXNAME].ob_spec.tedinfo->te_ptext, cpx->cpxhead.title_text, 18);
         rs_object[CPXNAME].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
 
-        rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
-        rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
-
         strncpy(rs_object[CPXITEXT].ob_spec.tedinfo->te_ptext, cpx->cpxhead.i_text, 14);
         rs_object[CPXITEXT].ob_spec.tedinfo->te_txtlen = strlen(cpx->cpxhead.i_text);
 
+        rs_object[CPXICON].ob_spec.bitblk->bi_color = cpx->cpxhead.i_color;
+        rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
+
+        rs_object[CPXITEXT].ob_spec.tedinfo->te_color = cpx->cpxhead.t_color;
         memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
               48 * sizeof(short));
 
@@ -123,6 +91,7 @@ static short cpx_call(GRECT *rect)
         sprintf(rs_object[ICNCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.i_color >> 12);
 
         objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
+
         /*
         * Sit around waiting for a message
         */
@@ -170,6 +139,9 @@ static short cpx_call(GRECT *rect)
         }
 
         dbg("button=%d\r\n", button);
+
+        GRECT butrect;
+        short sel;
 
         switch(button)
         {
@@ -236,16 +208,20 @@ static short cpx_call(GRECT *rect)
                 rs_object[PTXTCOL].ob_state &= ~OS_SELECTED;
                 break;
 
+            case RESPUP:
+                objc_offset(rs_object, RESPUP, &butrect.g_x, &butrect.g_y);
+                butrect.g_w = rs_object[RESPUP].ob_width;
+                butrect.g_h = rs_object[RESPUP].ob_height;
+
+                sel = (*xcpb->Popup)(&rs_frstr[PUPSY], 2, 1, AES_LARGEFONT, &butrect, rect);
+                dbg("sel=%d\r\n", sel);
+                strncpy(rs_object[RESPUP].ob_spec.tedinfo->te_ptext, rs_frstr[sel],
+                        rs_object[RESPUP].ob_spec.tedinfo->te_txtlen);
+                break;
+
             case BSAVE:
             case BOK:
 
-                flags = get_flag_buttons();
-                if (flags >= 0)
-                {
-                    header.flags &= ~FLAG_MASK;
-                    header.flags |= flags;
-                    write_program_header(pathname);
-                }
                 /* fall through */
             case BCANCEL:
                 quit = 1;
@@ -259,9 +235,9 @@ static short cpx_call(GRECT *rect)
 static CPXINFO cpxinfo = { &cpx_call, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 /*
-* cpx_init - main entry to the CPX, we arrive here when called either
-* during boot up or at the users request.
-*/
+ * cpx_init - main entry to the CPX, we arrive here when called either
+ * during boot up or at the users request.
+ */
 CPXINFO *cpx_init(XCPB * Xcpb)
 {
     xcpb = Xcpb;
@@ -271,13 +247,13 @@ CPXINFO *cpx_init(XCPB * Xcpb)
     appl_init();      // initialise private tables
 
     /*
-    * Just in case someone turns the boot flag on in the CPX ...
-    */
+     * Just in case someone turns the boot flag on in the CPX ...
+     */
     if (xcpb->booting)
     {
         /*
-        * Nothing special to do at boot time ...
-        */
+         * Nothing special to do at boot time ...
+         */
         return (CPXINFO *) 1;    // indicate we want to keep going
     }
 
@@ -297,42 +273,4 @@ CPXINFO *cpx_init(XCPB * Xcpb)
         xcpb->SkipRshFix = true;
     }
     return &cpxinfo;
-}
-
-/*
-* disable & deselect all the buttons
-*/
-void disable_flag_buttons(void)
-{
-
-}
-
-/*
-* enable all the buttons & select those corresponding to 'flags'
-*/
-void enable_flag_buttons(short flags)
-{
-
-}
-
-short get_flag_buttons(void)
-{
-
-}
-
-/*
-* read the header of the program
-* returns the flags, or -1 if an error
-*/
-short read_program_header(char *filename)
-{
-
-}
-
-/*
-* write the header of the program
-*/
-void write_program_header(char *filename)
-{
-
 }
