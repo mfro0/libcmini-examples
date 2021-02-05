@@ -1,6 +1,6 @@
 /* */
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -213,10 +213,9 @@ static short cpx_call(GRECT *rect)
                 butrect.g_w = rs_object[RESPUP].ob_width;
                 butrect.g_h = rs_object[RESPUP].ob_height;
 
-                sel = (*xcpb->Popup)(&rs_frstr[PUPSY], 2, 1, AES_LARGEFONT, &butrect, rect);
+                sel = (*xcpb->Popup)(&rs_frstr[PUPSY], 2, -1, AES_LARGEFONT, &butrect, rect);
                 dbg("sel=%d\r\n", sel);
-                strncpy(rs_object[RESPUP].ob_spec.tedinfo->te_ptext, rs_frstr[sel],
-                        rs_object[RESPUP].ob_spec.tedinfo->te_txtlen);
+                rs_object[RESPUP].ob_spec.free_string = rs_frstr[sel];
                 break;
 
             case BSAVE:
