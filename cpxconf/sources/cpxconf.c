@@ -216,6 +216,7 @@ static short cpx_call(GRECT *rect)
                 sel = (*xcpb->Popup)(&rs_frstr[PUPSY], 2, -1, AES_LARGEFONT, &butrect, rect);
                 dbg("sel=%d\r\n", sel);
                 rs_object[RESPUP].ob_spec.free_string = rs_frstr[sel];
+                rs_object[RESPUP].ob_state &= ~OS_SELECTED;
                 break;
 
             case BSAVE:
