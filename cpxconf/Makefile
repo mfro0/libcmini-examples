@@ -57,6 +57,7 @@ CFLAGS= \
 	-DFORCE_GEMLIB_UDEF \
 	-Wall \
 	-fomit-frame-pointer \
+	-fno-merge-constants \
 	$(CHARSET_FLAGS)
 
 SRCDIR=sources

@@ -87,14 +87,14 @@ static short cpx_call(GRECT *rect)
         memcpy(rs_object[CPXICON].ob_spec.bitblk->bi_pdata, cpx->cpxhead.sm_icon,
               48 * sizeof(short));
 
-        sprintf(rs_object[TXTCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.t_color >> 12);
+        sprintf(rs_object[TXTCOL].ob_spec.tedinfo->te_ptext, "%2d", (cpx->cpxhead.t_color >> 8) & 0xf);
         sprintf(rs_object[ICNCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.i_color >> 12);
 
         objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
 
         /*
-        * Sit around waiting for a message
-        */
+         * Sit around waiting for a message
+         */
         button = xcpb->Xform_do(&rs_object[CPXCONF], ROOT, msg);
 
         /* Check if we have a double click item */
@@ -193,18 +193,18 @@ static short cpx_call(GRECT *rect)
                 break;
 
             case NTXTCOL:
-                color = cpx->cpxhead.t_color >> 12;
+                color = (cpx->cpxhead.t_color >> 8) & 0xf;
                 color += 1;
                 color &= 15;
-                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 12)) | (color << 12);
+                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 8)) | (color << 8);
                 rs_object[NTXTCOL].ob_state &= ~OS_SELECTED;
                 break;
 
             case PTXTCOL:
-                color = cpx->cpxhead.t_color >> 12;
+                color = (cpx->cpxhead.t_color >> 8) & 0xf;
                 color -= 1;
                 color &= 15;
-                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 12)) | (color << 12);
+                cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 8)) | (color << 8);
                 rs_object[PTXTCOL].ob_state &= ~OS_SELECTED;
                 break;
 

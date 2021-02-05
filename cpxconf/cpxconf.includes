@@ -1,4 +1,6 @@
 include
 rsc
 /usr/m68k-atari-mint/include
+/usr/lib/gcc/m68k-atari-mint/4.6.4/include
+
 
