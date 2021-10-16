@@ -1,6 +1,6 @@
 /* */
 
-// #define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -30,17 +30,32 @@
 #include "cpxdata.h"
 
 
+static short ap_id;
+
 /*
  * cpxconf.c
  *
  * CPX to set CPXHEADER information
  */
 
-
 /*
  *  variables
  */
 static XCPB *xcpb;      /* XControl Parameter Block */
+
+
+static void redraw(GRECT *rect)
+{
+    GRECT *ret;
+
+    ret = (*xcpb->GetFirstRect)(rect);
+    while (ret)
+    {
+        objc_draw(&rs_object[CPXCONF], ROOT, MAX_DEPTH,
+                  ret->g_x, ret->g_y, ret->g_w, ret->g_h);
+        ret = (*xcpb->GetNextRect)();
+    }
+}
 
 /*
  * cpx_call - the main CPX driver entry point. We spend most of our time
@@ -90,8 +105,6 @@ static short cpx_call(GRECT *rect)
         sprintf(rs_object[TXTCOL].ob_spec.tedinfo->te_ptext, "%2d", (cpx->cpxhead.t_color >> 8) & 0xf);
         sprintf(rs_object[ICNCOL].ob_spec.tedinfo->te_ptext, "%2d", cpx->cpxhead.i_color >> 12);
 
-        objc_draw(rs_object, ROOT, MAX_DEPTH, rect->g_x, rect->g_y, rect->g_w, rect->g_h);
-
         /*
          * Sit around waiting for a message
          */
@@ -116,16 +129,7 @@ static short cpx_call(GRECT *rect)
 
                 case WM_REDRAW:
                 {
-                    GRECT *ret;
-
-                    ret = (*xcpb->GetFirstRect)(rect);
-                    while (ret)
-                    {
-                        objc_draw(&rs_object[CPXCONF], ROOT, MAX_DEPTH,
-                                  ret->g_x, ret->g_y, ret->g_w, ret->g_h);
-                        ret = (*xcpb->GetNextRect)();
-                    }
-                    continue;
+                    redraw(rect);
                 }
                 break;
 
@@ -153,6 +157,7 @@ static short cpx_call(GRECT *rect)
                     cpx = (*xcpb->Get_Head_Node)();
                 }
                 rs_object[NCPX].ob_state &= ~OS_SELECTED;
+                redraw(rect);
                 break;
 
             case PCPX:
@@ -174,6 +179,7 @@ static short cpx_call(GRECT *rect)
                     }
                 }
                 rs_object[PCPX].ob_state &= ~OS_SELECTED;
+                redraw(rect);
                 break;
 
             case NICNCOL:
@@ -182,6 +188,7 @@ static short cpx_call(GRECT *rect)
                 color &= 15;
                 cpx->cpxhead.i_color = (cpx->cpxhead.i_color & ~ (0xf << 12)) | (color << 12);
                 rs_object[NICNCOL].ob_state &= ~OS_SELECTED;
+                redraw(rect);
                 break;
 
             case PICNCOL:
@@ -190,6 +197,7 @@ static short cpx_call(GRECT *rect)
                 color &= 15;
                 cpx->cpxhead.i_color = (cpx->cpxhead.i_color & ~ (0xf << 12)) | (color << 12);
                 rs_object[PICNCOL].ob_state &= ~OS_SELECTED;
+                redraw(rect);
                 break;
 
             case NTXTCOL:
@@ -198,6 +206,14 @@ static short cpx_call(GRECT *rect)
                 color &= 15;
                 cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 8)) | (color << 8);
                 rs_object[NTXTCOL].ob_state &= ~OS_SELECTED;
+                redraw(& (GRECT){rs_object[COLORBOX].ob_x + rect->g_x,
+                                 rs_object[COLORBOX].ob_y + rect->g_y,
+                                 rs_object[COLORBOX].ob_width,
+                                 rs_object[COLORBOX].ob_height });
+                redraw(& (GRECT){ rs_object[CPXBOX].ob_x + rect->g_x,
+                                  rs_object[CPXBOX].ob_y + rect->g_y,
+                                  rs_object[CPXBOX].ob_width,
+                                  rs_object[CPXBOX].ob_height });
                 break;
 
             case PTXTCOL:
@@ -206,6 +222,7 @@ static short cpx_call(GRECT *rect)
                 color &= 15;
                 cpx->cpxhead.t_color = (cpx->cpxhead.t_color & ~ (0xf << 8)) | (color << 8);
                 rs_object[PTXTCOL].ob_state &= ~OS_SELECTED;
+                redraw(rect);
                 break;
 
             case RESPUP:
@@ -217,6 +234,7 @@ static short cpx_call(GRECT *rect)
                 dbg("sel=%d\r\n", sel);
                 rs_object[RESPUP].ob_spec.free_string = rs_frstr[sel];
                 rs_object[RESPUP].ob_state &= ~OS_SELECTED;
+                // redraw(rect); // it appears this happens here anyway
                 break;
 
             case BSAVE:
@@ -244,7 +262,7 @@ CPXINFO *cpx_init(XCPB * Xcpb)
 
     dbg("xcpb = %p\r\n", (void *) xcpb);
 
-    appl_init();      // initialise private tables
+    ap_id = appl_init();      // initialise private tables
 
     /*
      * Just in case someone turns the boot flag on in the CPX ...

@@ -89,7 +89,7 @@ BYTE FAR *rs_frstr[] =
 OBJECT FAR rs_object[] =
 { 
   /******** Tree 0 CPXCONF ****************************************************/
-        -1,        1,       23, G_BOX             ,   /* Object 0  */
+        -1,        1, RESBOX          , G_BOX             ,   /* Object 0  */
   NONE, NORMAL, (LONG)0x00FF1141L,
   0x0000, 0x0000, 0x0020, 0x000B,
          3, BSAVE           , BSAVE           , G_BOX             ,   /* Object 1  */
@@ -131,7 +131,7 @@ OBJECT FAR rs_object[] =
         12,       -1,       -1, G_TEXT            ,   /* Object 13  */
   NONE, NORMAL, (LONG)&rs_tedinfo[2],
   0x000B, 0x0000, 0x000B, 0x0001,
-        23,       15, ICNCOL          , G_BOX             ,   /* Object 14 COLORBOX */
+  RESBOX          ,       15, ICNCOL          , G_BOX             ,   /* Object 14 COLORBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A03, 0x041F, 0x0D02,
         16,       -1,       -1, G_TEXT            ,   /* Object 15  */
@@ -158,13 +158,13 @@ OBJECT FAR rs_object[] =
   ICNCOL          ,       -1,       -1, G_BOXCHAR         ,   /* Object 22 NICNCOL */
   SELECTABLE|EXIT, NORMAL, (LONG) ((LONG)'\003' << 24)|0x00FF1100L,
   0x0007, 0x0000, 0x0203, 0x0001,
-         0,       24, RESPUP          , G_BOX             ,   /* Object 23  */
+         0,       24, RESPUP          , G_BOX             ,   /* Object 23 RESBOX */
   NONE, NORMAL, (LONG)0x00FF1101L,
   0x0200, 0x0A06, 0x041F, 0x0C01,
   RESPUP          ,       -1,       -1, G_TEXT            ,   /* Object 24  */
   NONE, NORMAL, (LONG)&rs_tedinfo[7],
   0x0501, 0x0600, 0x000D, 0x0001,
-        23,       -1,       -1, G_BUTTON          ,   /* Object 25 RESPUP */
+  RESBOX          ,       -1,       -1, G_BUTTON          ,   /* Object 25 RESPUP */
   SELECTABLE|LASTOB|TOUCHEXIT, SHADOWED, (LONG)"   No   ",
   0x0713, 0x0600, 0x0008, 0x0001
 };

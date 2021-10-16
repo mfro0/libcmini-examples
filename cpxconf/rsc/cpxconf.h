@@ -17,6 +17,7 @@
 #define ICNCOL           20  /* BOXTEXT in Baum CPXCONF */
 #define PICNCOL          21  /* BOXCHAR in Baum CPXCONF */
 #define NICNCOL          22  /* BOXCHAR in Baum CPXCONF */
+#define RESBOX           23  /* BOX in Baum CPXCONF */
 #define RESPUP           25  /* BUTTON in Baum CPXCONF */
 
 #define PUPSY            0   /* Freier String */
