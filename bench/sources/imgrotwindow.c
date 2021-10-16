@@ -12,7 +12,7 @@
 #include "bench.h"
 #include <math.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)

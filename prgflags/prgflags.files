@@ -1,0 +1,12 @@
+Makefile
+include/cpxdata.h
+include/dragdrop.h
+m68020-60/mshort/prgflags.cp
+rsc/portab.h
+rsc/prgflags.h
+rsc/prgflags.rsh
+sources/cpx_preinit.c
+sources/cpxhead.c
+sources/cpxstart.S
+sources/dragdrop.c
+sources/prgflags.c
