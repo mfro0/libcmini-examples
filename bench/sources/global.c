@@ -26,8 +26,8 @@ short gl_hbox;
 short gl_wbox;
 short gl_hchar;
 short gl_wchar;
-short gl_hbox;
 short gl_nplanes;
+short gl_nsysfonts;
 
 OBJECT *gl_menu;
 

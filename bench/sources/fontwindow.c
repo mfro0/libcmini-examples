@@ -58,7 +58,7 @@ void init_fontwindow(struct window *wi)
 
         if (fi->font_info != NULL)
             free(fi->font_info);
-        fi->font_info = malloc(sizeof(struct finfo) * (fi->add_fonts + 2));
+        fi->font_info = malloc(sizeof(struct finfo) * (fi->add_fonts + gl_nsysfonts));
 
         if (fi->font_info == NULL)
         {
@@ -66,7 +66,7 @@ void init_fontwindow(struct window *wi)
             exit(1);
         }
 
-        for (i = 0; i < fi->add_fonts + 2; i++)
+        for (i = 0; i < fi->add_fonts + gl_nsysfonts; i++)
         {
             fi->font_info[i].font_index = vqt_name(wi->vdi_handle, i, fi->font_info[i].font_name);
             fi->font_info[i].font_name[32] = '\0';

@@ -26,7 +26,7 @@ extern short ptsout[128];	/* storage wasted for idiotic bindings */
 
 extern short work_in[11];	/* Input to GSX parameter array */
 extern short work_out[57];	/* Output from GSX parameter array */
-short ext_out[57];
+extern short ext_out[57];
 extern short pxyarray[10];	/* input poshort array */
 
 extern short ap_id;
@@ -36,6 +36,7 @@ extern short window_open_pos_y;
 
 extern short gl_wchar, gl_hchar, gl_wbox, gl_hbox;
 extern short gl_nplanes;
+extern short gl_nsysfonts;
 
 extern OBJECT *gl_menu;
 extern GRECT gl_desk;
