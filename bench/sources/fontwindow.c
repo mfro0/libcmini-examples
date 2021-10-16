@@ -244,7 +244,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     wi->clear(wi, x, y, w, h);
     vst_color(vh, G_BLACK);
 
-    for (i = 0; i < fw->add_fonts + 2; i++)
+    for (i = 0; i < fw->add_fonts + gl_nsysfonts; i++)
     {
         short ch_w, ch_h, ce_w, ce_h;
         short hor, vert;
