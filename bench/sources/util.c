@@ -44,6 +44,7 @@ short open_vwork(short work_out[], short ext_out[])
     v_opnvwk(work_in, &vdi_handle, work_out);
     vq_extnd(vdi_handle, 1, ext_out);
     gl_nplanes = ext_out[4];
+    gl_nsysfonts = work_out[10];
 
     return vdi_handle;
 }
