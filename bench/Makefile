@@ -60,24 +60,24 @@ INCDIR=include
 INCLUDE+=-I$(INCDIR)
 
 CSRCS=\
-	$(SRCDIR)/bench.c\
-	$(SRCDIR)/menu.c\
-	$(SRCDIR)/window.c\
-	$(SRCDIR)/global.c\
-	$(SRCDIR)/util.c\
-	$(SRCDIR)/intmath.c\
-	$(SRCDIR)/dialog.c\
-	$(SRCDIR)/rsrc.c\
-	$(SRCDIR)/grafwindow.c\
-	$(SRCDIR)/offscreen.c\
-	$(SRCDIR)/testwindow.c\
-	$(SRCDIR)/complexwindow.c\
-	$(SRCDIR)/bezierwindow.c\
-	$(SRCDIR)/clockwindow.c\
-	$(SRCDIR)/rasterwindow.c\
-	$(SRCDIR)/rcircles_bb_window.c\
-	$(SRCDIR)/rcircles_vdi_window.c\
-	$(SRCDIR)/vdiwindow.c\
+	$(SRCDIR)/bench.c \
+	$(SRCDIR)/menu.c \
+	$(SRCDIR)/window.c \
+	$(SRCDIR)/global.c \
+	$(SRCDIR)/util.c \
+	$(SRCDIR)/intmath.c \
+	$(SRCDIR)/dialog.c \
+	$(SRCDIR)/rsrc.c \
+	$(SRCDIR)/grafwindow.c \
+	$(SRCDIR)/offscreen.c \
+	$(SRCDIR)/testwindow.c \
+	$(SRCDIR)/complexwindow.c \
+	$(SRCDIR)/bezierwindow.c \
+	$(SRCDIR)/clockwindow.c \
+	$(SRCDIR)/rasterwindow.c \
+	$(SRCDIR)/rcircles_bb_window.c \
+	$(SRCDIR)/rcircles_vdi_window.c \
+	$(SRCDIR)/vdiwindow.c \
 	$(SRCDIR)/cubewindow.c \
 	$(SRCDIR)/fontwindow.c \
 	$(SRCDIR)/imgrotwindow.c \
