@@ -11,7 +11,7 @@ struct window *create_fontwindow(short wi_kind, char *title);
 
 struct finfo
 {
-    short font_index;
+    short font_id;
     char font_name[33];
 };
 

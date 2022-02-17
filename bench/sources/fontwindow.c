@@ -68,7 +68,7 @@ void init_fontwindow(struct window *wi)
 
         for (i = 0; i < fi->add_fonts + gl_nsysfonts; i++)
         {
-            fi->font_info[i].font_index = vqt_name(wi->vdi_handle, i, fi->font_info[i].font_name);
+            fi->font_info[i].font_id = vqt_name(wi->vdi_handle, i, fi->font_info[i].font_name);
             fi->font_info[i].font_name[32] = '\0';
 
             dbg("font %d (index %d)=\"%s\"\n", i, fi->font_info[i].font_index, fi->font_info[i].font_name);
@@ -249,20 +249,27 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
         short ch_w, ch_h, ce_w, ce_h;
         short hor, vert;
         short fnt_extend[8];
+        char fntstr[128];
 
         vst_alignment(vh, TA_LEFT, TA_TOP, &hor, &vert);
         if (hor != TA_LEFT || vert != TA_TOP)
             dbg("did not get alignment we were asking for: hor (should be %d) = %d\n,"
                 "vert (should be %d) = %d\n", TA_LEFT, hor, TA_TOP, vert);
         vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
-        vst_font(vh, fw->font_info[i].font_index);
+        vst_font(vh, fw->font_info[i].font_id);
         vqt_extent(vh, fw->font_info[i].font_name, fnt_extend);
 
         /* save new doc width if larger than set value */
         wi->doc_width = fnt_extend[2] - fnt_extend[0] > wi->doc_width ? fnt_extend[2] - fnt_extend[0] : wi->doc_width;
 
         if (wy - yoffs + (fnt_extend[5] - fnt_extend[1]) >= wi->work.g_y && wy - yoffs <= wi->work.g_y + wi->work.g_h - 1)
-            v_ftext(vh, wx - xoffs, wy - yoffs, fw->font_info[i].font_name);
+        {
+            strcpy(fntstr, fw->font_info[i].font_name);
+            strcat(fntstr, " (font id=");
+            itoa(fw->font_info[i].font_id, &fntstr[strlen(fntstr)], 10);
+            strcat(fntstr, ")");
+            v_ftext(vh, wx - xoffs, wy - yoffs, fntstr);
+        }
         wy += fnt_extend[5] - fnt_extend[1];
     }
     wi->doc_height = wy - wi->work.g_y;
