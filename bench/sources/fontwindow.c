@@ -25,7 +25,6 @@
  * local function prototypes
  */
 static void draw_fontwindow(struct window *wi, short wx, short wy, short wh, short ww);
-static void timer_fontwindow(struct window *wi);
 static void delete_fontwindow(struct window *wi);
 static void open_fontwindow(struct window *wi, short x, short y, short w, short h);
 static void delete_fontwindow(struct window *wi);
@@ -117,6 +116,7 @@ struct window *create_fontwindow(short wi_kind, char *title)
         wi->y_fac = 1;
     }
 
+    wi->scroll(wi);
     return wi;
 }
 
@@ -255,8 +255,8 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
         if (hor != TA_LEFT || vert != TA_TOP)
             dbg("did not get alignment we were asking for: hor (should be %d) = %d\n,"
                 "vert (should be %d) = %d\n", TA_LEFT, hor, TA_TOP, vert);
-        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
         vst_font(vh, fw->font_info[i].font_id);
+        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
         vqt_extent(vh, fw->font_info[i].font_name, fnt_extend);
 
         /* save new doc width if larger than set value */
@@ -275,15 +275,3 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     wi->doc_height = wy - wi->work.g_y;
     wi->scroll(wi);
 }
-
-
-/*
- * react on timer events
- */
-static void timer_fontwindow(struct window *wi)
-{
-    struct fontwindow *fw = wi->priv;
-
-    do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-}
-
