@@ -1,5 +1,5 @@
-#ifndef _MENU_H_
-#define _MENU_H_
+#ifndef BENCHMENU_H
+#define BENCHMENU_H
 
 #include <gem.h>
 #include <stdint.h>
@@ -10,5 +10,5 @@ short free_menu();
 short handle_menu(OBJECT *menu, short title, short item);
 bool is_menu_key(OBJECT *menu_tree, short keyreturn, short keystate, short *title, short *item);
 
-#endif /* _MENU_H_ */
+#endif /* BENCHMENU_H */
 

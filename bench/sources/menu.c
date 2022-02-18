@@ -22,7 +22,7 @@
 #include "dialog.h"
 #include "global.h"
 #include "util.h"
-#include "menu.h"
+#include "benchmenu.h"
 
 //#define DEBUG
 #ifdef DEBUG

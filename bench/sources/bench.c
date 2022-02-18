@@ -8,7 +8,7 @@
 
 #include "window.h"
 #include "bench.h"
-#include "menu.h"
+#include "benchmenu.h"
 #include "rsrc.h"
 #include "util.h"
 #include "global.h"
