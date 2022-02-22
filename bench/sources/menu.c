@@ -19,6 +19,7 @@
 #include "imgrotwindow.h"
 #include "rcircles_bb_window.h"
 #include "rcircles_vdi_window.h"
+#include "terrainwindow.h"
 #include "dialog.h"
 #include "global.h"
 #include "util.h"
@@ -495,6 +496,16 @@ short handle_menu(OBJECT *menu, short title, short item)
 
                 case MN_ROT:
                     wi = create_imgrotwindow(IMGROTWINDOW_WINELEMENTS, "Raster Rotate");
+                    if (wi != NULL)
+                    {
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        window_open_pos_x += 20;
+                        window_open_pos_y += 20;
+                    }
+                    break;
+
+                case MN_TERRAIN:
+                    wi = create_terrainwindow(IMGROTWINDOW_WINELEMENTS, "Terrain");
                     if (wi != NULL)
                     {
                         wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);

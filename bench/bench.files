@@ -12,6 +12,7 @@ include/intmath.h
 include/menu.h
 include/offscreen.h
 include/rsrc.h
+include/terrainwindow.h
 include/util.h
 include/window.h
 sources/bench.c
@@ -51,3 +52,4 @@ include/natfeats.h
 sources/natfeats.c
 sources/testwindow.c
 include/testwindow.h
+sources/terrainwindow.c

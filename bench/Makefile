@@ -81,6 +81,7 @@ CSRCS=\
 	$(SRCDIR)/cubewindow.c \
 	$(SRCDIR)/fontwindow.c \
 	$(SRCDIR)/imgrotwindow.c \
+	$(SRCDIR)/terrainwindow.c \
 	\
 	$(SRCDIR)/natfeats.c
 
@@ -113,11 +114,14 @@ $(DEPEND): $(ASRCS) $(CSRCS) include/patterns.h
 		do $(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
 	done
 
+
 #
 # generate pattern rules for multilib object files.
 #
 define CC_TEMPLATE
-$(1)/objs/%.o:$(SRCDIR)/%.c
+$(1)/objs/rasterwindow.o: $(SRCDIR)/rasterwindow.c include/rasterdraw.h
+$(1)/objs/rcircles_bb_window.o: $(SRCDIR)/rcircles_bb_window.c include/rasterdraw.h
+$(1)/objs/%.o:$(SRCDIR)/%.c 
 	$(Q)echo "CC $$<"
 	$(Q)$(CC) $$(CFLAGS) $(INCLUDE) -c $$< -o $$@
 
