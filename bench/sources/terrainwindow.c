@@ -136,7 +136,7 @@ static MFDB read_png(const char *filename)
 
             /* 32 bit */
             unsigned long *pixels = img.fd_addr;
-            pixels[i * width + j] = c.red << 16 | c.blue << 8 | c.green;
+            pixels[i * width + j] = c.red << 16 | c.green << 8 | c.blue;
         }
     return img;
 }
