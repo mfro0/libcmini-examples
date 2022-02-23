@@ -7,10 +7,11 @@
 #include <stdbool.h>
 
 #include "terrainwindow.h"
+#include "rasterdraw.h"
 
 #include <png.h>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -19,34 +20,126 @@
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
 
-
-/*
- * return the smaller of two values
- */
-static inline int min(int a, int b)
-{
-    return (a < b ? a : b);
-}
-
-/*
- * return the larger of two values
- */
-static inline int max(int a, int b)
-{
-    return (a > b ? a : b);
-}
-
-
 /* private data for this window type */
 struct terrainwindow
 {
     bool new_turn;
     short color;
+    MFDB heightmap;
+    MFDB colormap;
 };
 
 static void timer_terrainwindow(struct window *wi);
 static void delete_terrainwindow(struct window *wi);
 static void draw_terrainwindow(struct window *wi, short wx, short wy, short ww, short wh);
+
+static char *color_type_string(int color_type)
+{
+    switch (color_type)
+    {
+        case PNG_COLOR_TYPE_GRAY:
+            return "PNG_COLOR_TYPE_GRAY";
+        case PNG_COLOR_TYPE_GRAY_ALPHA:
+            return "PNG_COLOR_TYPE_GRAY_ALPHA";
+        case PNG_COLOR_TYPE_PALETTE:
+            return "PNG_COLOR_TYPE_PALETTE";
+        case PNG_COLOR_TYPE_RGB:
+            return "PNG_COLOR_TYPE_RGB";
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+            return "PNG_COLOR_TYPE_RGB_ALPHA";
+        default:
+            return "unknown color type";
+    }
+}
+static void rd_png_warning(void)
+{
+    dbg("png warning");
+}
+
+static void rd_png_error(void)
+{
+    dbg("png_error");
+}
+
+
+static MFDB read_png(const char *filename)
+{
+    unsigned char header[8];
+    bool is_png;
+    MFDB img = { 0 };
+
+    FILE *fp = fopen(filename, "rb");
+    if (!fp) return img;
+
+    fread(header, 1, 8, fp);
+    is_png = (!png_sig_cmp(header, 0, 8));
+
+    if (!is_png) return img;
+
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png_ptr) return img;
+
+    png_infop info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr)
+    {
+        png_destroy_read_struct(&png_ptr, NULL, NULL);
+        return img;
+    }
+
+    png_infop end_info = png_create_info_struct(png_ptr);
+    if (!end_info)
+    {
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        return img;
+    }
+
+    if (setjmp(png_jmpbuf(png_ptr)))
+    {
+        png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+        fclose(fp);
+        return img;
+    }
+
+    png_init_io(png_ptr, fp);
+    png_set_sig_bytes(png_ptr, 8);      /* we already have read the header */
+
+    png_read_png(png_ptr, info_ptr, 0, NULL);
+    unsigned int width = png_get_image_width(png_ptr, info_ptr);
+    unsigned int height = png_get_image_height(png_ptr, info_ptr);
+    png_bytepp row_pointers = png_get_rows(png_ptr, info_ptr);
+
+    dbg("sucessfully read png image \"%s\" with width=%d and height=%d\r\n", filename, width, height);
+    dbg("bit_depth=%d, color_type=%s\n", png_get_bit_depth(png_ptr, info_ptr),
+        color_type_string(png_get_color_type(png_ptr, info_ptr)));
+
+    png_color *palette;
+    int num_palette;
+
+    png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
+    dbg("# of channels=%d, palette=%p, # palette entries=%d\n", png_get_channels(png_ptr, info_ptr),
+        palette, num_palette);
+
+    img.fd_addr = 0L;
+    img.fd_w = (short) width;
+    img.fd_h = (short) height;
+    img.fd_wdwidth = width + 15 / 16;
+    img.fd_stand = 0;
+    img.fd_nplanes = gl_nplanes;
+    img.fd_r1 = img.fd_r2 = img.fd_r3 = 0;
+
+    img.fd_addr = malloc(width * height * sizeof(long));
+    for (unsigned int i = 0; i < height; i++)
+        for (unsigned int j = 0; j < width; j++)
+        {
+            unsigned char colorindex = row_pointers[i][j];
+            png_color c = palette[colorindex];
+
+            /* 32 bit */
+            unsigned long *pixels = img.fd_addr;
+            pixels[i * width + j] = c.red << 16 | c.blue << 8 | c.green;
+        }
+    return img;
+}
 
 /*
  * create a new window and add it to the window list.
@@ -56,7 +149,7 @@ struct window *create_terrainwindow(short wi_kind, char *title)
     struct window *wi = NULL;
     struct terrainwindow *vw;
 
-    dbg("start");
+    dbg("start\r\n");
 
     wi = create_window(wi_kind, title);
 
@@ -76,6 +169,9 @@ struct window *create_terrainwindow(short wi_kind, char *title)
             wi->priv = vw;
             vw->color = 0;
             vw->new_turn = true;
+
+            vw->colormap = read_png("C7W.png");
+            vw->heightmap = read_png("D7.png");
         }
         else
         {
@@ -90,7 +186,7 @@ struct window *create_terrainwindow(short wi_kind, char *title)
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
-    dbg("finished");
+    dbg("finished\r\n");
 
     return wi;
 }
@@ -113,21 +209,28 @@ static void delete_terrainwindow(struct window *wi)
 /*
  * draw window
  */
-static void draw_terrainwindow(struct window *wi, short wx, short wy, short ww, short wh)
+static void draw_terrainwindow(struct window *wi, short x, short y, short w, short h)
 {
-    short x;
-    short y;
-    short w;
-    short h;
     short vh = wi->vdi_handle;
+
     struct terrainwindow *vw = (struct terrainwindow *) wi->priv;
 
-    /* get size of window's work area */
-    wind_get(wi->handle, WF_WORKXYWH, &x, &y, &w, &h);
+    MFDB screen = { 0 };
 
-    /* first, clear it */
-    if (wi->clear) wi->clear(wi, x, y, w, h);
+    short pxy[8] =
+    {
+        0,
+        0,
+        wi->work.g_w - 1,
+        wi->work.g_h - 1,
+        wi->work.g_x,
+        wi->work.g_y,
+        wi->work.g_x + wi->work.g_y - 1,
+        wi->work.g_y + wi->work.g_h - 1
+    };
 
+    screen.fd_addr = 0;
+    vro_cpyfm(vh, S_ONLY, pxy, &vw->colormap, &screen);
 
 }
 

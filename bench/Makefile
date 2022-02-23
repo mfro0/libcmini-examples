@@ -31,7 +31,7 @@ LIBCMINI=../../libcmini
 LIBCMINI_LIB=$(LIBCMINI)/build
 
 INCLUDE=-I$(LIBCMINI)/include -I/usr/m68k-atari-mint/include -nostdlib
-LIBS=-lgem -lm -lcmini -nostdlib -lgcc
+LIBS=-lgem -lpng16 -lz -lm -lcmini -nostdlib -lgcc
 CC=$(PREFIX)/bin/gcc
 
 CC=$(CROSSBINDIR)gcc
@@ -52,6 +52,7 @@ CFLAGS= \
 	-I/usr/lib/gcc/m68k-atari-mint/4.6.4/include \
 	-DFORCE_GEMLIB_UDEF \
 	-Wl,-Map,mapfile \
+	-std=c99 \
 	-Wall \
 	$(CHARSET_FLAGS)
 
@@ -121,7 +122,7 @@ $(DEPEND): $(ASRCS) $(CSRCS) include/patterns.h
 define CC_TEMPLATE
 $(1)/objs/rasterwindow.o: $(SRCDIR)/rasterwindow.c include/rasterdraw.h
 $(1)/objs/rcircles_bb_window.o: $(SRCDIR)/rcircles_bb_window.c include/rasterdraw.h
-$(1)/objs/%.o:$(SRCDIR)/%.c 
+$(1)/objs/%.o:$(SRCDIR)/%.c
 	$(Q)echo "CC $$<"
 	$(Q)$(CC) $$(CFLAGS) $(INCLUDE) -c $$< -o $$@
 
