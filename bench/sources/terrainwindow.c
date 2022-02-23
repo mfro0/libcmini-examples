@@ -122,7 +122,7 @@ static MFDB read_png(const char *filename)
     img.fd_addr = 0L;
     img.fd_w = (short) width;
     img.fd_h = (short) height;
-    img.fd_wdwidth = width + 15 / 16;
+    img.fd_wdwidth = (width + 15) / 16;
     img.fd_stand = 0;
     img.fd_nplanes = gl_nplanes;
     img.fd_r1 = img.fd_r2 = img.fd_r3 = 0;
