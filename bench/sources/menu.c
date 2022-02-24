@@ -505,7 +505,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     break;
 
                 case MN_TERRAIN:
-                    wi = create_terrainwindow(IMGROTWINDOW_WINELEMENTS, "Terrain");
+                    wi = create_terrainwindow(TERRAINWINDOW_WINELEMENTS, "Terrain");
                     if (wi != NULL)
                     {
                         wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
