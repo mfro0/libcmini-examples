@@ -11,7 +11,7 @@
 
 #include <png.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -134,9 +134,18 @@ static MFDB read_png(const char *filename)
             unsigned char colorindex = row_pointers[i][j];
             png_color c = palette[colorindex];
 
-            /* 32 bit */
-            unsigned long *pixels = img.fd_addr;
-            pixels[i * width + j] = c.red << 16 | c.blue << 8 | c.green;
+            unsigned long *pixels32 = img.fd_addr;
+            unsigned short *pixels16 = img.fd_addr;
+            switch (gl_nplanes)
+            {
+                case 32:
+                    /* 32 bit */
+                    pixels32[i * width + j] = c.red << 16 | c.green << 8 | c.blue;
+
+                case 16:
+                    /* 16 bit */
+                    pixels16[i * width + j] = (c.red >> 3) << 11 | (c.green >> 2) << 5 | (c.blue >> 3);
+            }
         }
     return img;
 }
@@ -158,7 +167,6 @@ struct window *create_terrainwindow(short wi_kind, char *title)
         wi->wclass = TERRAINWINDOW_CLASS;
         wi->draw = draw_terrainwindow;
         wi->del = delete_terrainwindow;
-        wi->timer = timer_terrainwindow;
 
         wi->word_aligned = true;
 
@@ -233,22 +241,4 @@ static void draw_terrainwindow(struct window *wi, short x, short y, short w, sho
     vro_cpyfm(vh, S_ONLY, pxy, &vw->colormap, &screen);
 
 }
-
-
-/*
- * react on timer events
- */
-static void timer_terrainwindow(struct window *wi)
-{
-    struct terrainwindow *vw = wi->priv;
-
-    if (vw != NULL)
-    {
-        vw->new_turn = true;    /* signal drawing code that this is a new draw */
-        do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-        vw->color += 1;
-        vw->color &= 15;        /* flip through the first 16 color indices */
-    }
-}
-
 
