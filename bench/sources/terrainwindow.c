@@ -206,7 +206,9 @@ static void delete_terrainwindow(struct window *wi)
     {
         struct terrainwindow *vw = (struct terrainwindow *) wi->priv;
 
-        (void) vw; /* we might need it later */
+        free(vw->colormap.fd_addr);
+        free(vw->heightmap.fd_addr);
+
 
         free(wi->priv);
     }
