@@ -46,6 +46,9 @@ short open_vwork(short work_out[], short ext_out[])
     gl_nplanes = ext_out[4];
     gl_nsysfonts = work_out[10];
 
+    gl_scrwidth = work_out[0];
+    gl_scrheight = work_out[1];
+
     return vdi_handle;
 }
 

@@ -37,6 +37,8 @@ extern short window_open_pos_y;
 extern short gl_wchar, gl_hchar, gl_wbox, gl_hbox;
 extern short gl_nplanes;
 extern short gl_nsysfonts;
+extern short gl_scrwidth;
+extern short gl_scrheight;
 
 extern OBJECT *gl_menu;
 extern GRECT gl_desk;

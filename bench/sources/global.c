@@ -28,6 +28,8 @@ short gl_hchar;
 short gl_wchar;
 short gl_nplanes;
 short gl_nsysfonts;
+short gl_scrwidth;
+short gl_scrheight;
 
 OBJECT *gl_menu;
 
