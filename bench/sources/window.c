@@ -171,6 +171,8 @@ struct window *create_window(short wi_kind, char *title)
     wi->left = wi->top = 0;		/* start display at top left corner of document */
     wi->doc_width = wi->doc_height = 0;
 
+    for (int i = 0; i < 10; wi->work_in[i++] = 0);
+    wi->work_in[10] = 2;
     v_opnvwk(wi->work_in, &wi->vdi_handle, wi->work_out);
     wind_set_str(wi->handle, WF_NAME, title);
     wind_set_str(wi->handle, WF_INFO, "");
