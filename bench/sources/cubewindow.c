@@ -222,6 +222,8 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
         v_pline(vh, 2, pxy);
     }
 
+    vsl_width(vh, 1);
+
     for (i = 0; i < NUM_NODES; i++)
     {
         struct world_point *node = &cube[i];
