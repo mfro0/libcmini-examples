@@ -12,11 +12,16 @@
 
 #include <gemx.h>
 
-// #define DEBUG
+//#define DEBUG
 #ifdef DEBUG
+#ifdef __mcoldfire__
+#define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { fprintf(format, ##arg); } while (0)
+#else
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
 #define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
+#endif /* __mcoldfire__ */
 #else
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
@@ -27,7 +32,6 @@
 static void draw_fontwindow(struct window *wi, short wx, short wy, short wh, short ww);
 static void delete_fontwindow(struct window *wi);
 static void open_fontwindow(struct window *wi, short x, short y, short w, short h);
-static void delete_fontwindow(struct window *wi);
 static void size_fontwindow(struct window *wi, short x, short y, short w, short h);
 static void full_fontwindow(struct window *wi);
 static void scroll_fontwindow(struct window *wi);
@@ -38,6 +42,7 @@ void init_fontwindow(struct window *wi)
 {
     struct fontwindow *fi = wi->priv;
 
+    dbg("");
     if (! fi->gdos_initialised)
     {
         int i;
@@ -61,7 +66,7 @@ void init_fontwindow(struct window *wi)
 
         if (fi->font_info == NULL)
         {
-            /* TODO: add error message */
+            form_alert(2, "[1][could not get font info][OK]");
             exit(1);
         }
 
@@ -70,7 +75,7 @@ void init_fontwindow(struct window *wi)
             fi->font_info[i].font_id = vqt_name(wi->vdi_handle, i, fi->font_info[i].font_name);
             fi->font_info[i].font_name[32] = '\0';
 
-            dbg("font %d (index %d)=\"%s\"\n", i, fi->font_info[i].font_index, fi->font_info[i].font_name);
+            dbg("font %d (index %d)=\"%s\"\n", i, fi->font_info[i].font_id, fi->font_info[i].font_name);
         }
     }
 }
@@ -83,7 +88,7 @@ struct window *create_fontwindow(short wi_kind, char *title)
     struct window *wi;
     struct fontwindow *fw;
 
-    /* call base 'class' constructor */
+    /* call base 'class' method */
     wi = create_window(wi_kind, title);
 
     if (wi)
@@ -140,8 +145,6 @@ static void delete_fontwindow(struct window *wi)
 static void open_fontwindow(struct window *wi, short x, short y, short w, short h)
 {
     open_window(wi, x, y, w, h);    /* call "base class method" */
-
-    // vro_cpyfm(vh, S_ONLY, pxy, &mfdb_src, &mfdb_dst);
 }
 
 /*
@@ -156,13 +159,27 @@ static void scroll_fontwindow(struct window *wi)
     short ret;
     short value;
 
+    dbg("wi->doc_width=%ld\n", wi->doc_width);
+
+    /* call "superclass" scroll function */
     scroll_window(wi);
 
-    sl_hsz = 1000L * wi->work.g_w / wi->doc_width;
-    sl_hsz = sl_hsz > 1000 ? 1000 : sl_hsz;
+    if (wi->doc_width > 0)
+    {
+        sl_hsz = 1000L * wi->work.g_w / wi->doc_width;
+        sl_hsz = sl_hsz > 1000 ? 1000 : sl_hsz;
+    }
+    else
+        sl_hsz = 1000;
 
-    sl_vsz = 1000L * wi->work.g_h / wi->doc_height;
-    sl_vsz = sl_vsz > 1000 ? 1000 : sl_vsz;
+    if (wi->doc_height > 0)
+    {
+        sl_vsz = 1000L * wi->work.g_h / wi->doc_height;
+        sl_vsz = sl_vsz > 1000 ? 1000 : sl_vsz;
+    }
+    else
+        sl_vsz = 1000;
+
 
     dbg("sl_hsz = %d, sl_vsz = %d\r\n", sl_hsz, sl_vsz);
 
@@ -209,7 +226,7 @@ static void size_fontwindow(struct window *wi, short x, short y, short w, short 
     size_window(wi, x, y, w, h);
 }
 
-void full_fontwindow(struct window *wi)
+static void full_fontwindow(struct window *wi)
 {
     full_window(wi);
 
@@ -227,6 +244,8 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
 
     short wx = wi->work.g_x;
     short wy = wi->work.g_y;
+
+    dbg("");
 
     /*
      * determine scroll offsets
@@ -248,7 +267,9 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     {
         short ch_w, ch_h, ce_w, ce_h;
         short hor, vert;
-        short fnt_extend[8];
+        short fnt_extent[8];
+        short max_str_width = 0;
+        short str_height = 0;
         char fntstr[128];
 
         vst_alignment(vh, TA_LEFT, TA_TOP, &hor, &vert);
@@ -257,12 +278,20 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
                 "vert (should be %d) = %d\n", TA_LEFT, hor, TA_TOP, vert);
         vst_font(vh, fw->font_info[i].font_id);
         vst_height(vh, 16, &ch_w, &ch_h, &ce_w, &ce_h);
-        vqt_extent(vh, fw->font_info[i].font_name, fnt_extend);
+        vqt_extent(vh, fw->font_info[i].font_name, fnt_extent);
 
         /* save new doc width if larger than set value */
-        wi->doc_width = fnt_extend[2] - fnt_extend[0] > wi->doc_width ? fnt_extend[2] - fnt_extend[0] : wi->doc_width;
+        max_str_width = fnt_extent[2] - fnt_extent[0];
+        wi->doc_width = max_str_width > wi->doc_width ? max_str_width : wi->doc_width;
 
-        if (wy - yoffs + (fnt_extend[5] - fnt_extend[1]) >= wi->work.g_y && wy - yoffs <= wi->work.g_y + wi->work.g_h - 1)
+        str_height = fnt_extent[5] - fnt_extent[1];
+
+        /*
+         * small performance improvement:
+         * only append and display text if inside window work area, otherwise just add up text height to
+         * calculate the correct dimensions of the canvas in order to set scrollbars right
+         */
+        if (wy - yoffs + str_height >= wi->work.g_y && wy - yoffs <= wi->work.g_y + wi->work.g_h - 1)
         {
             strcpy(fntstr, fw->font_info[i].font_name);
             strcat(fntstr, " (font id=");
@@ -270,7 +299,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
             strcat(fntstr, ")");
             v_ftext(vh, wx - xoffs, wy - yoffs, fntstr);
         }
-        wy += fnt_extend[5] - fnt_extend[1];
+        wy += str_height;
     }
     wi->doc_height = wy - wi->work.g_y;
     wi->scroll(wi);
