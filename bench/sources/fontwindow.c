@@ -256,7 +256,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
             dbg("did not get alignment we were asking for: hor (should be %d) = %d\n,"
                 "vert (should be %d) = %d\n", TA_LEFT, hor, TA_TOP, vert);
         vst_font(vh, fw->font_info[i].font_id);
-        vst_height(vh, 12, &ch_w, &ch_h, &ce_w, &ce_h);
+        vst_height(vh, 16, &ch_w, &ch_h, &ce_w, &ce_h);
         vqt_extent(vh, fw->font_info[i].font_name, fnt_extend);
 
         /* save new doc width if larger than set value */
