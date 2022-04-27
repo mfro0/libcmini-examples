@@ -252,35 +252,48 @@ void open_window(struct window *wi, short x, short y, short w, short h)
  */
 void scroll_window(struct window *wi)
 {
-    short xpos;
-    short ypos;
-    short sl_horiz;
-    short sl_vert;
-    short ret;
-    short value;
+    short sl_vpos;
+    short sl_hpos;
+    short sl_hsz;
+    short sl_vsz;
+    long dw, dh;
 
-    sl_horiz = (int)((float) wi->work.g_w / wi->x_fac / wi->doc_width * 1000);
-    sl_vert = (int)((float) wi->work.g_h / wi->y_fac / wi->doc_height * 1000);
+    /*
+     * set sliders according to document area
+     * If document size is smaller than window area, use the latter
+     */
+    dw = (wi->doc_width > 0 ? wi->doc_width : wi->rect.g_w);
+    dh = (wi->doc_height > 0 ? wi->doc_height : wi->rect.g_h);
 
-    xpos = (int)((float) wi->left / (wi->doc_width - wi->work.g_w / wi->x_fac) * 1000);
-    ypos = (int)((float) wi->top / (wi->doc_height - wi->work.g_h / wi->y_fac) * 1000);
+    dbg("wi->doc_width=%ld\n", wi->doc_width);
 
-    /* wind_set is a costly operation. Set values only if we need to */
-    wind_get(wi->handle, WF_HSLIDE, &value, &ret, &ret, &ret);
-    if (value != xpos)
-        wind_set(wi->handle, WF_HSLIDE, xpos, 0, 0, 0);
+    sl_hsz = dw == 0 ? 1000 : 1000L * wi->work.g_w / dw;
+    sl_hsz = sl_hsz > 1000 ? 1000 : sl_hsz;
+    sl_vsz = dh == 0 ? 1000 : 1000L * wi->work.g_h / dh;
+    sl_vsz = sl_vsz > 1000 ? 1000 : sl_vsz;
 
-    wind_get(wi->handle, WF_VSLIDE, &value, &ret, &ret, &ret);
-    if (value != ypos)
-        wind_set(wi->handle, WF_VSLIDE, ypos, 0, 0, 0);
+    dbg("sl_hsz = %d, sl_vsz = %d\r\n", sl_hsz, sl_vsz);
 
-    wind_get(wi->handle, WF_HSLSIZE, &value, &ret, &ret, &ret);
-    if (value != sl_horiz)
-        wind_set(wi->handle, WF_HSLSIZE, sl_horiz, 0, 0, 0);
 
-    wind_get(wi->handle, WF_VSLSIZE, &value, &ret, &ret, &ret);
-    if (value != sl_vert)
-        wind_set(wi->handle, WF_VSLSIZE, sl_vert, 0, 0, 0);
+    if (dw - wi->work.g_w == 0)
+        sl_vpos = 0;
+    else
+        sl_vpos = 1000L * wi->left / (dw - wi->work.g_w);
+    sl_vpos = sl_vpos > 1000 ? 1000 : sl_vpos;
+    sl_vpos = sl_vpos < 0 ? 0 : sl_vpos;
+
+    if (dh - wi->work.g_h == 0)
+        sl_hpos = 0;
+    else
+        sl_hpos = 1000L * wi->top / (dh - wi->work.g_h);
+    sl_hpos = sl_hpos > 1000 ? 1000 : sl_hpos;
+    sl_hpos = sl_hpos < 0 ? 0 : sl_hpos;
+    dbg("sl_vpos=%d, sl_hpos=%d\r\n", sl_vpos, sl_hpos);
+
+    wind_set(wi->handle, WF_HSLIDE, sl_vpos, 0, 0, 0);
+    wind_set(wi->handle, WF_VSLIDE, sl_hpos, 0, 0, 0);
+    wind_set(wi->handle, WF_HSLSIZE, sl_hsz, 0, 0, 0);
+    wind_set(wi->handle, WF_VSLSIZE, sl_vsz, 0, 0, 0);
 }
 
 void full_window(struct window *wi)
