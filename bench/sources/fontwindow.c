@@ -138,7 +138,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     struct fontwindow *fw = wi->priv;
     short i;
     short d;
-    short hslpos, vslpos, hslsiz, vslsiz;
+    short hslpos, vslpos;
     short xoffs, yoffs;
 
     short wx = wi->work.g_x;
@@ -149,10 +149,8 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     /*
      * determine scroll offsets
      */
-    wind_get(wi->handle, WF_HSLIDE, &hslpos, &d, &d, &d);
-    wind_get(wi->handle, WF_VSLIDE, &vslpos, &d, &d, &d);
-    wind_get(wi->handle, WF_HSLSIZE, &hslsiz, &d, &d, &d);
-    wind_get(wi->handle, WF_VSLSIZE, &vslsiz, &d, &d, &d);
+    wind_get_int(wi->handle, WF_HSLIDE, &hslpos);
+    wind_get_int(wi->handle, WF_VSLIDE, &vslpos);
 
     xoffs = (long) (wi->doc_width - wi->work.g_w) * hslpos / 1000;
 
