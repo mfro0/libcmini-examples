@@ -259,12 +259,15 @@ struct window *create_terrainwindow(short wi_kind, char *title)
 
         wi->top = 0;
         wi->left = 0;
-        wi->doc_width = 0;
-        wi->doc_height = 0;
+        wi->doc_width = vw->colormap.fd_w;
+        wi->doc_height = vw->colormap.fd_h;
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
     dbg("finished\r\n");
+
+    /* set sliders */
+    if (wi->scroll) wi->scroll(wi);
 
     return wi;
 }
@@ -292,6 +295,13 @@ static void delete_terrainwindow(struct window *wi)
 static void draw_terrainwindow(struct window *wi, short x, short y, short w, short h)
 {
     short vh = wi->vdi_handle;
+    short hslpos, vslpos, d;
+
+    wind_get(wi->handle, WF_HSLIDE, &hslpos, &d, &d, &d);
+    wind_get(wi->handle, WF_VSLIDE, &vslpos, &d, &d, &d);
+
+    short xoffs = (long) (wi->doc_width - wi->work.g_w) * hslpos / 1000;
+    short yoffs = (long) (wi->doc_height - wi->work.g_h) * vslpos / 1000;
 
     struct terrainwindow *vw = (struct terrainwindow *) wi->priv;
 
@@ -299,10 +309,10 @@ static void draw_terrainwindow(struct window *wi, short x, short y, short w, sho
 
     short pxy[8] =
     {
-        0,
-        0,
-        wi->work.g_w - 1,
-        wi->work.g_h - 1,
+        xoffs,
+        yoffs,
+        xoffs + wi->work.g_w - 1,
+        yoffs + wi->work.g_h - 1,
         wi->work.g_x,
         wi->work.g_y,
         wi->work.g_x + wi->work.g_y - 1,
@@ -311,10 +321,6 @@ static void draw_terrainwindow(struct window *wi, short x, short y, short w, sho
 
     screen.fd_addr = 0;
 
-#ifndef __mcoldfire__
     vro_cpyfm(vh, S_ONLY, pxy, &vw->colormap, &screen);
-#else /* experimental "DMA blit" */
-    cf_dma_blit(&screen, &vw->colormap, pxy);
-#endif
 }
 
