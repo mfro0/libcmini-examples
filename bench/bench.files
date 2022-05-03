@@ -22,6 +22,7 @@ sources/clockwindow.c
 sources/clockwindow.c
 sources/complexwindow.c
 sources/dialog.c
+sources/fb_blitter.c
 sources/fontwindow.c
 sources/global.c
 sources/grafwindow.c
