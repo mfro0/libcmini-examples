@@ -295,13 +295,6 @@ static void delete_terrainwindow(struct window *wi)
 static void draw_terrainwindow(struct window *wi, short x, short y, short w, short h)
 {
     short vh = wi->vdi_handle;
-    short hslpos, vslpos, d;
-
-    wind_get(wi->handle, WF_HSLIDE, &hslpos, &d, &d, &d);
-    wind_get(wi->handle, WF_VSLIDE, &vslpos, &d, &d, &d);
-
-    short xoffs = (long) (wi->doc_width - wi->work.g_w) * hslpos / 1000;
-    short yoffs = (long) (wi->doc_height - wi->work.g_h) * vslpos / 1000;
 
     struct terrainwindow *vw = (struct terrainwindow *) wi->priv;
 
@@ -309,10 +302,10 @@ static void draw_terrainwindow(struct window *wi, short x, short y, short w, sho
 
     short pxy[8] =
     {
-        xoffs,
-        yoffs,
-        xoffs + wi->work.g_w - 1,
-        yoffs + wi->work.g_h - 1,
+        wi->left,
+        wi->top,
+        wi->left + wi->work.g_w - 1,
+        wi->top + wi->work.g_h - 1,
         wi->work.g_x,
         wi->work.g_y,
         wi->work.g_x + wi->work.g_y - 1,

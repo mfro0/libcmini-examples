@@ -303,12 +303,12 @@ static void multi(void)
                             break;
 
                         case WA_LFPAGE:
-                            wi->left -= (wi->doc_width - wi->work.g_w);
+                            wi->left -= wi->work.g_w;
                             dbg("WA_LEFT\r\n");
                             break;
 
                         case WA_RTPAGE:
-                            wi->left += (wi->doc_width - wi->work.g_w);
+                            wi->left += wi->work.g_w;
                             dbg("WI_RTPAGE\r\n");
                             break;
 
@@ -322,23 +322,29 @@ static void multi(void)
                             dbg("WA_RTLINE\r\n");
                             break;
                     } /* switch */
-                    if (wi->top > wi->doc_height - wi->work.g_h / wi->y_fac)
+                    if (wi->top > wi->doc_height - wi->work.g_h)
                     {
-                        wi->top = wi->doc_height - wi->work.g_h / wi->y_fac;
+                        wi->top = wi->doc_height - wi->work.g_h;
                     }
                     if (wi->top < 0) wi->top = 0;
-                    if (wi->left > wi->doc_width - wi->work.g_w / wi->x_fac)
+
+                    if (wi->left > wi->doc_width - wi->work.g_w)
                     {
-                        wi->left = wi->doc_width - wi->work.g_w / wi->x_fac;
+                        wi->left = wi->doc_width - wi->work.g_w;
                     }
 
                     if (wi->left < 0) wi->left = 0;
+
                     if (wi->scroll) wi->scroll(wi);
+
                     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
                     break;
 
                 case WM_HSLID:
-                    wi->left = (int)((float) msgbuff[4] / 1000.0 * wi->doc_width);
+                    wi->left = msgbuff[4] * wi->doc_width / 1000;
+
+                    if (wi->left > wi->doc_width - wi->work.g_w)
+                        wi->left = wi->doc_width - wi->work.g_w;
 
                     if (wi->scroll)
                     {
@@ -349,11 +355,16 @@ static void multi(void)
                     break;
 
                 case WM_VSLID:
-                    wi->top = (int)((float) msgbuff[4] / 1000.0 * wi->doc_height);
+                    wi->top = msgbuff[4] * wi->doc_height / 1000;
+
+                    if (wi->top > wi->doc_height - wi->work.g_h)
+                        wi->top = wi->doc_height - wi->work.g_h;
+
                     if (wi->scroll)
                     {
                         wi->scroll(wi);
                     }
+
                     dbg("WM_VSLID\r\n");
                     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
                     break;

@@ -12,7 +12,7 @@
 
 #include <gemx.h>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #ifdef __mcoldfire__
 #define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -38,7 +38,7 @@ void init_fontwindow(struct window *wi)
 {
     struct fontwindow *fi = wi->priv;
 
-    dbg("");
+    dbg("\n");
     if (! fi->gdos_initialised)
     {
         int i;
@@ -144,7 +144,7 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     short wx = wi->work.g_x;
     short wy = wi->work.g_y;
 
-    dbg("");
+    dbg("\n");
 
     /*
      * determine scroll offsets
