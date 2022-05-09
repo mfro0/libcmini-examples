@@ -10,11 +10,16 @@
 #include "rcircles_vdi_window.h"
 #include "util.h"
 
-//#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
+#ifdef __mcoldfire__
+#define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { fprintf(format, ##arg); } while (0)
+#else
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
 #define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
+#endif /* __mcoldfire__ */
 #else
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
