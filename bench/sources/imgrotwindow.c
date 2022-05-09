@@ -83,7 +83,8 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         if (!rsrc_gaddr(R_TREE, ICNS, &dlg))
         {
             form_alert(1, "[2][Could not get RASTER resource][CANCEL]");
-            exit(1);
+            wi->del(wi);
+            return NULL;
         }
 
         CICONBLK *iconblk = dlg[COLICON].ob_spec.ciconblk;
@@ -117,7 +118,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             icon = icon->next_res;
         } while (icon != NULL);
 
-        dbg("selected icon of depth %d\r\n", src_mfdb.fd_nplanes);
+        dbg("selected icon of depth %d\r\n", icon->num_planes);
 
         if (iw->iconblk == NULL)
         {
