@@ -12,7 +12,7 @@
 
 #include <gemx.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #ifdef __mcoldfire__
 #define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -41,7 +41,7 @@ void init_fontwindow(struct window *wi)
     dbg("\n");
     if (! fi->gdos_initialised)
     {
-        int i;
+        short i;
 
         fi->gdos_initialised = true;
         if (!vq_gdos())
@@ -58,7 +58,7 @@ void init_fontwindow(struct window *wi)
 
         if (fi->font_info != NULL)
             free(fi->font_info);
-        fi->font_info = malloc(sizeof(struct finfo) * (fi->add_fonts + gl_nsysfonts));
+        fi->font_info = malloc(sizeof(struct finfo) * (unsigned long) (fi->add_fonts + gl_nsysfonts));
 
         if (fi->font_info == NULL)
         {
@@ -137,7 +137,6 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     short vh = wi->vdi_handle;
     struct fontwindow *fw = wi->priv;
     short i;
-    short d;
     short hslpos, vslpos;
     short xoffs, yoffs;
 
@@ -152,9 +151,9 @@ static void draw_fontwindow(struct window *wi, short x, short y, short w, short 
     wind_get_int(wi->handle, WF_HSLIDE, &hslpos);
     wind_get_int(wi->handle, WF_VSLIDE, &vslpos);
 
-    xoffs = (long) (wi->doc_width - wi->work.g_w) * hslpos / 1000;
+    xoffs = (short)((long) (wi->doc_width - wi->work.g_w) * hslpos / 1000L);
 
-    yoffs = (long) (wi->doc_height - wi->work.g_h) * vslpos / 1000;
+    yoffs = (short)((long) (wi->doc_height - wi->work.g_h) * vslpos / 1000L);
 
     init_fontwindow(wi);
     wi->clear(wi, x, y, w, h);
