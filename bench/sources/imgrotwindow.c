@@ -12,11 +12,16 @@
 #include "bench.h"
 #include <math.h>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
+#ifdef __mcoldfire__
+#define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { fprintf(format, ##arg); } while (0)
+#else
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
 #define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
+#endif /* __mcoldfire__ */
 #else
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
@@ -25,10 +30,9 @@
 struct imgrotwindow
 {
     CICONBLK *iconblk;
-    CICON *icon;
     short angle;
     short *bitmap;
-    MFDB icon_mfdb;
+    MFDB image_mfdb;
 };
 
 static void timer_imgrotwindow(struct window *wi);
@@ -69,7 +73,9 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         }
         else
         {
-            fprintf(stderr, "%s: could not allocate vdiwindow private data\r\n", __FUNCTION__);
+            form_alert(1, "[1][could not allocate vdiwindow private data][CANCEL]");
+            wi->del(wi);
+
             return NULL;
         }
 
@@ -88,59 +94,79 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         }
 
         CICONBLK *iconblk = dlg[COLICON].ob_spec.ciconblk;
-        CICON *icon = iconblk->mainlist;
+        CICON *icon;
+
+        if ((iw->iconblk = iconblk) == NULL || (iconblk->mainlist) == NULL)
+        {
+            form_alert(1, "[2][Could not get color icon][CANCEL]");
+            wi->del(wi);
+
+            return NULL;
+        }
+        icon = iconblk->mainlist;
 
         MFDB src_mfdb =
         {
-            .fd_w = iconblk->monoblk.ib_wicon,
-            .fd_h = iconblk->monoblk.ib_hicon,
-            .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
-            .fd_stand = 1,
-            .fd_r1 = 0,
-            .fd_r2 = 0,
-            .fd_r3 = 0
-        };
-
-        /*
-         * find the icon data from the available color depths in the CICONBLK that fits best
-         */
-        iw->icon = NULL;
-        do {
-            dbg("found depth %d\r\n", icon->num_planes);
-            if (icon->num_planes <= gl_nplanes
-                    && icon->num_planes > src_mfdb.fd_nplanes)
-            {
-                src_mfdb.fd_addr = icon->col_data;
-                src_mfdb.fd_nplanes = icon->num_planes;
-                iw->iconblk = iconblk;
-                iw->icon = icon;
-            }
-            icon = icon->next_res;
-        } while (icon != NULL);
-
-        dbg("selected icon of depth %d\r\n", icon->num_planes);
-
-        if (iw->iconblk == NULL)
-        {
-            form_alert(1, "[1][No suitable color icon found][CANCEL]");
-            exit(1);
-        }
-
-
-        MFDB dst =
-        {
-            .fd_addr = iw->icon->col_data,
+            .fd_nplanes = icon->num_planes,
+            .fd_addr = icon->col_data,
             .fd_w = iconblk->monoblk.ib_wicon,
             .fd_h = iconblk->monoblk.ib_hicon,
             .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
             .fd_stand = 0,
-            .fd_nplanes = gl_nplanes,
             .fd_r1 = 0,
             .fd_r2 = 0,
             .fd_r3 = 0
         };
-        iw->icon_mfdb = dst;
 
+        dbg("src_mfdb.fd_nplanes = %d\n", src_mfdb.fd_nplanes);
+        dbg("src_mfdb.fd_addr = %p\n", src_mfdb.fd_addr);
+
+        MFDB dst_mfdb = src_mfdb;
+
+        short new_width = (short) ((long) src_mfdb.fd_w * 2000L / 1000L);
+        short new_height = (short) ((long) src_mfdb.fd_h * 2000L / 1000L);
+
+        dst_mfdb.fd_w = new_width;
+        dst_mfdb.fd_h = new_height;
+        dst_mfdb.fd_wdwidth = (new_width + 15) / sizeof(short) / 8;
+
+        if ((dst_mfdb.fd_addr = calloc(1, dst_mfdb.fd_wdwidth *sizeof(short) * dst_mfdb.fd_nplanes
+                                       * dst_mfdb.fd_h)) == NULL)
+        {
+            form_alert(1, "[1][Could not allocate memory for new icon][CANCEL]");
+            wi->del(wi);
+            return NULL;
+        }
+        dbg("allocated new address at %p, new dimension=%d,%d\n", dst_mfdb.fd_addr, dst_mfdb.fd_w, dst_mfdb.fd_h);
+
+        short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
+
+        dbg("2\n");
+        vro_cpyfm(vh, ALL_WHITE, pxy, NULL, &dst_mfdb);
+        dbg("3\n");
+
+        pxy[2] = src_mfdb.fd_w - 1;
+        pxy[3] = src_mfdb.fd_h - 1;
+        pxy[4] = (new_width - src_mfdb.fd_w) / 2;
+        pxy[5] = (new_height - src_mfdb.fd_h) / 2;
+        pxy[6] = dst_mfdb.fd_w - pxy[4] - 1;
+        pxy[7] = dst_mfdb.fd_h - pxy[5] - 1;
+
+        dbg("copy from (%d,%d)(%d,%d) to (%d,%d)(%d,%d)\n", pxy[0], pxy[1], pxy[2], pxy[3],
+                                                            pxy[4], pxy[5], pxy[6], pxy[7]);
+
+        vro_cpyfm(vh, S_ONLY, pxy, &src_mfdb, &dst_mfdb);
+        if (iw->iconblk == NULL)
+        {
+            form_alert(1, "[1][No suitable color icon found][CANCEL]");
+            wi->del(wi);
+
+            return NULL;
+        }
+
+        iw->image_mfdb = dst_mfdb;
+
+        dbg("finished");
 
     }
 
@@ -149,6 +175,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
 static void delete_imgrotwindow(struct window *wi)
 {
+    dbg("\n");
     /* free window-private memory */
     if (wi && wi->priv)
     {
@@ -178,6 +205,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     (void) wx; (void) wy; (void) ww; (void) wh;
 
+    dbg("\n");
+
     /* get size of window's work area */
     wind_get(wi->handle, WF_WORKXYWH, &x, &y, &w, &h);
 
@@ -187,8 +216,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     /* draw our (possibly rotated) icon */
     MFDB dst = { 0 };
 
-    short wicon = iw->iconblk->monoblk.ib_wicon;
-    short hicon = iw->iconblk->monoblk.ib_hicon;
+    short wicon = iw->image_mfdb.fd_w;
+    short hicon = iw->image_mfdb.fd_h;
 
     /*
      * center icon into window's work area
@@ -204,9 +233,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     vro_cpyfm(vh, S_ONLY,
               pxy,
-              &iw->icon_mfdb, &dst);
-
-    yshear(wi, &iw->icon_mfdb, &dst, iw->icon_mfdb.fd_w / 2, iw->icon_mfdb.fd_h / 2, 150);
+              &iw->image_mfdb, &dst);
+    yshear(wi, &iw->image_mfdb, &dst, iw->image_mfdb.fd_w / 2, iw->image_mfdb.fd_h / 2, iw->angle);
 }
 
 
@@ -220,7 +248,7 @@ static void timer_imgrotwindow(struct window *wi)
     if (iw != NULL)
     {
         do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-        iw->angle += 1;
+        iw->angle += 10;
     }
 }
 
@@ -275,11 +303,11 @@ static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, sh
 {
     short pxy[4];       /* end coordinates of the imaginary line */
 
-    pxy[0] = (src->fd_w - x) * icos(angle) / SHRT_MAX;
-    pxy[1] = (src->fd_h - y) * isin(angle) / SHRT_MAX;
+    pxy[0] = -x * icos(angle) / SHRT_MAX;
+    pxy[1] = -y * isin(angle) / SHRT_MAX;
 
-    pxy[2] = -x * icos(angle) / SHRT_MAX;
-    pxy[3] = -y * isin(angle) / SHRT_MAX;
+    pxy[2] = (src->fd_w - x) * icos(angle) / SHRT_MAX;
+    pxy[3] = (src->fd_h - y) * isin(angle) / SHRT_MAX;
 
     dbg("x=%d, y=%d, pxy = (%d, %d)(%d, %d)\r\n", x, y, pxy[0], pxy[1], pxy[2], pxy[3]);
     pxy[0] += wi->work.g_x + wi->work.g_w / 2;
