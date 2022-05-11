@@ -2,15 +2,21 @@
 #include "global.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "offscreen.h"
 #include <gemx.h>
 
 #define DEBUG
 #ifdef DEBUG
+#ifdef __mcoldfire__
+#define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { fprintf(format, ##arg); } while (0)
+#else
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
 #define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
+#endif /* __mcoldfire__ */
 #else
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
@@ -45,7 +51,7 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
         wi->draw = draw_sample;
         wi->del = delete_offscreenwindow;
         wi->timer = timer_offscreenwindow;
-        // wi->size = size_offscreenwindow;
+        wi->size = size_offscreenwindow;
 
         ow = malloc(sizeof(struct offscreenwindow));
         if (ow != NULL)
@@ -113,13 +119,12 @@ static void delete_offscreenwindow(struct window *wi)
 static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h)
 {
     struct offscreenwindow *ow = wi->priv;
-    short pxy[] = { 0, 0, 0, 0, 0, 0, w, h };
 
     wi->top = 0;
     wi->left = 0;
 
-    if (wi->size) wi->size(wi, x, y, w, h);        /* call super "class" */
-    // vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, NULL, &ow->bm);
+    size_window(wi, x, y, w, h);        /* call super "class"' size method */
+
 }
 /*
  * Draw Filled Ellipse
@@ -131,9 +136,8 @@ static void draw_sample(struct window *wi, short wx, short wy, short ww, short w
 
     MFDB screen = { 0 };
     short pxy[8] = { wi->left, wi->top, wi->left + ww - 1, wi->top + wh - 1,
-                     wx, wy, ww, wh };
+                     wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h };
 
-    wi->clear(wi, wx, wy, wh, ww);
     vro_cpyfm(vh, S_ONLY, pxy, &ow->bm, &screen);
 }
 
@@ -146,13 +150,17 @@ static void timer_offscreenwindow(struct window *wi)
     struct offscreenwindow *ow = (struct offscreenwindow *) wi->priv;
     short bh = ow->bm_handle;
 
+    short pxy[8] = { 0, 0, ow->bm.fd_w - 1, ow->bm.fd_h - 1, 0, 0, ow->bm.fd_w - 1, ow->bm.fd_h - 1 };
+
+    // vr_recfl(ow->bm_handle, pxy);
+    vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, &ow->bm, &ow->bm);
+
     vsf_style(bh, FIS_PATTERN);
     vsf_interior(bh, ow->ellipse_pattern);
     vsf_interior(bh, 1);
     vsf_color(bh, ow->ellipse_color);
-    v_ellipse(bh, wi->work.g_x + wi->work.g_w / 2,
-                      wi->work.g_y + wi->work.g_h / 2,
-                      wi->work.g_w / 2, wi->work.g_h / 2);
+    v_ellipse(bh, wi->work.g_w / 2, wi->work.g_h / 2,
+                  wi->work.g_w / 2, wi->work.g_h / 2);
 
 
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
