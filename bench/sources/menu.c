@@ -8,6 +8,7 @@
 #include "bench.h"
 #include "window.h"
 #include "grafwindow.h"
+#include "offscreen.h"
 #include "testwindow.h"
 #include "complexwindow.h"
 #include "bezierwindow.h"
@@ -406,6 +407,16 @@ short handle_menu(OBJECT *menu, short title, short item)
 
                 case MMENU_MNCOMPLE:
                     wi = create_complexwindow(COMPLEXWINDOW_WINELEMENTS, "Complex Window");
+                    if (wi != NULL)
+                    {
+                        wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);
+                        window_open_pos_x += 20;
+                        window_open_pos_y += 10;
+                    }
+                    break;
+
+                case MN_OFFSCREEN:
+                    wi = create_offscreenwindow(OFFWINDOW_WINELEMENTS, "Offscreen Window");
                     if (wi != NULL)
                     {
                         wi->opn(wi, window_open_pos_x, window_open_pos_y, MIN_WIDTH, MIN_HEIGHT);

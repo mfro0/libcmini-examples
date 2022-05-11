@@ -1,10 +1,12 @@
 #include "window.h"
 #include "global.h"
 #include <stdlib.h>
+#include <string.h>
+
 #include "offscreen.h"
 #include <gemx.h>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #include "natfeats.h"
 #define dbg(format, arg...) do { nf_printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -15,15 +17,16 @@
 
 struct offscreenwindow
 {
-    short oh;           /* offscreen bitmap handle */
-    short *bm;
+    short bm_handle;           /* offscreen bitmap handle */
+    MFDB bm;
     short ellipse_color;
+    short ellipse_pattern;
 };
 
 static void draw_sample(struct window *wi, short wx, short wy, short wh, short ww);
 static void timer_offscreenwindow(struct window *wi);
 static void delete_offscreenwindow(struct window *wi);
-
+static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h);
 /*
  * create a new window and add it to the window list.
  */
@@ -31,6 +34,8 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
 {
     struct window *wi = NULL;
     struct offscreenwindow *ow;
+    short work_in[20] = { 0 };
+    short work_out[57];
 
     wi = create_window(wi_kind, title);
 
@@ -40,23 +45,49 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
         wi->draw = draw_sample;
         wi->del = delete_offscreenwindow;
         wi->timer = timer_offscreenwindow;
+        // wi->size = size_offscreenwindow;
 
         ow = malloc(sizeof(struct offscreenwindow));
         if (ow != NULL)
         {
             wi->priv = ow;
-            ow->oh = v_open_bm(wi->vdi_handle, NULL, 1, 0, 600, 400);
+            ow->ellipse_color = 0;
+            ow->ellipse_pattern = 0;
         }
 
-        if (! ow->oh)
+        ow->bm_handle = wi->vdi_handle;
+        memset(&ow->bm, 0, sizeof(MFDB));
+
+        work_in[10] = 2;
+
+        work_in[11] = 1279;
+        work_in[12] = 959;
+        work_in[13] = 1000;
+        work_in[14] = 1000;
+
+        dbg("VDI handle: %d\n", vdi_handle);
+        v_opnbm(work_in, &ow->bm, &ow->bm_handle, work_out);
+
+        dbg("bitmap handle: %d\n", ow->bm_handle);
+        dbg("MFDB.fd_addr=%p\n", ow->bm.fd_addr);
+        dbg("MFDB.fd_w=%d\n", ow->bm.fd_w);
+        dbg("MFDB.fd_h=%d\n", ow->bm.fd_h);
+        dbg("MFDB.fd_wdwidth=%d\n", ow->bm.fd_wdwidth);
+        dbg("MFDB.fd_stand=%d\n", ow->bm.fd_stand);
+        dbg("MFDB.fd_nplanes=%d\n", ow->bm.fd_nplanes);
+
+        if (! ow->bm_handle)
         {
-            dbg("v_open_bm() failed.\r\n");
+            form_alert(1, "[Could not get offscreen | bitmap handle (v_opnbm)][CANCEL]");
+
+            wi->del(wi);
+            return NULL;
         }
 
         wi->top = 0;
         wi->left = 0;
-        wi->doc_width = 0;
-        wi->doc_height = 0;
+        wi->doc_width = ow->bm.fd_w;
+        wi->doc_height = ow->bm.fd_h;
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
@@ -65,26 +96,45 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
 
 static void delete_offscreenwindow(struct window *wi)
 {
-    if (wi && wi->priv) free(wi->priv);
+    if (wi && wi->priv)
+    {
+        struct offscreenwindow *ow = (struct offscreenwindow *) wi->priv;
+
+        if (ow->bm_handle)
+        {
+            v_clsbm(ow->bm_handle);
+        }
+        free(wi->priv);
+    }
     /* let the generic window code do the rest */
     delete_window(wi);
 }
 
+static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h)
+{
+    struct offscreenwindow *ow = wi->priv;
+    short pxy[] = { 0, 0, 0, 0, 0, 0, w, h };
+
+    wi->top = 0;
+    wi->left = 0;
+
+    if (wi->size) wi->size(wi, x, y, w, h);        /* call super "class" */
+    // vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, NULL, &ow->bm);
+}
 /*
  * Draw Filled Ellipse
  */
-static void draw_sample(struct window *wi, short wx, short wy, short wh, short ww)
+static void draw_sample(struct window *wi, short wx, short wy, short ww, short wh)
 {
     struct offscreenwindow *ow = wi->priv;
     short vh = wi->vdi_handle;
 
+    MFDB screen = { 0 };
+    short pxy[8] = { wi->left, wi->top, wi->left + ww - 1, wi->top + wh - 1,
+                     wx, wy, ww, wh };
+
     wi->clear(wi, wx, wy, wh, ww);
-    vsf_style(vh, FIS_PATTERN);
-    vsf_interior(vh, 1);
-    vsf_color(vh, ow->ellipse_color);
-    v_ellipse(vh, wi->work.g_x + wi->work.g_w / 2,
-                      wi->work.g_y + wi->work.g_h / 2,
-                      wi->work.g_w / 2, wi->work.g_h / 2);
+    vro_cpyfm(vh, S_ONLY, pxy, &ow->bm, &screen);
 }
 
 
@@ -93,10 +143,28 @@ static void draw_sample(struct window *wi, short wx, short wy, short wh, short w
  */
 static void timer_offscreenwindow(struct window *wi)
 {
-    struct offscreenwindow *gw = (struct offscreenwindow *) wi->priv;
+    struct offscreenwindow *ow = (struct offscreenwindow *) wi->priv;
+    short bh = ow->bm_handle;
+
+    vsf_style(bh, FIS_PATTERN);
+    vsf_interior(bh, ow->ellipse_pattern);
+    vsf_interior(bh, 1);
+    vsf_color(bh, ow->ellipse_color);
+    v_ellipse(bh, wi->work.g_x + wi->work.g_w / 2,
+                      wi->work.g_y + wi->work.g_h / 2,
+                      wi->work.g_w / 2, wi->work.g_h / 2);
+
 
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-    gw->ellipse_color++;
-    gw->ellipse_color &= (1 << gl_nplanes) - 1;
+
+    ow->ellipse_color++;
+    ow->ellipse_color &= 15;
+
+    if (ow->ellipse_color == 15)
+    {
+        ow->ellipse_pattern++;
+        ow->ellipse_pattern &= 15;
+    }
+
 }
 
