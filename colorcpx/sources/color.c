@@ -130,7 +130,7 @@ void draw_boxes(void);
 void outline(OBJECT *tree, short obj, short flag);
 void update_slid(OBJECT *tree, short base, short slider, short value,
                  short min, short max, short draw);
-void slidtext(void);
+short slidtext(void);
 void myitoa(unsigned short inword, char *numbuf);
 void update_rgb(short draw);
 
@@ -138,7 +138,7 @@ void do_redraw(GRECT *dirty_rect, short *oldclip);
 
 void nxtrow(void);
 void nxtpage(void);
-void nxtgrp(void);
+short nxtgrp(void);
 void nxt_to_show(short toscroll);
 void adjcol(void);
 
@@ -225,13 +225,21 @@ short hcnt=0;			/* handle count */
 short gl_hchar, gl_wchar, gl_hbox, gl_wbox;
 GRECT desk;
 MFORM orig_mf;		/* original mouse form */
-short AES_Version;
-
 
 
 /* FUNCTIONS
  * ======================================================================
  */
+
+static short min(short a, short b)
+{
+    return (a < b ? a : b);
+}
+
+static short max(short a, short b)
+{
+    return (a > b ? a : b);
+}
 
 static void rc_2xy(GRECT *rect, short *xy)
 {
@@ -293,9 +301,8 @@ CPXINFO *cpx_init(XCPB *Xcpb)
     else
     {
         appl_init();
-        AES_Version = aes_global[0];
 
-        dbg("AES version reported=%d\n", AES_Version);
+        dbg("AES version reported=%d\n", _AESversion);
 
         /*
          * can't use rsh_fix here as INTRFACE (which was used to create the RSC)
@@ -390,7 +397,7 @@ CPXINFO *cpx_init(XCPB *Xcpb)
          */
         if (!xcpb->SkipRshFix)
         {
-            if ((AES_Version >= 0x0330) && (numcol > LWHITE))
+            if ((_AESversion >= 0x0330) && (numcol > LWHITE))
             {
                 Do3D();
             }
@@ -491,7 +498,7 @@ short cpx_call(GRECT *rect)
                 if ((*xcpb->XGen_Alert)(SAVE_DEFAULTS) == true)
                 {
                     (*xcpb->MFsave)(MFSAVE, &orig_mf);
-                    if (AES_Version >= 0x0320)
+                    if (_AESversion >= 0x0320)
                         graf_mouse(BUSYBEE, 0L);
 
                     savergb();              /* save color info */
@@ -570,16 +577,16 @@ short cpx_call(GRECT *rect)
                 else
                 {
                     (*xcpb->MFsave)(MFSAVE, &orig_mf);
-                    if (AES_Version >= 0x0320)
+                    if (_AESversion >= 0x0320)
                         graf_mouse( FLAT_HAND, 0L );
 
-                    if ((AES_Version >= 0x0330) && (numcol > LWHITE))
+                    if ((_AESversion >= 0x0330) && (numcol > LWHITE))
                         XSelect(ad_tree, CSLIDE );
 
                     (*xcpb->Sl_dragy)(ad_tree, CBASE, CSLIDE, col_max,
                                       col_min, &curcol, nxtgrp);
 
-                    if ((AES_Version >= 0x0330 ) && (numcol > LWHITE))
+                    if ((_AESversion >= 0x0330 ) && (numcol > LWHITE))
                         XDeselect(ad_tree, CSLIDE);
                     (*xcpb->MFsave)(MFRESTORE, &orig_mf);
                 }
@@ -885,7 +892,7 @@ void update_slid(OBJECT *tree, short base, short slider, short value,
 /*
  * Update R, G, B, color or bank index on screen.
  */
-void slidtext(void)
+short slidtext(void)
 {
     switch (curslid) {
 
@@ -908,6 +915,7 @@ void slidtext(void)
         default:
             break;
     }
+    return 0;
 }
 
 
@@ -1032,12 +1040,14 @@ void nxtpage(void)
  * Show the next group
  * (when using slider to drag through color map)
  */
-void nxtgrp(void)
+short nxtgrp(void)
 {
     if (curcol < headcol)       /* dragging backwards */
         nxt_to_show(headcol - curcol);
     else                        /* dragging forward */
         nxt_to_show(curcol - headcol - MAX_COL_SHOWN + 1);
+
+    return 0;
 }
 
 
@@ -1101,7 +1111,7 @@ void adjcol(void)
     short clip[4] = { desk.g_x, desk.g_y, desk.g_w - desk.g_x - 1, desk.g_h - desk.g_y - 1 };
     vs_clip(vhandle, 1, clip);
 
-    vs_color(vhandle, curcol, &curnew[curcol]);
+    vs_color(vhandle, curcol, (short *) &curnew[curcol]);
 
     /* cjg - force a redraw fo the curbox */
     vsf_color(vhandle, curcol);     /* fill with color of obj */
@@ -1335,10 +1345,10 @@ void Do_Slider(OBJECT *tree, short base, short slider, short index, bool dclick 
     else
     {
         (*xcpb->MFsave)(MFSAVE, &orig_mf);
-        if (AES_Version >= 0x0320)
+        if (_AESversion >= 0x0320)
             graf_mouse(FLAT_HAND, 0L);
 
-        if ((AES_Version >= 0x0330) && (numcol > LWHITE))
+        if ((_AESversion >= 0x0330) && (numcol > LWHITE))
             XSelect(tree, slider);
 
         curslid = slider;
@@ -1351,9 +1361,10 @@ void Do_Slider(OBJECT *tree, short base, short slider, short index, bool dclick 
 
         if (mk.buttons && (mk.y != oldy))
             (*xcpb->Sl_dragy)(tree, base, slider, 0, 1000,
-                              &curscrn[index], adjcol);
+                              &curscrn[index],
+                              (short (*)()) adjcol);
 
-        if ((AES_Version >= 0x0330) && (numcol > LWHITE))
+        if ((_AESversion >= 0x0330) && (numcol > LWHITE))
             XDeselect(tree, slider );
         (*xcpb->MFsave)(MFRESTORE, &orig_mf);
      }

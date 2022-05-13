@@ -59,4 +59,3 @@
 #define BASE0 2  	/* OBJECT in TREE #0 */
 #define BASE1 49  	/* OBJECT in TREE #0 */
 #define BASER 50  	/* OBJECT in TREE #0 */
-

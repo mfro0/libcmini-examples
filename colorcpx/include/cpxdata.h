@@ -67,27 +67,27 @@ typedef struct
     GRECT *(*GetFirstRect)(GRECT *prect);
     GRECT *(*GetNextRect)(void);
     void (*Set_Evnt_Mask)(short mask, MOBLK *m1, MOBLK *m2, long time );
-    short (*XGen_Alert)(int id);
+    short (*XGen_Alert)(short id);
     short (*CPX_Save)(void *ptr, long num);
     void *  (*Get_Buffer)(void);
     short (*getcookie)(long cookie, long *p_value);
     short Country_Code;
-    short (*MFsave)(int saveit, MFORM *mf);
+    short (*MFsave)(short saveit, MFORM *mf);
 } XCPB;
 
 
 
-#define VERTICAL	0
-#define HORIZONTAL	1
-#define NULLFUNC	( void(*)())0L
+#define VERTICAL        0
+#define HORIZONTAL      1
+#define NULLFUNC        ( void(*)())0L
 
 #define SAVE_DEFAULTS	0
-#define MEM_ERR		1
-#define FILE_ERR	2
-#define FILE_NOT_FOUND	3
+#define MEM_ERR         1
+#define FILE_ERR        2
+#define FILE_NOT_FOUND  3
 
-#define MFSAVE 1
-#define MFRESTORE 0
+#define MFSAVE          1
+#define MFRESTORE       0
 
 #endif /* CPXDATA_H */
 
