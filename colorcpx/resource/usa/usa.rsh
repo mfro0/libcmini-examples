@@ -27,7 +27,7 @@
 #define STATE14 0x4000
 #define STATE15 0x8000
 
-TEDINFO rs_tedinfo[] =
+static TEDINFO rs_tedinfo[] =
 { "Color",
   "\0",
   "\0",
@@ -106,7 +106,7 @@ TEDINFO rs_tedinfo[] =
   IBM  , 0, TE_CNTR , 0x1180, 0, -1, 5, 5
 };
 
-OBJECT rs_object[] =
+static OBJECT rs_object[] =
 { 
   /******** Tree 0 COLOR ****************************************************/
         -1, RGBBOX          , BASE1           , G_BOX             ,   /* Object 0  */
@@ -298,7 +298,7 @@ OBJECT rs_object[] =
   0x0003, 0x0603, 0x0401, 0x0900
 };
 
-OBJECT *rs_trindex[] =
+static OBJECT *rs_trindex[] =
 { &rs_object[0],   /* Tree  0 COLOR            */
   &rs_object[55],   /* Tree  1 SLIDE1           */
   &rs_object[58]    /* Tree  2 SLIDE2           */

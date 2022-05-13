@@ -30,6 +30,11 @@ typedef struct
     void (*cpx_close)( bool flag );
 } CPXINFO;
 
+struct foobar {
+    short dummy;
+    short *image;
+};
+
 typedef struct
 {
     short handle;
@@ -41,7 +46,7 @@ typedef struct
 
     void (*rsh_fix)(short num_objs, short num_frstr, short num_frimg, short num_tree,
                     OBJECT *rs_object, TEDINFO *rs_tedinfo, char **rs_strings, ICONBLK *rs_iconblk,
-                    BITBLK *rs_bitblk, long *rs_frstr, long *rs_frimg, long *rs_trindex, struct foobar *rs_imdope);
+                    BITBLK *rs_bitblk, char **rs_frstr, BITBLK *rs_frimg, OBJECT **rs_trindex, struct foobar *rs_imdope);
     void (*rsh_obfix)(OBJECT *tree, short curobj);
     short (*Popup)(char **items, short num_items, short default_item, short font_size, GRECT *button, GRECT *world);
 

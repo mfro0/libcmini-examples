@@ -46,6 +46,14 @@
 
 #include <gemx.h>
 
+#define DEBUG
+#ifdef DEBUG
+//#include "natfeats.h"
+#define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
+#define out(format, arg...) do { printf("" format, ##arg); } while (0)
+#else
+#define dbg(format, arg...) do { ; } while (0)
+#endif /* DEBUG */
 
 /* DEFINES
  * ======================================================================
@@ -225,6 +233,13 @@ short AES_Version;
  * ======================================================================
  */
 
+static void rc_2xy(GRECT *rect, short *xy)
+{
+    xy[0] = rect->g_x;
+    xy[1] = rect->g_y;
+    xy[2] = rect->g_x + rect->g_w - 1;
+    xy[3] = rect->g_y + rect->g_h - 1;
+}
 
 /* cpx_init()
  * ======================================================================
@@ -243,23 +258,35 @@ short AES_Version;
  * IN:  XCPB	*Xcpb:	Pointer to the XControl Parameter Block
  * OUT: CPXINFO  *ptr:	Pointer to the CP Information Structure
  */
+
+char *rs_strings[] = { 0 };
+ICONBLK rs_iconblk[] = {{ 0 }};
+BITBLK rs_bitblk[] = { { 0 }};
+char *rs_frstr[] =  { 0 };
+struct foobar rs_imdope[] = { { 0 }};
+
 CPXINFO *cpx_init(XCPB *Xcpb)
 {
+    dbg("before appl_init()\n");
+
     appl_init();
 
     xcpb = Xcpb;
 
-    currez = Getrez();				/* find current resolution */
+    currez = Getrez();          /* find current resolution */
     open_vwork();
     close_vwork();
-    numcol = work_out[13];			/* size of CLUT */
+
+    dbg("opened and closed virtual workstation\n");
+
+    numcol = work_out[13];      /* size of CLUT */
 
     if (xcpb->booting)
     {
-        if (saved)		/* if user-preference saved */
-            init(&usr_vals);	/* init to saved user-preference */
+        if (saved)              /* if user-preference saved */
+            init(&usr_vals);    /* init to saved user-preference */
         else
-            init(&def_vals);	/* init to default values */
+            init(&def_vals);    /* init to default values */
 
         return (CPXINFO *) true;
     }
@@ -268,13 +295,25 @@ CPXINFO *cpx_init(XCPB *Xcpb)
         appl_init();
         AES_Version = aes_global[0];
 
-        if( !xcpb->SkipRshFix )
+        dbg("AES version reported=%d\n", AES_Version);
+
+        /*
+         * can't use rsh_fix here as INTRFACE (which was used to create the RSC)
+         * prepares a finished object structure in memory while
+         * rsh_fix() expects a serialized structure
+         */
+
+        xcpb->SkipRshFix = true;
+        if (!xcpb->SkipRshFix)
         {
-            (*xcpb->rsh_fix)( NUM_OBS, NUM_FRSTR, NUM_FRIMG, NUM_TREE,
-                            rs_object, rs_tedinfo, rs_frstr, rs_iconblk,
-                            rs_bitblk, rs_frstr, rs_frimg, rs_trindex,
-                            NULL);
+            (*xcpb->rsh_fix)(NUM_OBS, NUM_FRSTR, NUM_FRIMG, NUM_TREE,
+                            rs_object, rs_tedinfo, rs_strings, rs_iconblk,
+                            rs_bitblk, rs_frstr, rs_bitblk, rs_trindex,
+                            rs_imdope);
         }
+        for (int i = 0; i < NUM_OBS; i++)
+            rsrc_obfix(rs_object, i);
+        dbg("rsh_fix() returned\n");
 
         ad_tree   = (OBJECT *) rs_trindex[COLOR];
         ad_slide1 = (OBJECT *) rs_trindex[SLIDE1];
@@ -512,7 +551,7 @@ short cpx_call(GRECT *rect)
 
                         headcol = ( curcol / COL_PER_BNK )* COL_PER_BNK;
                         open_vwork();
-                        rc_2xy( &desk, clip );
+                        rc_2xy(&desk, clip);
                         vs_clip(vhandle, 1, clip);
                         draw_boxes();
                         close_vwork();
@@ -683,7 +722,7 @@ short cpx_call(GRECT *rect)
 
                                     /* Redraw the boxes deliberately */
                                     open_vwork();
-                                    rc_2xy( &desk, clip );  /*   Desktop space */
+                                    rc_2xy(&desk, clip);  /*   Desktop space */
                                     vs_clip(vhandle, 1, clip);
                                     draw_boxes();           /* draw the color boxes */
                                     close_vwork();
@@ -1086,20 +1125,27 @@ void adjcol(void)
  */
 void init(DEFAULTS *info)
 {
+    dbg("info=%p\n", info);
+
     open_vwork();
 
-    switch( numcol )
+    dbg("number of colors=%d\n", numcol);
+
+    switch (numcol)
     {
        case 1:
        case 2:
        case 4:
-       case 16:     slamcol( info->bank.num16 );
+       case 16:
+            slamcol( info->bank.num16 );
             break;
 
-       case 256:    slamcol( info->bank.num256 );
+       case 256:
+            slamcol( info->bank.num256 );
             break;
 
-       default:     slamcol( info->bank.num16 );
+       default:
+            slamcol( info->bank.num16 );
             break;
     }
     close_vwork();
@@ -1257,7 +1303,7 @@ void do_rgb(short slider, short base, short index)
 
      adjcol();
      update_slid(ad_tree, base, slider, curscrn[index], 0, 1000, 1);
-     EvntButton(1, 1, 0, &mk);
+     evnt_button(1, 1, 0, &mk.x, &mk.y, &mk.buttons, &mk.kstate);
 }
 
 

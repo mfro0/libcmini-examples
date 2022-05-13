@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -36,9 +36,9 @@ typedef struct
     char **rs_strings;
     ICONBLK *rs_iconblk;
     BITBLK *rs_bitblk;
-    long *rs_frstr;
-    long *rs_frimg;
-    long *rs_trindex;
+    char **rs_frstr;
+    BITBLK *rs_frimg;
+    OBJECT *rs_trindex;
     struct foobar *rs_imdope;
 } RSH_FIX_PARAMS;
 
