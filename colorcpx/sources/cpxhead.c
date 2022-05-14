@@ -33,7 +33,7 @@ const CPXHEAD header =
         .bootinit = 1,
         .setonly = 0
     },
-    .cpx_id = 0x436f6c72,
+    .cpx_id = 0x436f6c72,   /* "Colr" */
     .cpx_version = 0x0100,
     .i_text = "Colors",
     .sm_icon = {  0x0000, 0x0000, 0x0078, 0x0000,
