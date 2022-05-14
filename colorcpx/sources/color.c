@@ -546,7 +546,7 @@ short cpx_call(GRECT *rect)
 
                     if (strlen(ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext))
                     {
-                        CurPen = (short) atoi(ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext);
+                        CurPen = atoi(ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext);
                         CurPen = min(CurPen, col_max);
                         CurPen = max(CurPen, col_min);
                         curcol = CurPen;
@@ -795,7 +795,7 @@ void draw_boxes(void)
     short obj, objcol;
     short lastbox;
 
-    wind_update(true);
+    wind_update(BEG_UPDATE);
     graf_mouse(M_OFF, 0L);
 
     if (numcol < MAX_COL_SHOWN)                 /* init last box to be drawn */
@@ -817,7 +817,7 @@ void draw_boxes(void)
         v_bar(vhandle, pxyarray);
     }
     graf_mouse(M_ON, 0L);
-    wind_update(false);
+    wind_update(END_UPDATE);
 }
 
 
@@ -829,13 +829,13 @@ void outline(OBJECT *tree, short obj, short flag)
     short color;
     GRECT obrect;
 
-    if( flag == HILITE )
+    if (flag == HILITE)
         color = 1;              /* highlight box with foreground color */
     else
     {
-       color = WHITE;           /* de-light box with background color */
+        color = WHITE;          /* de-light box with background color */
     }
-    wind_update(true);
+    wind_update(BEG_UPDATE);
     graf_mouse(M_OFF, 0L);
     vsl_color(vhandle, color);
 
@@ -847,13 +847,14 @@ void outline(OBJECT *tree, short obj, short flag)
     pxyarray[3] = pxyarray[5] = obrect.g_y + obrect.g_h + 1;
     pxyarray[4] = pxyarray[6] = obrect.g_x + obrect.g_w + 1;
     v_pline(vhandle, 5, pxyarray);
+
     pxyarray[0] = pxyarray[2] = pxyarray[8] = obrect.g_x - 3;
     pxyarray[1] = pxyarray[7] = pxyarray[9] = obrect.g_y - 3;
     pxyarray[3] = pxyarray[5] = obrect.g_y + obrect.g_h + 2;
     pxyarray[4] = pxyarray[6] = obrect.g_x + obrect.g_w + 2;
     v_pline(vhandle, 5, pxyarray);
     graf_mouse(M_ON, 0L);
-    wind_update(false);
+    wind_update(END_UPDATE);
 }
 
 
@@ -924,10 +925,10 @@ short slidtext(void)
  */
 void myitoa(unsigned short inword, char *numbuf)
 {
-    unsigned int temp1, value;
-    register int i, j;
+    unsigned short temp1, value;
+    int i, j;
     char tmpbuf[10];
-    register char *ascbuf;
+    char *ascbuf;
 
     ascbuf = numbuf;
     i = 0;                      /* if the value is non zero  */
@@ -965,7 +966,7 @@ void update_rgb(short draw)
     /* Inquire the RGB intensities for current pen */
     ptr = curnew + curcol;
     open_vwork();
-    vq_color(vhandle, curcol, 0, (short *) ptr );
+    vq_color(vhandle, curcol, 0, (short *) ptr);
     close_vwork();
 
     /* Update the RGB gun values for current pen */
@@ -1008,7 +1009,7 @@ void do_redraw(GRECT *dirty_rect, short *oldclip)
             rc_2xy(&r2, clip);
             vs_clip(vhandle, 1, clip);
             draw_boxes();
-            outline(ad_tree, curbox, HILITE );
+            outline(ad_tree, curbox, HILITE);
             r1 = (*xcpb->GetNextRect)();
         }
         vs_clip(vhandle, 1, oldclip);	/* restore original clipping */
@@ -1108,15 +1109,16 @@ void adjcol(void)
     slidtext();
     open_vwork();
 
-    short clip[4] = { desk.g_x, desk.g_y, desk.g_w - desk.g_x - 1, desk.g_h - desk.g_y - 1 };
-    vs_clip(vhandle, 1, clip);
-
     vs_color(vhandle, curcol, (short *) &curnew[curcol]);
 
     /* cjg - force a redraw fo the curbox */
     vsf_color(vhandle, curcol);     /* fill with color of obj */
     obrect = * (GRECT *) &ad_tree[curbox].ob_x;
     objc_offset(ad_tree, curbox, &obrect.g_x, &obrect.g_y);
+
+    short clip[4] = { obrect.g_x, obrect.g_y,
+                      obrect.g_w - obrect.g_x - 1, obrect.g_h - obrect.g_y - 1 };
+    vs_clip(vhandle, 1, clip);
 
     pxyarray[0] = obrect.g_x;
     pxyarray[1] = obrect.g_y;
@@ -1294,6 +1296,9 @@ void do_rgb(short slider, short base, short index)
     ad_slide2[CSLIDERS].ob_height = orect.g_h += 4;
 
     myitoa(curscrn[index], &PenNum[0]);
+
+    dbg("curscrn[index]=%d, PenNum=%s\n", curscrn[index], PenNum);
+
     ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext = PenNum;
 
     objc_draw(ad_slide2, CSLIDERS, 0, ad_slide2[CSLIDERS].ob_x, ad_slide2[CSLIDERS].ob_y,
