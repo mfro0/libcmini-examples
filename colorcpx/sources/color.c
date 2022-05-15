@@ -178,45 +178,40 @@ extern DEFAULTS def_vals;   /* system defaults */
 /* GLOBALS
  * ======================================================================
  */
-XCPB *xcpb;             /* XControl Parameter Block   */
-CPXINFO cpxinfo;        /* CPX Information Structure  */
+static XCPB *xcpb;              /* XControl Parameter Block   */
+static CPXINFO cpxinfo;         /* CPX Information Structure  */
 
-OBJECT *ad_tree;        /* Main cpx tree...           */
-OBJECT *ad_slide1;      /* editable text field - pen  */
-OBJECT *ad_slide2;      /* editable text field - rgb  */
+static OBJECT *ad_tree;         /* Main cpx tree...           */
+static OBJECT *pen_edit;        /* editable text field - pen  */
+static OBJECT *rgb_edit;        /* editable text field - rgb  */
 
-RGB	oldrgb[NUMREG],     /* old RGBs for all colors */
-    *curold = NULL,     /* pointer to old RGBs for current bank */
-    newrgb[NUMREG],     /* new RGBs for all colors */
-    *curnew = NULL;     /* pointer to new RGBs for current bank */
+static RGB oldrgb[NUMREG],      /* old RGBs for all colors */
+           *curold = NULL,      /* pointer to old RGBs for current bank */
+           newrgb[NUMREG],      /* new RGBs for all colors */
+           *curnew = NULL;      /* pointer to new RGBs for current bank */
 
-short currez;           /* current resolution */
-short headbox,          /* object number of 1st color box */
-      headcol = 0;      /* color # of 1st color box */
-short curcol,           /* current color number */
-      curbox,           /* current color box selected */
-      curslid;          /* current slider */
-short col_min = 0,      /* smallest color number */
-      col_max = 0,      /* biggest color number */
-      col_page;         /* color pager value */
-short curscrn[3],       /* current RGB gun values on screen */
-      oldscrn[3];       /* old RGB gun values on screen */
-short numcol = 0;       /* # colors that can be displayed at once */
-char    setup_bnk,
-    touch_bnk,
-    dirt_col[NUMREG],   /* dirty list for all colors */
-    *curdirt = NULL;    /* dirty list for current bank of colors */
+static short currez;           /* current resolution */
+static short headbox,          /* object number of 1st color box */
+             headcol = 0;      /* color # of 1st color box */
+static short curcol,           /* current color number */
+             curbox,           /* current color box selected */
+             curslid;          /* current slider */
+static short col_min = 0,      /* smallest color number */
+             col_max = 0,      /* biggest color number */
+             col_page;         /* color pager value */
+static short curscrn[3],       /* current RGB gun values on screen */
+             oldscrn[3];       /* old RGB gun values on screen */
+static short numcol = 0;       /* # colors that can be displayed at once */
+static char  setup_bnk,
+             touch_bnk,
+             dirt_col[NUMREG], /* dirty list for all colors */
+             *curdirt = NULL;  /* dirty list for current bank of colors */
 
-char    PenNum[10];     /* text buffer for Pen Number arrows */
+static char PenNum[10];       /* text buffer for Pen Number arrows */
 
 
 /* VDI arrays */
-short contrl[12],
-      intin[128],
-      intout[128],
-      ptsin[128],
-      ptsout[128],
-      work_in[12],
+short work_in[12],
       work_out[57];
 short pxyarray[10];     /* input point array */
 short vhandle = -1;     /* virtual workstation handle */
@@ -310,18 +305,18 @@ CPXINFO *cpx_init(XCPB *Xcpb)
             rsrc_obfix(rs_object, i);
 
         ad_tree   = (OBJECT *) rs_trindex[COLOR];
-        ad_slide1 = (OBJECT *) rs_trindex[SLIDE1];
-        ad_slide2 = (OBJECT *) rs_trindex[SLIDE2];
+        pen_edit = (OBJECT *) rs_trindex[SLIDE1];
+        rgb_edit = (OBJECT *) rs_trindex[SLIDE2];
 
-        ad_slide1[ROOT].ob_x = ad_slide1[ROOT].ob_y = 0;
-        ad_slide1[ROOT].ob_width = work_out[0] - 1;
-        ad_slide1[ROOT].ob_height = work_out[1] - 1;
-        ad_slide1[EXIT1].ob_width = ad_slide1[EXIT1].ob_height = 0;
+        pen_edit[ROOT].ob_x = pen_edit[ROOT].ob_y = 0;
+        pen_edit[ROOT].ob_width = work_out[0] - 1;
+        pen_edit[ROOT].ob_height = work_out[1] - 1;
+        pen_edit[EXIT1].ob_width = pen_edit[EXIT1].ob_height = 0;
 
-        ad_slide2[ROOT].ob_x = ad_slide2[ROOT].ob_y = 0;
-        ad_slide2[ROOT].ob_width = work_out[0] - 1;
-        ad_slide2[ROOT].ob_height = work_out[1] - 1;
-        ad_slide2[EXIT2].ob_width = ad_slide2[EXIT2].ob_height = 0;
+        rgb_edit[ROOT].ob_x = rgb_edit[ROOT].ob_y = 0;
+        rgb_edit[ROOT].ob_width = work_out[0] - 1;
+        rgb_edit[ROOT].ob_height = work_out[1] - 1;
+        rgb_edit[EXIT2].ob_width = rgb_edit[EXIT2].ob_height = 0;
 
 
         ad_tree[BASE2].ob_flags |= OF_HIDETREE;
@@ -518,27 +513,27 @@ short cpx_call(GRECT *rect)
                     orect = * (GRECT *) &ad_tree[CSLIDE].ob_x;
                     objc_offset(ad_tree, CSLIDE, &orect.g_x, &orect.g_y);
 
-                    ad_slide1[CTSLIDE].ob_x = ad_slide1[EXIT1].ob_x = orect.g_x - 2;
-                    ad_slide1[CTSLIDE].ob_y = ad_slide1[EXIT1].ob_y = orect.g_y - 2;
-                    ad_slide1[CTSLIDE].ob_width = orect.g_w + 3;
-                    ad_slide1[CTSLIDE].ob_height = orect.g_h + 4;
+                    pen_edit[CTSLIDE].ob_x = pen_edit[EXIT1].ob_x = orect.g_x - 2;
+                    pen_edit[CTSLIDE].ob_y = pen_edit[EXIT1].ob_y = orect.g_y - 2;
+                    pen_edit[CTSLIDE].ob_width = orect.g_w + 3;
+                    pen_edit[CTSLIDE].ob_height = orect.g_h + 4;
 
 
                     myitoa(curcol, &PenNum[0]);
-                    ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext = PenNum;
+                    pen_edit[CTSLIDE].ob_spec.tedinfo->te_ptext = PenNum;
 
-                    objc_draw(ad_slide1, CTSLIDE, 0, ad_slide1[CTSLIDE].ob_x, ad_slide1[CTSLIDE].ob_y,
-                              ad_slide1[CTSLIDE].ob_width, ad_slide1[CTSLIDE].ob_height);
-                    form_do(ad_slide1, CTSLIDE);
+                    objc_draw(pen_edit, CTSLIDE, 0, pen_edit[CTSLIDE].ob_x, pen_edit[CTSLIDE].ob_y,
+                              pen_edit[CTSLIDE].ob_width, pen_edit[CTSLIDE].ob_height);
+                    form_do(pen_edit, CTSLIDE);
 
-                    if (strlen(ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext))
+                    if (strlen(pen_edit[CTSLIDE].ob_spec.tedinfo->te_ptext))
                     {
-                        CurPen = atoi(ad_slide1[CTSLIDE].ob_spec.tedinfo->te_ptext);
+                        CurPen = atoi(pen_edit[CTSLIDE].ob_spec.tedinfo->te_ptext);
                         CurPen = min(CurPen, col_max);
                         CurPen = max(CurPen, col_min);
                         curcol = CurPen;
-                        ad_slide1[CTSLIDE].ob_state &= ~OS_SELECTED;
-                        ad_slide1[EXIT1].ob_state &= ~OS_SELECTED;
+                        pen_edit[CTSLIDE].ob_state &= ~OS_SELECTED;
+                        pen_edit[EXIT1].ob_state &= ~OS_SELECTED;
 
                         objc_draw(ad_tree, CSLIDE, MAX_DEPTH, ad_tree[ROOT].ob_x, ad_tree[ROOT].ob_y,
                                                               ad_tree[ROOT].ob_width, ad_tree[ROOT].ob_height);
@@ -554,8 +549,8 @@ short cpx_call(GRECT *rect)
                     }
                     else
                     {
-                        ad_slide1[CTSLIDE].ob_state &= ~OS_SELECTED;
-                        ad_slide1[EXIT1].ob_state &= ~OS_SELECTED;
+                        pen_edit[CTSLIDE].ob_state &= ~OS_SELECTED;
+                        pen_edit[EXIT1].ob_state &= ~OS_SELECTED;
                         objc_draw(ad_tree, CSLIDE, 0, ad_tree[CSLIDE].ob_x, ad_tree[CSLIDE].ob_y,
                                                       ad_tree[CSLIDE].ob_width, ad_tree[CSLIDE].ob_height);
                     }
@@ -1272,31 +1267,31 @@ void do_rgb(short slider, short base, short index)
     objc_offset(ad_tree, slider, &orect.g_x, &orect.g_y);
 
 
-    ad_slide2[CSLIDERS].ob_x = ad_slide2[EXIT2].ob_x = orect.g_x -= 2;
-    ad_slide2[CSLIDERS].ob_y = ad_slide2[EXIT2].ob_y = orect.g_y -= 2;
-    ad_slide2[CSLIDERS].ob_width = orect.g_w += 3;
-    ad_slide2[CSLIDERS].ob_height = orect.g_h += 4;
+    rgb_edit[CSLIDERS].ob_x = rgb_edit[EXIT2].ob_x = orect.g_x -= 2;
+    rgb_edit[CSLIDERS].ob_y = rgb_edit[EXIT2].ob_y = orect.g_y -= 2;
+    rgb_edit[CSLIDERS].ob_width = orect.g_w += 3;
+    rgb_edit[CSLIDERS].ob_height = orect.g_h += 4;
 
     myitoa(curscrn[index], &PenNum[0]);
 
     dbg("curscrn[index]=%d, PenNum=%s\n", curscrn[index], PenNum);
 
-    ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext = PenNum;
+    rgb_edit[CSLIDERS].ob_spec.tedinfo->te_ptext = PenNum;
 
-    objc_draw(ad_slide2, CSLIDERS, 0, ad_slide2[CSLIDERS].ob_x, ad_slide2[CSLIDERS].ob_y,
-                                      ad_slide2[CSLIDERS].ob_width, ad_slide2[CSLIDERS].ob_height);
-    form_do(ad_slide2, CSLIDERS);
+    objc_draw(rgb_edit, CSLIDERS, 0, rgb_edit[CSLIDERS].ob_x, rgb_edit[CSLIDERS].ob_y,
+                                      rgb_edit[CSLIDERS].ob_width, rgb_edit[CSLIDERS].ob_height);
+    form_do(rgb_edit, CSLIDERS);
 
-    if (strlen(ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext))
+    if (strlen(rgb_edit[CSLIDERS].ob_spec.tedinfo->te_ptext))
     {
-        CurValue = (short) atoi(ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext);
+        CurValue = (short) atoi(rgb_edit[CSLIDERS].ob_spec.tedinfo->te_ptext);
         CurValue = min(CurValue, 1000);
         CurValue = max(CurValue, 0);
         curscrn[index] = CurValue;
     }
 
-    ad_slide2[CSLIDERS].ob_state &= ~OS_SELECTED;
-    ad_slide2[EXIT2].ob_state &= ~OS_SELECTED;
+    rgb_edit[CSLIDERS].ob_state &= ~OS_SELECTED;
+    rgb_edit[EXIT2].ob_state &= ~OS_SELECTED;
 
      adjcol();
      update_slid(ad_tree, base, slider, curscrn[index], 0, 1000, 1);
