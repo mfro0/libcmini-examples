@@ -190,7 +190,6 @@ static RGB oldrgb[NUMREG],      /* old RGBs for all colors */
            newrgb[NUMREG],      /* new RGBs for all colors */
            *curnew = NULL;      /* pointer to new RGBs for current bank */
 
-static short currez;           /* current resolution */
 static short headbox,          /* object number of 1st color box */
              headcol = 0;      /* color # of 1st color box */
 static short curcol,           /* current color number */
@@ -271,7 +270,6 @@ CPXINFO *cpx_init(XCPB *Xcpb)
 
     xcpb = Xcpb;
 
-    currez = Getrez();          /* find current resolution */
     open_vwork();
     close_vwork();
 
@@ -743,7 +741,6 @@ void open_vwork(void)
   if (hcnt == 0) {
     for (i = 1; i < 10;)
         work_in[i++] = 1;
-    work_in[0] = currez + 2;
     work_in[10] = 2;
     vhandle = xcpb->handle;
     v_opnvwk(work_in, &vhandle, work_out);
