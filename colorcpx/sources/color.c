@@ -1415,15 +1415,15 @@ void XSelect(OBJECT *tree, short button)
 
 void MakeIndicator(OBJECT *tree, short obj)
 {
-    tree[obj].ob_flags |= OF_FL3DIND;
+    tree[obj].ob_flags |= OF_FL3DMASK;
     tree[obj].ob_flags &= ~OF_FL3DACT;
 }
 
 
 void MakeActivator(OBJECT *tree, short obj)
 {
+    tree[obj].ob_flags |= OF_FL3DMASK;
     tree[obj].ob_flags |= OF_FL3DACT;
-    tree[obj].ob_flags &= ~OF_FL3DIND;
 }
 
 
@@ -1446,7 +1446,6 @@ void Do3D(void)
     ad_tree[BASER].ob_y += 1;
     ad_tree[BASER].ob_width -= 2;
     ad_tree[BASER].ob_height -= 2;
-
     MakeActivator(ad_tree, CUP);
     MakeActivator(ad_tree, CDOWN);
     MakeActivator(ad_tree, CBASE);
@@ -1455,7 +1454,6 @@ void Do3D(void)
     MakeTed(ad_tree, CUP);
     MakeTed(ad_tree, CDOWN);
     MakeTed(ad_tree, CSLIDE);
-
     ad_tree[CUP].ob_x += 2;
     ad_tree[CUP].ob_y += 2;
     ad_tree[CUP].ob_width -= 4;
@@ -1509,6 +1507,7 @@ void Do3D(void)
 
     MakeActivator(ad_tree, CRELOAD);
     MakeTed(ad_tree, CRELOAD);
+
 
     ad_tree[CRELOAD].ob_x -= 1;
     ad_tree[CRELOAD].ob_y -= 1;
