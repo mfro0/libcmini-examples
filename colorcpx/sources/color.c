@@ -53,6 +53,7 @@
 #define out(format, arg...) do { printf("" format, ##arg); } while (0)
 #else
 #define dbg(format, arg...) do { ; } while (0)
+#define out(format, arg...) do { printf("" format, ##arg); } while (0)
 #endif /* DEBUG */
 
 /* DEFINES
@@ -131,7 +132,7 @@ void outline(OBJECT *tree, short obj, short flag);
 void update_slid(OBJECT *tree, short base, short slider, short value,
                  short min, short max, short draw);
 short slidtext(void);
-void myitoa(unsigned short inword, char *numbuf);
+void myitoa(short inword, char *numbuf);
 void update_rgb(short draw);
 
 void do_redraw(GRECT *dirty_rect, short *oldclip);
@@ -169,16 +170,16 @@ void MakeTed(OBJECT *tree, short obj);
 /* EXTERNALS
  * ======================================================================
  */
-extern int		saved;		/* 0: no user-preference saved yet */
-extern DEFAULTS	usr_vals;	/* saved user-preference */
-extern DEFAULTS	def_vals;	/* system defaults */
+extern int      saved;      /* 0: no user-preference saved yet */
+extern DEFAULTS usr_vals;   /* saved user-preference */
+extern DEFAULTS def_vals;   /* system defaults */
 
 
 /* GLOBALS
  * ======================================================================
  */
-XCPB *xcpb;			/* XControl Parameter Block   */
-CPXINFO cpxinfo;		/* CPX Information Structure  */
+XCPB *xcpb;             /* XControl Parameter Block   */
+CPXINFO cpxinfo;        /* CPX Information Structure  */
 
 OBJECT *ad_tree;        /* Main cpx tree...           */
 OBJECT *ad_slide1;      /* editable text field - pen  */
@@ -192,21 +193,21 @@ RGB	oldrgb[NUMREG],     /* old RGBs for all colors */
 short currez;           /* current resolution */
 short headbox,          /* object number of 1st color box */
       headcol = 0;      /* color # of 1st color box */
-short curcol,			/* current color number */
-      curbox,			/* current color box selected */
+short curcol,           /* current color number */
+      curbox,           /* current color box selected */
       curslid;          /* current slider */
-short col_min = 0,		/* smallest color number */
-      col_max = 0,		/* biggest color number */
-      col_page;		/* color pager value */
-short curscrn[3],		/* current RGB gun values on screen */
-      oldscrn[3];		/* old RGB gun values on screen */
-short numcol = 0;           /* # colors that can be displayed at once */
+short col_min = 0,      /* smallest color number */
+      col_max = 0,      /* biggest color number */
+      col_page;         /* color pager value */
+short curscrn[3],       /* current RGB gun values on screen */
+      oldscrn[3];       /* old RGB gun values on screen */
+short numcol = 0;       /* # colors that can be displayed at once */
 char    setup_bnk,
     touch_bnk,
-    dirt_col[NUMREG],	/* dirty list for all colors */
-    *curdirt=NULL;		/* dirty list for current bank of colors */
+    dirt_col[NUMREG],   /* dirty list for all colors */
+    *curdirt = NULL;    /* dirty list for current bank of colors */
 
-char    PenNum[10];		/* text buffer for Pen Number arrows */
+char    PenNum[10];     /* text buffer for Pen Number arrows */
 
 
 /* VDI arrays */
@@ -217,14 +218,14 @@ short contrl[12],
       ptsout[128],
       work_in[12],
       work_out[57];
-short pxyarray[10];		/* input point array */
-short vhandle=-1;		/* virtual workstation handle */
-short hcnt=0;			/* handle count */
+short pxyarray[10];     /* input point array */
+short vhandle = -1;     /* virtual workstation handle */
+short hcnt = 0;         /* handle count */
 
 /* AES variables */
 short gl_hchar, gl_wchar, gl_hbox, gl_wbox;
 GRECT desk;
-MFORM orig_mf;		/* original mouse form */
+MFORM orig_mf;          /* original mouse form */
 
 
 /* FUNCTIONS
@@ -267,12 +268,6 @@ static void rc_2xy(GRECT *rect, short *xy)
  * OUT: CPXINFO  *ptr:	Pointer to the CP Information Structure
  */
 
-char *rs_strings[] = { 0 };
-ICONBLK rs_iconblk[] = {{ 0 }};
-BITBLK rs_bitblk[] = { { 0 }};
-char *rs_frstr[] =  { 0 };
-struct foobar rs_imdope[] = { { 0 }};
-
 CPXINFO *cpx_init(XCPB *Xcpb)
 {
     dbg("before appl_init()\n");
@@ -310,17 +305,9 @@ CPXINFO *cpx_init(XCPB *Xcpb)
          * rsh_fix() expects a serialized structure
          */
 
-        xcpb->SkipRshFix = true;
-        if (!xcpb->SkipRshFix)
-        {
-            (*xcpb->rsh_fix)(NUM_OBS, NUM_FRSTR, NUM_FRIMG, NUM_TREE,
-                            rs_object, rs_tedinfo, rs_strings, rs_iconblk,
-                            rs_bitblk, rs_frstr, rs_bitblk, rs_trindex,
-                            rs_imdope);
-        }
-        for (int i = 0; i < NUM_OBS; i++)
+
+        for (short i = 0; i < NUM_OBS; i++)
             rsrc_obfix(rs_object, i);
-        dbg("rsh_fix() returned\n");
 
         ad_tree   = (OBJECT *) rs_trindex[COLOR];
         ad_slide1 = (OBJECT *) rs_trindex[SLIDE1];
@@ -381,16 +368,16 @@ CPXINFO *cpx_init(XCPB *Xcpb)
 
 
         /* Initialize the CPXINFO structure */
-        cpxinfo.cpx_call   = cpx_call;
-        cpxinfo.cpx_draw   = NULL;
-        cpxinfo.cpx_wmove  = NULL;
-        cpxinfo.cpx_timer  = NULL;
-        cpxinfo.cpx_key    = NULL;
-        cpxinfo.cpx_button = NULL;
-        cpxinfo.cpx_m1 	 = NULL;
-        cpxinfo.cpx_m2	 = NULL;
-        cpxinfo.cpx_hook   = NULL;
-        cpxinfo.cpx_close  = NULL;
+        cpxinfo.cpx_call    = cpx_call;
+        cpxinfo.cpx_draw    = NULL;
+        cpxinfo.cpx_wmove   = NULL;
+        cpxinfo.cpx_timer   = NULL;
+        cpxinfo.cpx_key     = NULL;
+        cpxinfo.cpx_button  = NULL;
+        cpxinfo.cpx_m1      = NULL;
+        cpxinfo.cpx_m2      = NULL;
+        cpxinfo.cpx_hook    = NULL;
+        cpxinfo.cpx_close   = NULL;
 
         /* Convert to 3D if possible - ONLY if AES 0x0400 or Greater!
          * AND if # of pens is greater than LWHITE
@@ -403,7 +390,7 @@ CPXINFO *cpx_init(XCPB *Xcpb)
             }
         }
         /* Return the pointer to the CPXINFO structure to XCONTROL */
-        return( &cpxinfo );
+        return &cpxinfo;
     }
 }
 
@@ -432,7 +419,7 @@ CPXINFO *cpx_init(XCPB *Xcpb)
 short cpx_call(GRECT *rect)
 {
     short button;
-    int quit = 0;
+    bool quit = 0;
     WORD msg[8];
     MRETS mk;
     short ox, oy;
@@ -693,19 +680,19 @@ short cpx_call(GRECT *rect)
                 {
                     switch (msg[0])
                     {
-                        case WM_REDRAW:         /* redraw the cpx */
+                        case WM_REDRAW:                 /* redraw the cpx */
                             do_redraw((GRECT *) &msg[4], clip);
                             break;
 
-                        case AC_CLOSE:          /* treated like a cancel */
-                            cnclchgs();         /* cancel changes made */
+                        case AC_CLOSE:                  /* treated like a cancel */
+                            cnclchgs();                 /* cancel changes made */
 
                         case WM_CLOSED:
-                            quit = true;         /* treated like an OK */
+                            quit = true;                /* treated like an OK */
                             break;
 
                         case CT_KEY:
-                            switch (msg[3])     /* check which key is returned */
+                            switch (msg[3])             /* check which key is returned */
                             {
                                 case UNDO:              /* if Undo key */
                                     cnclbnk();          /* cancel color changes */
@@ -754,8 +741,7 @@ short cpx_call(GRECT *rect)
 /*
  * Open virtual workstation
  */
-void
-open_vwork(void)
+void open_vwork(void)
 {
   int i;
 
@@ -774,14 +760,13 @@ open_vwork(void)
 /*
  * Close virtual workstation
  */
-void
-close_vwork(void)
+void close_vwork(void)
 {
     hcnt--;
-    if( !hcnt )
+    if (!hcnt)
     {
-    v_clsvwk(vhandle);
-    vhandle = -1;
+        v_clsvwk(vhandle);
+        vhandle = -1;
     }
 }
 
@@ -877,10 +862,11 @@ void update_slid(OBJECT *tree, short base, short slider, short value,
         obrect.g_y -= 3;
         obrect.g_w += 6;
         obrect.g_h += 6;
+
         /* undraw old */
         objc_draw(tree, base, MAX_DEPTH, obrect.g_x, obrect.g_y, obrect.g_w, obrect.g_h);
         objc_offset(tree, slider, &obrect.g_x, &obrect.g_y);
-        obrect.g_x -= 3;		/* account for outline */
+        obrect.g_x -= 3;            /* account for outline */
         obrect.g_y -= 3;
 
         /* draw new */
@@ -923,15 +909,15 @@ short slidtext(void)
 /*
  * Convert binary number to ascii value
  */
-void myitoa(unsigned short inword, char *numbuf)
+void myitoa(short inword, char *numbuf)
 {
-    unsigned short temp1, value;
+    short temp1, value;
     int i, j;
     char tmpbuf[10];
     char *ascbuf;
 
     ascbuf = numbuf;
-    i = 0;                      /* if the value is non zero  */
+    i = 0;                              /* if the value is non zero  */
 
     if (!inword)
         *ascbuf++ = '0';
@@ -961,7 +947,7 @@ void myitoa(unsigned short inword, char *numbuf)
  */
 void update_rgb(short draw)
 {
-    RGB *ptr;		/* ptr to RGB intensities of current color */
+    RGB *ptr;                           /* ptr to RGB intensities of current color */
 
     /* Inquire the RGB intensities for current pen */
     ptr = curnew + curcol;
@@ -977,8 +963,8 @@ void update_rgb(short draw)
     curscrn[G] = ptr->gint;
     curscrn[B] = ptr->bint;
 
-    /* Record old location of sliders, and update indices	*/
-    /* on R, G and B sliders if necessary			*/
+    /* Record old location of sliders, and update indices */
+    /* on R, G and B sliders if necessary */
     if (oldscrn[R] != curscrn[R])
         update_slid(ad_tree, RBASE, RSLIDE, curscrn[R], 0, 1000, draw);
 
@@ -1057,7 +1043,7 @@ short nxtgrp(void)
  */
 void nxt_to_show(short toscroll)
 {
-    int obj;
+    short obj;
     short clip[4];
 
     open_vwork();
@@ -1080,13 +1066,13 @@ void nxt_to_show(short toscroll)
     if (obj != curbox) {
         outline(ad_tree, curbox, DEHILITE);
         outline(ad_tree, obj, HILITE);
-        curbox = obj;			/* update current box selected */
+        curbox = obj;                               /* update current box selected */
     }
 
     /* update color # and RGB sliders */
     curslid = CSLIDE;
-    slidtext();				/* update color # ONLY */
-    update_rgb(1);				/* update and draw RGB gun values */
+    slidtext();                                     /* update color # ONLY */
+    update_rgb(1);                                  /* update and draw RGB gun values */
     close_vwork();
 }
 
@@ -1137,11 +1123,7 @@ void adjcol(void)
  */
 void init(DEFAULTS *info)
 {
-    dbg("info=%p\n", info);
-
     open_vwork();
-
-    dbg("number of colors=%d\n", numcol);
 
     switch (numcol)
     {
@@ -1307,7 +1289,7 @@ void do_rgb(short slider, short base, short index)
 
     if (strlen(ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext))
     {
-        CurValue = atoi(ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext);
+        CurValue = (short) atoi(ad_slide2[CSLIDERS].ob_spec.tedinfo->te_ptext);
         CurValue = min(CurValue, 1000);
         CurValue = max(CurValue, 0);
         curscrn[index] = CurValue;
@@ -1364,10 +1346,11 @@ void Do_Slider(OBJECT *tree, short base, short slider, short index, bool dclick 
             graf_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
         } while (mk.buttons && ( mk.y == oldy));
 
-        if (mk.buttons && (mk.y != oldy))
+        if (mk.buttons && (mk.y != oldy)) {
             (*xcpb->Sl_dragy)(tree, base, slider, 0, 1000,
                               &curscrn[index],
-                              (short (*)()) adjcol);
+                              (short (*)(void)) adjcol);
+        }
 
         if ((_AESversion >= 0x0330) && (numcol > LWHITE))
             XDeselect(tree, slider );
