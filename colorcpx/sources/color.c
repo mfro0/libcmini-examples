@@ -163,7 +163,7 @@ void XDeselect(OBJECT *tree, short button);
 
 void MakeIndicator(OBJECT *tree, short obj);
 void MakeActivator(OBJECT *tree, short obj);
-void Do3D( void );
+void Do3D(void);
 void MakeTed(OBJECT *tree, short obj);
 
 
@@ -1427,15 +1427,21 @@ void MakeActivator(OBJECT *tree, short obj)
 }
 
 
+void MakeTed(OBJECT *tree, short obj)
+{
+    OBJC_COLORWORD *cw = (OBJC_COLORWORD *) &tree[obj].ob_spec.tedinfo->te_color;
+    cw->fillc = G_WHITE;
+}
+
 
 void Do3D(void)
 {
     short i;
 
-    /*
-     * reset border color to white
-     */
+    /* reset border color to white */
     ad_tree[BASER].ob_spec.obspec.framecol = 0;
+
+    /* make room for 3D frames */
     ad_tree[BASER].ob_x += 1;
     ad_tree[BASER].ob_y += 1;
     ad_tree[BASER].ob_width -= 2;
@@ -1520,8 +1526,3 @@ void Do3D(void)
     ad_tree[CRELOAD].ob_height -= 3;
 }
 
-
-void MakeTed(OBJECT *tree, short obj)
-{
-    ((OBJC_COLORWORD *) &tree[obj].ob_spec.tedinfo->te_color)->fillc = G_LWHITE;
-}
