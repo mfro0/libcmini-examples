@@ -1131,15 +1131,15 @@ void init(DEFAULTS *info)
        case 2:
        case 4:
        case 16:
-            slamcol( info->bank.num16 );
+            slamcol(info->bank.num16);
             break;
 
        case 256:
-            slamcol( info->bank.num256 );
+            slamcol(info->bank.num256);
             break;
 
        default:
-            slamcol( info->bank.num16 );
+            slamcol(info->bank.num16);
             break;
     }
     close_vwork();
@@ -1153,7 +1153,7 @@ void init(DEFAULTS *info)
  */
 void slamcol(RGB col_array[])
 {
-    short i;		/* counter */
+    short i;            /* counter */
 
     open_vwork();
     for (i = 0; i < numcol; i++ )
@@ -1344,7 +1344,7 @@ void Do_Slider(OBJECT *tree, short base, short slider, short index, bool dclick 
         do
         {
             graf_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
-        } while (mk.buttons && ( mk.y == oldy));
+        } while (mk.buttons && (mk.y == oldy));
 
         if (mk.buttons && (mk.y != oldy)) {
             (*xcpb->Sl_dragy)(tree, base, slider, 0, 1000,
@@ -1474,7 +1474,7 @@ void Do3D(void)
 
     for (i = RUP; i <= BDOWN; i++)
     {
-        if (ad_tree[i].ob_type == G_BOXTEXT)
+        if ((ad_tree[i].ob_type & 0xff) == G_BOXTEXT)
             MakeTed(ad_tree, i);
         MakeActivator(ad_tree, i);
 
@@ -1486,6 +1486,7 @@ void Do3D(void)
         }
         else
             ad_tree[i].ob_height = 16;
+
         ad_tree[i].ob_width -= 4;
 
         /* FIXME: this appears strange */
@@ -1517,7 +1518,7 @@ void Do3D(void)
         ad_tree[i].ob_x += 2;
         ad_tree[i].ob_y += 2;
         ad_tree[i].ob_width -= 4;
-        ad_tree[i].ob_height -= 4;
+        ad_tree[i].ob_height -= 3;
     }
     ad_tree[CRELOAD].ob_x += 2;
     ad_tree[CRELOAD].ob_y += 2;
