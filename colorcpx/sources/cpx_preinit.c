@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -24,6 +24,22 @@
 #else
 #define dbg(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
+
+/*
+ * GCC calling conventions usually do not allow to call functions compiled by other compilers
+ * through function pointers that have short parameters. That is because GCC aligns short
+ * parameters on longword boundaries when it pushes them on the stack while other Atari
+ * compilers usually just push a short.
+ * This can be tricked by instead pushing a struct parameter that has the same contents
+ * than the intended parameter list (GCC aligns struct fields on short boundaries).
+ *
+ * This module puts an intermediate layer between GCC-compiled CPXs and the CPX callback
+ * functions in order to allow GCC-compiled CPXs to callback to the CPX main application
+ * (strange when COPS is the CPX app as - also GCC-compiled - it does the
+ * reverse on its side, but that's how it is.
+ *
+ * Parameter structs for all CPX callbacks that have shorts in their parameter list
+ */
 
 typedef struct
 {
@@ -241,7 +257,8 @@ static void rsh_fix(short num_objs, short num_frstr, short num_frimg,
         struct foobar *rs_imdope)
 {
     (*gxcpb->rsh_fix)((RSH_FIX_PARAMS) { num_objs, num_frstr, num_frimg, num_tree, rs_object, rs_tedinfo,
-                                          rs_strings, rs_iconblk, rs_bitblk, rs_frstr, rs_frimg, rs_trindex, rs_imdope });
+                                         rs_strings, rs_iconblk, rs_bitblk, (char **) rs_frstr,
+                                         (BITBLK *) rs_frimg, (OBJECT *) rs_trindex, rs_imdope });
 }
 
 static void rsh_obfix(OBJECT *tree, short curob)
@@ -333,9 +350,9 @@ XCPB *cpx_preinit(XCPB_XCONTROL *xcpb)
         dbg("original xcpb=%p, fake xcpb=%p\r\n",
             (void *) gxcpb, (void *) gcc_xcpb);
         /*
-     * now replace all functions that have one or more shorts in their parameter list
-     * with our intermediates
-     */
+         * now replace all functions that have one or more shorts in their parameter list
+         * with our intermediates
+         */
         gcc_xcpb->rsh_fix = &rsh_fix;
         gcc_xcpb->rsh_obfix = &rsh_obfix;
         gcc_xcpb->Popup = &Popup;
