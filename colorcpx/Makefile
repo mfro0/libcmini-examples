@@ -1,4 +1,4 @@
-VERBOSE=yes
+VERBOSE=no
 ifneq (yes,$(VERBOSE))
     Q=@
 else
@@ -82,24 +82,25 @@ HOBJS=$(patsubst $(SRCDIR)/%.o,%.o,$(patsubst %.c,%.o,$(HSRCS)))
 
 CPX=$(patsubst %.cp,%.cpx,$(APP))
 
-TRGTDIRS=. ./m68020-60 ./m5475 ./mshort ./m68020-60/mshort ./m5475/mshort
+TRGTDIRS=. ./mshort ./m68020-60 ./m5475 ./m68020-60/mshort ./m5475/mshort
 OBJDIRS=$(patsubst %,%/objs,$(TRGTDIRS))
-
 #
 # multilib flags. These must match m68k-atari-mint-gcc -print-multi-lib output
 #
 m68020-60/$(APP):CFLAGS += -m68020-60
 m5475/$(APP):CFLAGS += -mcpu=5475
-mshort/$(APP):CFLAGS += -mshort
+m68000/mshort/$(APP):CFLAGS += -mshort
 m68020-60/mshort/$(APP): CFLAGS += -mcpu=68030 -mshort
 m5475/mshort/$(APP): CFLAGS += -mcpu=5475 -mshort
 
 all: $(patsubst %,%/$(APP),$(TRGTDIRS)) $(patsubst %,%/$(CPX),$(TRGTDIRS))
 
 $(DEPEND): $(ASRCS) $(CSRCS)
-	-rm -f $(DEPEND)
+	@-rm -f $(DEPEND)
 	$(Q)for d in $(TRGTDIRS);\
-		do $(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
+		do \
+		    if [ ! -d $$d/objs ]; then mkdir -p $$d/objs; fi; \
+		    $(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
 	done
 
 #
@@ -123,7 +124,7 @@ $(1)/$(APP): $$($(1)_OBJS)  $(1)/objs/$(AOBJS) $$($(1)_HOBJS)
 	$(Q)$(STRIP) $$@
 
 $(1)/$(CPX): $$($(1)_HOBJS) $(1)/$(APP)
-	$(Q)echo "objcopy $(1)/cpxhead"
+	$(Q)echo "GENCPX $(1)/cpxhead"
 	$(Q)$(OBJCOPY) -O binary $$($(1)_HOBJS) $(1)/cpxhead
 	$(Q)echo "GEN $$@"
 	$(Q)cat $(1)/cpxhead $(1)/$(APP) > $(1)/$(CPX)
