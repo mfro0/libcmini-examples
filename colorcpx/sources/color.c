@@ -46,7 +46,7 @@
 
 #include <gemx.h>
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 //#include "natfeats.h"
 #define dbg(format, arg...) do { printf("DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -264,10 +264,6 @@ static void rc_2xy(GRECT *rect, short *xy)
 
 CPXINFO *cpx_init(XCPB *Xcpb)
 {
-    dbg("before appl_init()\n");
-
-    appl_init();
-
     xcpb = Xcpb;
 
     open_vwork();
