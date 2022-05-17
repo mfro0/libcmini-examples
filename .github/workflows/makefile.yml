@@ -18,6 +18,15 @@ jobs:
       run: |
         sudo add-apt-repository ppa:vriviere/ppa && sudo apt-get update
         sudo apt-get install cross-mint-essential dos2unix hatari aranym mtools lftp
+    
+    - name: install libcmini
+      run: |
+        cd ..
+        mkdir libcmini
+        wget -q -O - https://github.com/freemint/libcmini/archive/master.tar.gz | tar xzf - --strip-components=1 -C libcmini
+        cd libcmini
+        make
+
     - name: Display package versions
       run: |
         git --version
@@ -33,6 +42,7 @@ jobs:
         lftp --version
         hatari --version || true
         aranym --version
+        
     - name: Build binaries
       run: |
         make clean
