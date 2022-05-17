@@ -31,10 +31,9 @@ jobs:
       run: |
         cd ..
         mkdir gemlib
-        wget -q -O - https://github.com/freemint/gemlib/archive/master.tar.gz | tar xzf - --strip-components=1 -C gemlib
+        wget -q -O - https://github.com/freemint/gemlib/archive/master.tar.gz | tar xzf -
         cd gemlib
-        make -j
-        sudo make install
+        sudo make install -j
         
     - name: Display package versions
       run: |
