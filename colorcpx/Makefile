@@ -93,7 +93,7 @@ m68000/mshort/$(APP):CFLAGS += -mshort
 m68020-60/mshort/$(APP): CFLAGS += -mcpu=68030 -mshort
 m5475/mshort/$(APP): CFLAGS += -mcpu=5475 -mshort
 
-all: $(patsubst %,%/$(APP),$(TRGTDIRS)) $(patsubst %,%/$(CPX),$(TRGTDIRS)) $(DEPEND)
+all: $(DEPEND) $(patsubst %,%/$(APP),$(TRGTDIRS)) $(patsubst %,%/$(CPX),$(TRGTDIRS))
 
 $(DEPEND): $(ASRCS) $(CSRCS)
 	@-rm -f $(DEPEND)
