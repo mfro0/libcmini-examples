@@ -4,12 +4,12 @@ else
     Q=
 endif
 
-.PHONY: bench primes viewer prgflags
-all: bench primes viewer
+.PHONY: bench primes viewer prgflags colorcpx cpxconf
+all: bench primes viewer prgflags colorcpx cpxconf
 	$(Q)for i in $^; do make -s -C $$i all; done
 
-.PHONY: bench primes viewer prgflags
-clean: bench primes viewer
+.PHONY: bench primes viewer prgflags colorcpx cpxconf
+clean: bench primes viewer prgflags colorcpx cpxconf
 	$(Q)for i in $^; do make -s -C $$i clean; done
 
 DEPENDS := $(foreach dir,$(LIBDIRS), $(wildcard $(dir)/objs/*.d) $(wildcard $(dir)/objs/iio/*.d))
