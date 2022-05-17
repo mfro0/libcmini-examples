@@ -93,12 +93,14 @@ mshort/$(APP):CFLAGS += -mshort
 m68020-60/mshort/$(APP): CFLAGS += -mcpu=68030 -mshort
 m5475/mshort/$(APP): CFLAGS += -mcpu=5475 -mshort
 
-all: $(patsubst %,%/$(APP),$(TRGTDIRS)) $(patsubst %,%/$(CPX),$(TRGTDIRS))
+all: $(DEPEND) $(patsubst %,%/$(APP),$(TRGTDIRS)) $(patsubst %,%/$(CPX),$(TRGTDIRS))
 
 $(DEPEND): $(ASRCS) $(CSRCS)
 	-rm -f $(DEPEND)
 	$(Q)for d in $(TRGTDIRS);\
-		do $(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
+		do \
+			if [ ! -d $$d/objs ]; then mkdir -p $$d/objs; fi; \
+			$(CC) $(CFLAGS) $(INCLUDE) -M $(ASRCS) $(CSRCS) | sed -e "s#^\(.*\).o:#$$d/objs/\1.o:#" >> $(DEPEND); \
 	done
 
 #
