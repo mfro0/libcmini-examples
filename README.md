@@ -1,3 +1,5 @@
+![example workflow](https://github.com/mfro0/libcmini-examples/actions/workflows/makefile.yml/badge.svg)
+
 # libcmini-examples
 a few simple example programs to show how to deal with the libcmini library
 At least, that was the initial intent. Meanwhile, some of the programs (bench, in particular) evolved into a testbed for many GEM related things I'm playing with.
