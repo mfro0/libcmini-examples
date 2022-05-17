@@ -26,7 +26,16 @@ jobs:
         wget -q -O - https://github.com/freemint/libcmini/archive/master.tar.gz | tar xzf - --strip-components=1 -C libcmini
         cd libcmini
         make
-
+    
+    - name: install gemlib
+      run: |
+        cd ..
+        mkdir gemlib
+        wget -q -O - https://github.com/freemint/gemlib/archive/master.tar.gz | tar xzf - --strip-components=1 -C gemlib
+        cd gemlib
+        make -j
+        sudo make install
+        
     - name: Display package versions
       run: |
         git --version
