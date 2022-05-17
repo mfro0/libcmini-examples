@@ -33,7 +33,7 @@ jobs:
         mkdir gemlib
         wget -q -O - https://github.com/freemint/gemlib/archive/master.tar.gz | tar xzf -
         cd gemlib-master
-        sudo make install -j
+        sudo make install
         
     - name: Display package versions
       run: |
