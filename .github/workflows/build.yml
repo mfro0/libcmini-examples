@@ -1,4 +1,4 @@
-name: Makefile CI
+name: libcmini-examples build/CI
 
 on:
   push:
