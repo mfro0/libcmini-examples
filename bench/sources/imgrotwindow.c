@@ -39,6 +39,7 @@ static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
 
+static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations);
 static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle);
 
 /*
@@ -93,8 +94,17 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             return NULL;
         }
 
+
         CICONBLK *iconblk = dlg[COLICON].ob_spec.ciconblk;
         CICON *icon;
+
+        icon = iconblk->mainlist;
+        do
+        {
+            if (iconblk->mainlist->num_planes == gl_nplanes)
+                break;
+            icon = iconblk->mainlist->next_res;
+        } while (icon != NULL);
 
         if ((iw->iconblk = iconblk) == NULL || (iconblk->mainlist) == NULL)
         {
@@ -103,7 +113,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
             return NULL;
         }
-        icon = iconblk->mainlist;
+
 
         MFDB src_mfdb =
         {
@@ -216,25 +226,32 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     /* draw our (possibly rotated) icon */
     MFDB dst = { 0 };
 
-    short wicon = iw->image_mfdb.fd_w;
-    short hicon = iw->image_mfdb.fd_h;
 
-    /*
-     * center icon into window's work area
-     */
-    short pxy[8] =
+    MFDB *new_image = integral_rotate_image(wi, &iw->image_mfdb, iw->angle);
+    dbg("new_image = %p\n", new_image);
+    if (new_image)
     {
-        0, 0, wicon - 1, hicon - 1,
-        x + w / 2 - wicon / 2,
-        y + h / 2 - hicon / 2,
-        x + w / 2 + wicon / 2 - 1,
-        y + h / 2 + hicon / 2 - 1
-    };
+        short wicon = new_image->fd_w;
+        short hicon = new_image->fd_h;
 
-    vro_cpyfm(vh, S_ONLY,
+        /*
+         * center icon into window's work area
+         */
+        short pxy[8] =
+        {
+            0, 0, wicon - 1, hicon - 1,
+            x + w / 2 - wicon / 2,
+            y + h / 2 - hicon / 2,
+            x + w / 2 + wicon / 2 - 1,
+            y + h / 2 + hicon / 2 - 1
+        };
+
+        vro_cpyfm(vh, S_ONLY,
               pxy,
-              &iw->image_mfdb, &dst);
-    yshear(wi, &iw->image_mfdb, &dst, iw->image_mfdb.fd_w / 2, iw->image_mfdb.fd_h / 2, iw->angle);
+              new_image, &dst);
+        free(new_image->fd_addr);
+        free(new_image);
+    }
 }
 
 
@@ -248,30 +265,87 @@ static void timer_imgrotwindow(struct window *wi)
     if (iw != NULL)
     {
         do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-        iw->angle += 10;
+        iw->angle += 1;
+        iw->angle %= 4;
+
+        dbg("iw->angle = %d\n", iw->angle);
     }
 }
 
-double vectors_dot_prod(const double *x, const double *y, int n)
+/*
+ * return an image that is rotated <rotations> * 90 degrees
+ */
+static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations)
 {
-    double res = 0.0;
-    int i;
+    MFDB *dst = calloc(1, sizeof(MFDB));
 
-    for (i = 0; i < n; i++)
+    if (dst)
     {
-        res += x[i] * y[i];
-    }
-    return res;
-}
+        dst->fd_wdwidth = (src->fd_h + 15) / 16;
+        dst->fd_addr = malloc(dst->fd_wdwidth * sizeof(short) * gl_nplanes * src->fd_h);
+        dst->fd_w = src->fd_h;
+        dst->fd_h = src->fd_w;
+        dst->fd_nplanes = gl_nplanes;
+        short pxy[8];
 
-void matrix_vector_mult(const double **mat, const double *vec, double *result, int rows, int cols)
-{
-    // in matrix form: result = mat * vec;
-    int i;
-    for (i = 0; i < rows; i++)
-    {
-        result[i] = vectors_dot_prod(mat[i], vec, cols);
+        if (dst->fd_addr)
+        {
+            switch (rotations)
+            {
+                case 0:
+                default:
+                    pxy[0] = pxy[1] = pxy[4] = pxy[5] = 0;
+                    pxy[2] = pxy[6] = src->fd_w - 1;
+                    pxy[3] = pxy[7] = src->fd_h - 1;
+                    vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                    break;
+
+                case 1:
+                    /* swap rows and columns */
+                    for (short i = 0; i < src->fd_w; i++)
+                    {
+                        for (short j = 0; j < src->fd_h; j++)
+                        {
+                            short pxy[8] = { i, j, i, j, j, i, j, i };
+
+                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    /* x-mirror */
+                    for (short i = 0; i < src->fd_w; i++)
+                    {
+                        for (short j = 0; j < src->fd_h; j++)
+                        {
+                            short pxy[8] = { i, j, i, j,
+                                             src->fd_h - 1 - j, src->fd_w - 1 - i, src->fd_h - 1 - j, src->fd_w - 1 -i };
+
+                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                        }
+                    }
+                    break;
+
+                case 3:
+                    /* upside down */
+                    for (short i = 0; i < src->fd_w; i++)
+                    {
+                        for (short j = 0; j < src->fd_h; j++)
+                        {
+                            short pxy[8] = { i, j, i, j,
+                                             src->fd_h - 1 - j, src->fd_w - 1 - i, src->fd_h - 1 - j, src->fd_w - 1 - i };
+
+                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                        }
+                    }
+                    break;
+            }
+
+            return dst;
+        }
     }
+    return (MFDB *) NULL;
 }
 
 /*
@@ -281,12 +355,6 @@ void matrix_vector_mult(const double **mat, const double *vec, double *result, i
  */
 void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
 {
-    /*
-     * Algorithm:
-     * we construct an imaginary line through the center point with the
-     * supplied angle. We then shift rasterline by rasterline by the
-     * horizontal distance to the x coordinate of the center point left or right
-     */
 }
 
 /*
@@ -301,20 +369,5 @@ void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
  */
 static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle)
 {
-    short pxy[4];       /* end coordinates of the imaginary line */
-
-    pxy[0] = -x * icos(angle) / SHRT_MAX;
-    pxy[1] = -y * isin(angle) / SHRT_MAX;
-
-    pxy[2] = (src->fd_w - x) * icos(angle) / SHRT_MAX;
-    pxy[3] = (src->fd_h - y) * isin(angle) / SHRT_MAX;
-
-    dbg("x=%d, y=%d, pxy = (%d, %d)(%d, %d)\r\n", x, y, pxy[0], pxy[1], pxy[2], pxy[3]);
-    pxy[0] += wi->work.g_x + wi->work.g_w / 2;
-    pxy[2] += wi->work.g_x + wi->work.g_w / 2;
-    pxy[1] += wi->work.g_y + wi->work.g_h / 2;
-    pxy[3] += wi->work.g_y + wi->work.g_h / 2;
-
-    v_pline(vdi_handle, 2, pxy);
 }
 
