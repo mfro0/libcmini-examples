@@ -39,8 +39,9 @@ static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
 
-static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations);
-static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle);
+static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short shear_x);
+static void y_shear(struct window *wi, MFDB *src, short shear_y);
+static void x_shear(struct window *wi, MFDB *src, short shear_x);
 
 /*
  * create a new window and add it to the window list.
@@ -275,7 +276,7 @@ static void timer_imgrotwindow(struct window *wi)
 /*
  * return an image that is rotated <rotations> * 90 degrees
  */
-static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations)
+static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short shear_x)
 {
     MFDB *dst = calloc(1, sizeof(MFDB));
 
@@ -290,7 +291,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
 
         if (dst->fd_addr)
         {
-            switch (rotations)
+            switch (shear_x)
             {
                 case 0:
                 default:
@@ -348,12 +349,47 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
     return (MFDB *) NULL;
 }
 
+static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
+{
+    short rotations;
+    MFDB *integral_img;
+
+    /*
+     * adjust rotation angle
+     */
+    angle = angle % 3600;
+    if (angle < -450)
+        angle + 3600;
+    for (rotations = 0; angle > 450; rotations++)
+        angle -= 90;
+    integral_img = integral_rotate_image(wi, src, rotations);
+    if (integral_img == NULL)
+    {
+        form_alert(1, "[1][could not create integral image][OK]");
+        return NULL;
+    }
+    short shear_x = -itan(angle) / SHRT_MAX;
+    short shear_y = isin(angle) / SHRT_MAX;
+    if (shear_x == 0 && shear_y == 0)
+        return integral_img;
+
+    /*
+     * compute maximum bounds for 3 shear operations
+     */
+
+    x_shear(wi, integral_img, shear_x);
+    y_shear(wi, integral_img, shear_y);
+    x_shear(wi, integral_img, shear_x);
+
+    return integral_img;
+}
+
 /*
  * shearing of image src to dst around angle in x-direction
  * center point at (x, y)
  * angle is in 10ths of degrees (0-3600)
  */
-void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
+static void x_shear(struct window *wi, MFDB *src, short shear_x)
 {
 }
 
@@ -367,7 +403,7 @@ void xshear(MFDB *src, MFDB *dst, short x, short y, short angle)
  * given angle relative to horizontal. We then shift rastercolumn by rastercolumn
  * by the vertical distance to the y coordinate of the center point up or down
  */
-static void yshear(struct window *wi, MFDB *src, MFDB *dst, short x, short y, short angle)
+static void y_shear(struct window *wi, MFDB *src, short shear_y)
 {
 }
 
