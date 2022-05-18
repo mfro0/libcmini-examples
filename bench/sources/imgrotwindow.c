@@ -102,7 +102,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         icon = iconblk->mainlist;
         do
         {
-            if (iconblk->mainlist->num_planes == gl_nplanes)
+            if (icon->num_planes == gl_nplanes)
                 break;
             icon = iconblk->mainlist->next_res;
         } while (icon != NULL);
@@ -320,8 +320,14 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short shear_x)
                     {
                         for (short j = 0; j < src->fd_h; j++)
                         {
-                            short pxy[8] = { i, j, i, j,
-                                             src->fd_h - 1 - j, src->fd_w - 1 - i, src->fd_h - 1 - j, src->fd_w - 1 -i };
+                            pxy[0] = i;
+                            pxy[1] = j;
+                            pxy[2] = i;
+                            pxy[3] = j;
+                            pxy[4] = src->fd_h - 1 - j;
+                            pxy[5] = src->fd_w - 1 - i;
+                            pxy[6] = src->fd_h - 1 - j;
+                            pxy[7] = src->fd_w - 1 - i;
 
                             vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
                         }
@@ -330,15 +336,18 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short shear_x)
 
                 case 3:
                     /* upside down */
-                    for (short i = 0; i < src->fd_w; i++)
+                    for (short j = 0; j < src->fd_h; j++)
                     {
-                        for (short j = 0; j < src->fd_h; j++)
-                        {
-                            short pxy[8] = { i, j, i, j,
-                                             src->fd_h - 1 - j, src->fd_w - 1 - i, src->fd_h - 1 - j, src->fd_w - 1 - i };
+                            pxy[0] = 0;
+                            pxy[1] = j;
+                            pxy[2] = src->fd_w - 1;
+                            pxy[3] = j;
+                            pxy[4] = 0;
+                            pxy[5] = src->fd_h - 1 - j;
+                            pxy[6] = src->fd_w - 1;
+                            pxy[7] = src->fd_h - 1 - j;
 
                             vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
-                        }
                     }
                     break;
             }
