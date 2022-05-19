@@ -42,6 +42,7 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations);
 static void y_shear(struct window *wi, MFDB *src, short shear_y);
 static void x_shear(struct window *wi, MFDB *src, short shear_x);
+static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle);
 
 static char *object_type(short type)
 {
@@ -202,7 +203,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
 
         dbg("2\n");
-        vro_cpyfm(vh, ALL_WHITE, pxy, NULL, &dst_mfdb);
+        vro_cpyfm(vh, ALL_BLACK, pxy, NULL, &dst_mfdb);
         dbg("3\n");
 
         pxy[2] = src_mfdb.fd_w - 1;
@@ -277,7 +278,7 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     MFDB dst = { 0 };
 
 
-    MFDB *new_image = integral_rotate_image(wi, &iw->image_mfdb, iw->angle);
+    MFDB *new_image = shear_rotate_image(wi, &iw->image_mfdb, iw->angle);
 
     dbg("new_image = %p\n", new_image);
     if (new_image)
@@ -315,14 +316,15 @@ static void timer_imgrotwindow(struct window *wi)
     static int timer_count = 0;
 
     timer_count++;
+    timer_count %= 15;
 
     if (iw != NULL)
     {
-        if (timer_count % 15 == 0)
+        if (timer_count == 14)
         {
             do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-            iw->angle += 1;
-            iw->angle %= 4;
+            iw->angle += 100;
+            iw->angle %= 3600;
 
             dbg("iw->angle = %d\n", iw->angle);
         }
@@ -335,6 +337,7 @@ static void timer_imgrotwindow(struct window *wi)
 static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations)
 {
     MFDB *dst = calloc(1, sizeof(MFDB));
+    short vh = wi->vdi_handle;
 
     if (dst)
     {
@@ -354,7 +357,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                     pxy[0] = pxy[1] = pxy[4] = pxy[5] = 0;
                     pxy[2] = pxy[6] = src->fd_w - 1;
                     pxy[3] = pxy[7] = src->fd_h - 1;
-                    vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                    vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                     break;
 
                 case 1:
@@ -372,7 +375,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                             pxy[6] = j;
                             pxy[7] = i;
 
-                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                         }
                     }
                     break;
@@ -390,7 +393,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                             pxy[6] = src->fd_w - 1;
                             pxy[7] = src->fd_h - 1 - j;
 
-                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                     }
                     break;
 
@@ -409,7 +412,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                             pxy[6] = src->fd_h - 1 - j;
                             pxy[7] = src->fd_w - 1 - i;
 
-                            vro_cpyfm(vdi_handle, S_ONLY, pxy, src, dst);
+                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                         }
                     }
                     break;
@@ -427,7 +430,7 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
     MFDB *integral_img;
 
     /*
-     * adjust rotation angle
+     * adjust rotation angle so that we need to shear-rotate by a maximum of +/- 45°
      */
     angle = angle % 3600;
     if (angle < -450)
@@ -440,14 +443,12 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
         form_alert(1, "[1][could not create integral image][OK]");
         return NULL;
     }
-    short shear_x = -itan(angle) / SHRT_MAX;
-    short shear_y = isin(angle) / SHRT_MAX;
+
+    short shear_x = -itan(angle);
+    short shear_y = isin(angle);
+
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
-
-    /*
-     * compute maximum bounds for 3 shear operations
-     */
 
     x_shear(wi, integral_img, shear_x);
     y_shear(wi, integral_img, shear_y);
@@ -456,25 +457,45 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
     return integral_img;
 }
 
-/*
- * shearing of image src to dst around angle in x-direction
- * center point at (x, y)
- * angle is in 10ths of degrees (0-3600)
- */
 static void x_shear(struct window *wi, MFDB *src, short shear_x)
 {
+    short pxy[8];
+
+    /* we assume a half width border left and right */
+    short border_width = src->fd_w / 2;
+
+
+    for (int i = 0; i < src->fd_h / 4; i++)
+    {
+
+        short mid_x = src->fd_w / 2;
+        short width = mid_x;
+
+        short left = mid_x - width / 2;
+        short right = left + width - 1;
+
+        short mid_y = src->fd_h / 2;
+
+        dbg("shear_x=%d, shift=%d\n", shear_x, shear_x * i / SHRT_MAX);
+
+        pxy[0] = left;
+        pxy[1] = mid_y + i;
+        pxy[2] = right;
+        pxy[3] = mid_y + i;
+
+        pxy[4] = left - shear_x * i / SHRT_MAX;
+        pxy[5] = mid_y + i;
+        pxy[6] = pxy[4] + width - 1;
+        pxy[7] = mid_y + i;
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, src, src);
+
+        pxy[1] = pxy[3] = pxy[5] = pxy[7] = mid_y - i;
+        pxy[4] = -pxy[4];
+        pxy[6] = pxy[4] + width - 1;
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, src, src);
+    }
 }
 
-/*
- * shearing of image src to dst around angle in y-direction
- * center point at (x, y)
- * angle is in 10ths of degrees (0-3600)
- *
- * Algorithm:
- * we construct an imaginary line through the supplied center point with the
- * given angle relative to horizontal. We then shift rastercolumn by rastercolumn
- * by the vertical distance to the y coordinate of the center point up or down
- */
 static void y_shear(struct window *wi, MFDB *src, short shear_y)
 {
 }
