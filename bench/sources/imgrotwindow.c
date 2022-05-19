@@ -43,6 +43,46 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
 static void y_shear(struct window *wi, MFDB *src, short shear_y);
 static void x_shear(struct window *wi, MFDB *src, short shear_x);
 
+static char *object_type(short type)
+{
+    static struct t_text
+    {
+        short type;
+        char *type_text;
+    } t[] =
+    {
+    {   .type = 20, .type_text = "G_BOX" },
+    {   .type = 21, .type_text = "G_TEXT" },
+    {   .type = 22, .type_text = "G_BOXTEXT" },
+    {   .type = 23, .type_text = "G_IMAGE" },
+    {   .type = 24, .type_text = "G_USERDEF" },
+    {   .type = 25, .type_text = "G_IBOX" },
+    {   .type = 26, .type_text = "G_BUTTON" },
+    {   .type = 27, .type_text = "G_BOXCHAR" },
+    {   .type = 28, .type_text = "G_STRING" },
+    {   .type = 29, .type_text = "G_FTEXT" },
+    {   .type = 30, .type_text = "G_FBOXTEXT" },
+    {   .type = 31, .type_text = "G_ICON" },
+    {   .type = 32, .type_text = "G_TITLE" },
+    {   .type = 33, .type_text = "G_CICON" },
+    {   .type = 34, .type_text = "G_SWBUTTON" },
+    {   .type = 35, .type_text = "G_POPUP" },
+    {   .type = 36, .type_text = "G_WINTITLE" },
+    {   .type = 37, .type_text = "G_EDIT" },
+    {   .type = 38, .type_text = "G_SHORTCUT" },
+    {   .type = 39, .type_text = "G_SLIST" },
+    {   .type = 99, .type_text = "UNKNOWN" }
+    };
+    int num_t = sizeof(t) / sizeof(struct t_text);
+    int i;
+
+    for (i = 0; i < num_t; i++)
+    {
+        if (type == t[i].type)
+            break;
+    }
+    return t[i].type_text;
+}
 /*
  * create a new window and add it to the window list.
  */
@@ -57,7 +97,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
     if (wi != NULL)
     {
-        OBJECT *dlg;
+        OBJECT *icon_tree;
 
         wi->wclass = IMGROTWINDOW_CLASS;
         wi->draw = draw_imgrotwindow;
@@ -88,18 +128,27 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
 
-        if (!rsrc_gaddr(R_TREE, ICNS, &dlg))
+        if (!rsrc_gaddr(R_TREE, ICNS, &icon_tree))
         {
-            form_alert(1, "[2][Could not get RASTER resource][CANCEL]");
+            form_alert(1, "[2][Could not get ICNS resource][CANCEL]");
             wi->del(wi);
             return NULL;
         }
 
 
-        CICONBLK *iconblk = dlg[COLICON].ob_spec.ciconblk;
+        CICONBLK *iconblk = icon_tree[COLICON].ob_spec.ciconblk;
         CICON *icon;
 
+        dbg("dlg[COLICON].ob_type=%s\n", object_type(icon_tree[COLICON].ob_type));
+        dbg("iconblk->mainlist=%p\n", iconblk->mainlist);
+        dbg("iconblk->monoblk=%p\n", iconblk->monoblk);
+
         icon = iconblk->mainlist;
+        if (icon == NULL)
+        {
+            form_alert(1, "[1][No color icon?][CANCEL]");
+            return NULL;
+        }
         do
         {
             if (icon->num_planes == gl_nplanes)
@@ -177,7 +226,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
         iw->image_mfdb = dst_mfdb;
 
-        dbg("finished");
+        dbg("finished\n");
 
     }
 
