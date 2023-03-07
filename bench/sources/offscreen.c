@@ -232,7 +232,9 @@ static void draw_sample(struct window *wi, short wx, short wy, short ww, short w
     short vh = wi->vdi_handle;
 
     MFDB screen = { 0 };
-    short pxy[8] = { wi->left, wi->top, wi->left + ww - 1, wi->top + wh - 1,
+    short w_x = wx - wi->work.g_x;
+    short w_y = wy - wi->work.g_y;
+    short pxy[8] = { wi->left + w_x, wi->top + w_y, wi->left + w_x + ww - 1, wi->top + w_y + wh - 1,
                      wx, wy, wx + ww - 1, wy + wh - 1};
 
     
