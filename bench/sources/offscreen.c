@@ -31,7 +31,7 @@ struct offscreenwindow
     short ellipse_pattern;
 };
 
-static void draw_sample(struct window *wi, short wx, short wy, short wh, short ww);
+static void copy_window(struct window *wi, short wx, short wy, short wh, short ww);
 static void timer_offscreenwindow(struct window *wi);
 static void delete_offscreenwindow(struct window *wi);
 static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h);
@@ -145,7 +145,7 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
     if (wi != NULL)
     {
         wi->wclass = OFFWINDOW_CLASS;
-        wi->draw = draw_sample;
+        wi->draw = copy_window;
         wi->del = delete_offscreenwindow;
         wi->timer = timer_offscreenwindow;
         wi->size = size_offscreenwindow;
@@ -226,7 +226,7 @@ static void size_offscreenwindow(struct window *wi, short x, short y, short w, s
 /*
  * Draw Filled Ellipse
  */
-static void draw_sample(struct window *wi, short wx, short wy, short ww, short wh)
+static void copy_window(struct window *wi, short wx, short wy, short ww, short wh)
 {
     struct offscreenwindow *ow = wi->priv;
     short vh = wi->vdi_handle;
@@ -259,9 +259,9 @@ static void timer_offscreenwindow(struct window *wi)
     
     vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, &ow->bm_mfdb, &ow->bm_mfdb);
 
-    vsf_style(bh, FIS_PATTERN);
-    vsf_interior(bh, ow->ellipse_pattern);
-    vsf_interior(bh, 1);
+    vsf_style(bh, ow->ellipse_pattern);
+    vsf_interior(bh, FIS_PATTERN);
+    //vsf_interior(bh, 1);
     vsf_color(bh, ow->ellipse_color);
     v_ellipse(bh, wi->work.g_w / 2, wi->work.g_h / 2,
                   wi->work.g_w / 2, wi->work.g_h / 2);
@@ -275,7 +275,7 @@ static void timer_offscreenwindow(struct window *wi)
     if (ow->ellipse_color == 15)
     {
         ow->ellipse_pattern++;
-        ow->ellipse_pattern &= 15;
+        ow->ellipse_pattern &= 30;
     }
 
 }
