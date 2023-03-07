@@ -31,7 +31,7 @@ struct offscreenwindow
     short ellipse_pattern;
 };
 
-static void copy_window(struct window *wi, short wx, short wy, short wh, short ww);
+static void refresh_window(struct window *wi, short wx, short wy, short wh, short ww);
 static void timer_offscreenwindow(struct window *wi);
 static void delete_offscreenwindow(struct window *wi);
 static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h);
@@ -49,48 +49,48 @@ typedef struct
 
 static bool get_cookie(long cookie, void *value )
 {
-  static short use_ssystem = 0;
-  COOKJAR *cookiejar;
-  long val = -1L;
-  short i = 0;
-
-  if (use_ssystem < 0)
-    use_ssystem = (Ssystem(S_INQUIRE, 0l, 0) == 0);
-
-  if (use_ssystem)
-  {
-      if( Ssystem(S_GETCOOKIE, cookie, (long) &val) == 0)
-      {
-          if (value != NULL)
-              *(long *) value = val;
-          return true;
-      }
-  }
-  else
-  {
-      /* Zeiger auf Cookie Jar holen */
-      cookiejar = (COOKJAR *)(Setexc(0x05A0 / 4, (const void (*)(void)) -1));
-
-      if (cookiejar)
-      {
-          for (i = 0; cookiejar[i].id ; i++)
-          {
-              dbg("cookiejar[%d] = %lx (\"%c%c%c%c\"\r\n", i, cookiejar[i].id,
-                  cookiejar[i].id >> 24 & 0xff,
-                  cookiejar[i].id >> 16 & 0xff,
-                  cookiejar[i].id >> 8 & 0xff,
-                  cookiejar[i].id >> 0 & 0xff);
-              if (cookiejar[i].id == cookie)
-              {
-                  if (value)
-                      *(long *) value = cookiejar[i].value;
-                  return true;
-              }
-          }
-      }
-  }
-
-  return false;
+    static short use_ssystem = 0;
+    COOKJAR *cookiejar;
+    long val = -1L;
+    short i = 0;
+    
+    if (use_ssystem < 0)
+        use_ssystem = Ssystem(S_INQUIRE, 0l, 0) == 0;
+    
+    if (use_ssystem)
+    {
+        if (Ssystem(S_GETCOOKIE, cookie, (long) &val) == 0)
+        {
+            if (value != NULL)
+                *(long *) value = val;
+            return true;
+        }
+    }
+    else
+    {
+        /* Zeiger auf Cookie Jar holen */
+        cookiejar = (COOKJAR *)(Setexc(0x5a0 / 4, (const void (*)(void)) -1));
+        
+        if (cookiejar)
+        {
+            for (i = 0; cookiejar[i].id ; i++)
+            {
+                dbg("cookiejar[%d] = %lx (\"%c%c%c%c\"\r\n", i, cookiejar[i].id,
+                    cookiejar[i].id >> 24 & 0xff,
+                    cookiejar[i].id >> 16 & 0xff,
+                    cookiejar[i].id >> 8 & 0xff,
+                    cookiejar[i].id >> 0 & 0xff);
+                if (cookiejar[i].id == cookie)
+                {
+                    if (value)
+                        *(long *) value = cookiejar[i].value;
+                    return true;
+                }
+            }
+        }
+    }
+    
+    return false;
 }
 
 /*
@@ -145,10 +145,9 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
     if (wi != NULL)
     {
         wi->wclass = OFFWINDOW_CLASS;
-        wi->draw = copy_window;
+        wi->draw = refresh_window;
         wi->del = delete_offscreenwindow;
         wi->timer = timer_offscreenwindow;
-        wi->size = size_offscreenwindow;
 
         ow = malloc(sizeof(struct offscreenwindow));
         if (ow != NULL)
@@ -213,20 +212,10 @@ static void delete_offscreenwindow(struct window *wi)
     delete_window(wi);
 }
 
-static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h)
-{
-    struct offscreenwindow *ow = wi->priv;
-
-    wi->top = 0;
-    wi->left = 0;
-
-    size_window(wi, x, y, w, h);        /* call super "class"' size method */
-
-}
 /*
  * Draw Filled Ellipse
  */
-static void copy_window(struct window *wi, short wx, short wy, short ww, short wh)
+static void refresh_window(struct window *wi, short wx, short wy, short ww, short wh)
 {
     struct offscreenwindow *ow = wi->priv;
     short vh = wi->vdi_handle;
@@ -237,7 +226,6 @@ static void copy_window(struct window *wi, short wx, short wy, short ww, short w
     short pxy[8] = { wi->left + w_x, wi->top + w_y, wi->left + w_x + ww - 1, wi->top + w_y + wh - 1,
                      wx, wy, wx + ww - 1, wy + wh - 1};
 
-    
     vro_cpyfm(vh, S_ONLY, pxy, &ow->bm_mfdb, &screen);
 }
 
@@ -266,7 +254,6 @@ static void timer_offscreenwindow(struct window *wi)
     v_ellipse(bh, wi->work.g_w / 2, wi->work.g_h / 2,
                   wi->work.g_w / 2, wi->work.g_h / 2);
 
-
     do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
 
     ow->ellipse_color++;
@@ -277,6 +264,5 @@ static void timer_offscreenwindow(struct window *wi)
         ow->ellipse_pattern++;
         ow->ellipse_pattern &= 30;
     }
-
 }
 
