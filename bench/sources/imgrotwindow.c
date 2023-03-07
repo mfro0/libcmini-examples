@@ -257,11 +257,6 @@ static void delete_imgrotwindow(struct window *wi)
  */
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh)
 {
-    short x;
-    short y;
-    short w;
-    short h;
-
     short vh = wi->vdi_handle;
     struct imgrotwindow *iw = (struct imgrotwindow *) wi->priv;
 
@@ -269,11 +264,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     dbg("\n");
 
-    /* get size of window's work area */
-    wind_get(wi->handle, WF_WORKXYWH, &x, &y, &w, &h);
-
     /* first, clear it */
-    if (wi->clear) wi->clear(wi, x, y, w, h);
+    if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
 
     /* draw our (possibly rotated) icon */
     MFDB dst = { 0 };
@@ -293,10 +285,10 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
         short pxy[8] =
         {
             0, 0, wicon - 1, hicon - 1,
-            x + w / 2 - wicon / 2,
-            y + h / 2 - hicon / 2,
-            x + w / 2 + wicon / 2 - 1,
-            y + h / 2 + hicon / 2 - 1
+            wi->work.g_x + wi->work.g_w / 2 - wicon / 2,
+            wi->work.g_y + wi->work.g_h / 2 - hicon / 2,
+            wi->work.g_x + wi->work.g_w / 2 + wicon / 2 - 1,
+            wi->work.g_y + wi->work.g_h / 2 + hicon / 2 - 1
         };
 
         vro_cpyfm(vh, S_ONLY,
@@ -355,26 +347,28 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
             {
                 case 0:
                 default:
+                    dbg("0\r\n");
                     pxy[0] = pxy[1] = pxy[4] = pxy[5] = 0;
                     pxy[2] = pxy[6] = src->fd_w - 1;
                     pxy[3] = pxy[7] = src->fd_h - 1;
                     vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                     break;
 
-                case 1:
+                case 1: /* 90 degrees counter clockwise */
+                    dbg("1\r\n");
                     /* swap rows and reverse columns */
-                    for (short i = 0; i < src->fd_w; i++)
+                    for (short i = 0; i < src->fd_h; i++)   /* rows */
                     {
-                        for (short j = 0; j < src->fd_h; j++)
+                        for (short j = 0; j < src->fd_w; j++) /* columns */
                         {
                             pxy[0] = i;
                             pxy[1] = j;
                             pxy[2] = i;
                             pxy[3] = j;
                             pxy[4] = j;
-                            pxy[5] = i;
+                            pxy[5] = src->fd_w - i - 1;
                             pxy[6] = j;
-                            pxy[7] = i;
+                            pxy[7] = src->fd_w - i - 1;
 
                             vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                         }
@@ -382,24 +376,28 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                     break;
 
                 case 2:
-                    /* upside down */
-                    for (short j = 0; j < src->fd_h; j++)
+                    /* 180 degrees counter clockwise (aka upside-down) */
+                    dbg("2\r\n");
+                    for (short i = 0; i < src->fd_h; i++)
                     {
-                            pxy[0] = 0;
-                            pxy[1] = j;
-                            pxy[2] = src->fd_w - 1;
-                            pxy[3] = j;
-                            pxy[4] = 0;
-                            pxy[5] = src->fd_h - 1 - j;
-                            pxy[6] = src->fd_w - 1;
-                            pxy[7] = src->fd_h - 1 - j;
+                        for (short j = 0; j < src->fd_w; j++)
+                        {
+                            pxy[0] = j;
+                            pxy[1] = i;
+                            pxy[2] = j;
+                            pxy[3] = i;
+                            pxy[4] = src->fd_w - j - 1;
+                            pxy[5] = src->fd_w - i - 1;
+                            pxy[6] = src->fd_h - j - 1;
+                            pxy[7] = src->fd_w - i - 1;
 
                             vro_cpyfm(vh, S_ONLY, pxy, src, dst);
+                        }
                     }
                     break;
 
                 case 3:
-                    /* x-mirror */
+                    /* 270 degrees counter clockwise */
                     for (short i = 0; i < src->fd_w; i++)
                     {
                         for (short j = 0; j < src->fd_h; j++)
@@ -408,10 +406,10 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                             pxy[1] = j;
                             pxy[2] = i;
                             pxy[3] = j;
-                            pxy[4] = src->fd_h - 1 - j;
-                            pxy[5] = src->fd_w - 1 - i;
-                            pxy[6] = src->fd_h - 1 - j;
-                            pxy[7] = src->fd_w - 1 - i;
+                            pxy[4] = src->fd_h - j - 1;
+                            pxy[5] = i;
+                            pxy[6] = src->fd_h - j - 1;
+                            pxy[7] = i;
 
                             vro_cpyfm(vh, S_ONLY, pxy, src, dst);
                         }
@@ -437,8 +435,10 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
     if (angle < -450)
         angle + 3600;
     for (rotations = 0; angle > 450; rotations++)
-        angle -= 90;
+        angle -= 900;
+    
     integral_img = integral_rotate_image(wi, src, rotations);
+    
     if (integral_img == NULL)
     {
         form_alert(1, "[1][could not create integral image][OK]");
