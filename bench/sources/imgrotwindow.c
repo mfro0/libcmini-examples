@@ -117,7 +117,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         }
         else
         {
-            form_alert(1, "[1][could not allocate vdiwindow private data][CANCEL]");
+            form_alert(1, "[1][could not allocate imgrotate private data][CANCEL]");
             wi->del(wi);
 
             return NULL;
