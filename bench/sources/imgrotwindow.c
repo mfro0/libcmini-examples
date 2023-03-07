@@ -52,27 +52,27 @@ static char *object_type(short type)
         char *type_text;
     } t[] =
     {
-    {   .type = 20, .type_text = "G_BOX" },
-    {   .type = 21, .type_text = "G_TEXT" },
-    {   .type = 22, .type_text = "G_BOXTEXT" },
-    {   .type = 23, .type_text = "G_IMAGE" },
-    {   .type = 24, .type_text = "G_USERDEF" },
-    {   .type = 25, .type_text = "G_IBOX" },
-    {   .type = 26, .type_text = "G_BUTTON" },
-    {   .type = 27, .type_text = "G_BOXCHAR" },
-    {   .type = 28, .type_text = "G_STRING" },
-    {   .type = 29, .type_text = "G_FTEXT" },
-    {   .type = 30, .type_text = "G_FBOXTEXT" },
-    {   .type = 31, .type_text = "G_ICON" },
-    {   .type = 32, .type_text = "G_TITLE" },
-    {   .type = 33, .type_text = "G_CICON" },
-    {   .type = 34, .type_text = "G_SWBUTTON" },
-    {   .type = 35, .type_text = "G_POPUP" },
-    {   .type = 36, .type_text = "G_WINTITLE" },
-    {   .type = 37, .type_text = "G_EDIT" },
-    {   .type = 38, .type_text = "G_SHORTCUT" },
-    {   .type = 39, .type_text = "G_SLIST" },
-    {   .type = 99, .type_text = "UNKNOWN" }
+        {   .type = 20, .type_text = "G_BOX" },
+        {   .type = 21, .type_text = "G_TEXT" },
+        {   .type = 22, .type_text = "G_BOXTEXT" },
+        {   .type = 23, .type_text = "G_IMAGE" },
+        {   .type = 24, .type_text = "G_USERDEF" },
+        {   .type = 25, .type_text = "G_IBOX" },
+        {   .type = 26, .type_text = "G_BUTTON" },
+        {   .type = 27, .type_text = "G_BOXCHAR" },
+        {   .type = 28, .type_text = "G_STRING" },
+        {   .type = 29, .type_text = "G_FTEXT" },
+        {   .type = 30, .type_text = "G_FBOXTEXT" },
+        {   .type = 31, .type_text = "G_ICON" },
+        {   .type = 32, .type_text = "G_TITLE" },
+        {   .type = 33, .type_text = "G_CICON" },
+        {   .type = 34, .type_text = "G_SWBUTTON" },
+        {   .type = 35, .type_text = "G_POPUP" },
+        {   .type = 36, .type_text = "G_WINTITLE" },
+        {   .type = 37, .type_text = "G_EDIT" },
+        {   .type = 38, .type_text = "G_SHORTCUT" },
+        {   .type = 39, .type_text = "G_SLIST" },
+        {   .type = 99, .type_text = "UNKNOWN" }
     };
     int num_t = sizeof(t) / sizeof(struct t_text);
     int i;
@@ -84,6 +84,7 @@ static char *object_type(short type)
     }
     return t[i].type_text;
 }
+
 /*
  * create a new window and add it to the window list.
  */
@@ -361,7 +362,7 @@ static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations
                     break;
 
                 case 1:
-                    /* swap rows and columns */
+                    /* swap rows and reverse columns */
                     for (short i = 0; i < src->fd_w; i++)
                     {
                         for (short j = 0; j < src->fd_h; j++)
