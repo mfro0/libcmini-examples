@@ -6,8 +6,10 @@
 
 #include "offscreen.h"
 #include <gemx.h>
+#include <mintbind.h>
+#include <mint/errno.h>
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #ifdef __mcoldfire__
 #define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
@@ -24,7 +26,7 @@
 struct offscreenwindow
 {
     short bm_handle;           /* offscreen bitmap handle */
-    MFDB bm;
+    MFDB bm_mfdb;
     short ellipse_color;
     short ellipse_pattern;
 };
@@ -33,6 +35,95 @@ static void draw_sample(struct window *wi, short wx, short wy, short wh, short w
 static void timer_offscreenwindow(struct window *wi);
 static void delete_offscreenwindow(struct window *wi);
 static void size_offscreenwindow(struct window *wi, short x, short y, short w, short h);
+
+typedef struct
+{
+    long id;             /* Identifikations-Code */
+    long value;          /* Wert des Cookies     */
+} COOKJAR;
+
+
+#define S_INQUIRE   ((short) 0xffff)
+#define S_GETCOOKIE ((short) 0x0008)
+
+
+static bool get_cookie(long cookie, void *value )
+{
+  static short use_ssystem = 0;
+  COOKJAR *cookiejar;
+  long val = -1L;
+  short i = 0;
+
+  if (use_ssystem < 0)
+    use_ssystem = (Ssystem(S_INQUIRE, 0l, 0) == 0);
+
+  if (use_ssystem)
+  {
+      if( Ssystem(S_GETCOOKIE, cookie, (long) &val) == 0)
+      {
+          if (value != NULL)
+              *(long *) value = val;
+          return true;
+      }
+  }
+  else
+  {
+      /* Zeiger auf Cookie Jar holen */
+      cookiejar = (COOKJAR *)(Setexc(0x05A0 / 4, (const void (*)(void)) -1));
+
+      if (cookiejar)
+      {
+          for (i = 0; cookiejar[i].id ; i++)
+          {
+              dbg("cookiejar[%d] = %lx (\"%c%c%c%c\"\r\n", i, cookiejar[i].id,
+                  cookiejar[i].id >> 24 & 0xff,
+                  cookiejar[i].id >> 16 & 0xff,
+                  cookiejar[i].id >> 8 & 0xff,
+                  cookiejar[i].id >> 0 & 0xff);
+              if (cookiejar[i].id == cookie)
+              {
+                  if (value)
+                      *(long *) value = cookiejar[i].value;
+                  return true;
+              }
+          }
+      }
+  }
+
+  return false;
+}
+
+/*
+ * must call EdDI functions with Pure-C calling conventions
+ */
+bool edi0(short (*func)(void), short parm)
+{
+    short out;
+    
+    __asm__ __volatile__("move.l %1,d0                  \n\t"
+                         "move.l %2,a0                  \n\t" 
+                         "jsr    (a0)                   \n\t"
+                         "move.l d0,%0                  \n\t"
+                         :"=g"(out)
+                         :"g"(parm), "m"(func): "memory");
+    return out;
+}
+
+static bool is_EdDI(void)
+{
+    short (*func)(void);
+    
+    if (get_cookie('EdDI', (long *) &func))
+    {
+        return edi0(func, 0);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 /*
  * create a new window and add it to the window list.
  */
@@ -43,8 +134,14 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
     short work_in[20] = { 0 };
     short work_out[57];
 
-    wi = create_window(wi_kind, title);
-
+    if (is_EdDI())
+        wi = create_window(wi_kind, title);
+    else
+    {
+        form_alert(0, "[0][No EdDI cookie found.|Offscreen bitmaps are unavailable][OK]");
+        return NULL;
+    }
+    
     if (wi != NULL)
     {
         wi->wclass = OFFWINDOW_CLASS;
@@ -62,7 +159,7 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
         }
 
         ow->bm_handle = wi->vdi_handle;
-        memset(&ow->bm, 0, sizeof(MFDB));
+        memset(&ow->bm_mfdb, 0, sizeof(MFDB));
 
         work_in[10] = 2;
 
@@ -72,15 +169,15 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
         work_in[14] = 1000;
 
         dbg("VDI handle: %d\n", vdi_handle);
-        v_opnbm(work_in, &ow->bm, &ow->bm_handle, work_out);
+        v_opnbm(work_in, &ow->bm_mfdb, &ow->bm_handle, work_out);
 
         dbg("bitmap handle: %d\n", ow->bm_handle);
-        dbg("MFDB.fd_addr=%p\n", ow->bm.fd_addr);
-        dbg("MFDB.fd_w=%d\n", ow->bm.fd_w);
-        dbg("MFDB.fd_h=%d\n", ow->bm.fd_h);
-        dbg("MFDB.fd_wdwidth=%d\n", ow->bm.fd_wdwidth);
-        dbg("MFDB.fd_stand=%d\n", ow->bm.fd_stand);
-        dbg("MFDB.fd_nplanes=%d\n", ow->bm.fd_nplanes);
+        dbg("MFDB.fd_addr=%p\n", ow->bm_mfdb.fd_addr);
+        dbg("MFDB.fd_w=%d\n", ow->bm_mfdb.fd_w);
+        dbg("MFDB.fd_h=%d\n", ow->bm_mfdb.fd_h);
+        dbg("MFDB.fd_wdwidth=%d\n", ow->bm_mfdb.fd_wdwidth);
+        dbg("MFDB.fd_stand=%d\n", ow->bm_mfdb.fd_stand);
+        dbg("MFDB.fd_nplanes=%d\n", ow->bm_mfdb.fd_nplanes);
 
         if (! ow->bm_handle)
         {
@@ -92,8 +189,8 @@ struct window *create_offscreenwindow(short wi_kind, char *title)
 
         wi->top = 0;
         wi->left = 0;
-        wi->doc_width = ow->bm.fd_w;
-        wi->doc_height = ow->bm.fd_h;
+        wi->doc_width = ow->bm_mfdb.fd_w;
+        wi->doc_height = ow->bm_mfdb.fd_h;
         wi->x_fac = gl_wchar;	/* width of one character */
         wi->y_fac = gl_hchar;	/* height of one character */
     }
@@ -136,9 +233,10 @@ static void draw_sample(struct window *wi, short wx, short wy, short ww, short w
 
     MFDB screen = { 0 };
     short pxy[8] = { wi->left, wi->top, wi->left + ww - 1, wi->top + wh - 1,
-                     wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h };
+                     wx, wy, wx + ww - 1, wy + wh - 1};
 
-    vro_cpyfm(vh, S_ONLY, pxy, &ow->bm, &screen);
+    
+    vro_cpyfm(vh, S_ONLY, pxy, &ow->bm_mfdb, &screen);
 }
 
 
@@ -150,10 +248,14 @@ static void timer_offscreenwindow(struct window *wi)
     struct offscreenwindow *ow = (struct offscreenwindow *) wi->priv;
     short bh = ow->bm_handle;
 
-    short pxy[8] = { 0, 0, ow->bm.fd_w - 1, ow->bm.fd_h - 1, 0, 0, ow->bm.fd_w - 1, ow->bm.fd_h - 1 };
+    short pxy[8] = { 
+        0, 0, ow->bm_mfdb.fd_w - 1, ow->bm_mfdb.fd_h - 1, 
+        0, 0, ow->bm_mfdb.fd_w - 1, ow->bm_mfdb.fd_h - 1 
+    };
 
-    // vr_recfl(ow->bm_handle, pxy);
-    vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, &ow->bm, &ow->bm);
+    vr_recfl(ow->bm_handle, pxy);
+    
+    vro_cpyfm(ow->bm_handle, ALL_WHITE, pxy, &ow->bm_mfdb, &ow->bm_mfdb);
 
     vsf_style(bh, FIS_PATTERN);
     vsf_interior(bh, ow->ellipse_pattern);

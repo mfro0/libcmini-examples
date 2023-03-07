@@ -344,6 +344,7 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
 
     Supexec(start_timer);
 
+    wind_update(BEG_UPDATE);
     wind_get(wi->handle, WF_FIRSTXYWH, &t1.g_x, &t1.g_y, &t1.g_w, &t1.g_h);
     while (t1.g_w || t1.g_h)
     {
@@ -358,7 +359,7 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
     }
     sprintf(wi->info, "Time for redraw: %ld ms", Supexec(stop_timer) * 5);
     wind_set_str(wi->handle, WF_INFO, wi->info);
-
+    wind_update(END_UPDATE);
     graf_mouse(M_ON, NULL);
 }
 
