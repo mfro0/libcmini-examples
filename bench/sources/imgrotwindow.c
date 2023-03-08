@@ -264,15 +264,16 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
     dbg("\n");
 
-    /* first, clear it */
-    if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-
-    /* draw our (possibly rotated) icon */
     MFDB dst = { 0 };
 
 
     MFDB *new_image = shear_rotate_image(wi, &iw->image_mfdb, iw->angle);
 
+    /* first, clear the window */
+    if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+
+    /* draw our (possibly rotated) icon */
+    
     dbg("new_image = %p\n", new_image);
     if (new_image)
     {
@@ -438,7 +439,7 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
         angle -= 900;
     
     integral_img = integral_rotate_image(wi, src, rotations);
-    
+
     if (integral_img == NULL)
     {
         form_alert(1, "[1][could not create integral image][OK]");
@@ -450,6 +451,8 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
 
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
+
+    return integral_img;
 
     x_shear(wi, integral_img, shear_x);
     y_shear(wi, integral_img, shear_y);
@@ -477,7 +480,7 @@ static void x_shear(struct window *wi, MFDB *src, short shear_x)
 
         short mid_y = src->fd_h / 2;
 
-        dbg("shear_x=%d, shift=%d\n", shear_x, shear_x * i / SHRT_MAX);
+        dbg("shear_x = %d, shift = %d\r\n", shear_x, shear_x * i / SHRT_MAX);
 
         pxy[0] = left;
         pxy[1] = mid_y + i;
