@@ -289,8 +289,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
             short hicon = new_image->mfdb.fd_h;
             
             /*
-         * center icon into window's work area
-         */
+             * center icon into window's work area
+             */
             short pxy[8] =
             {
                 0, 0, wicon - 1, hicon - 1,
