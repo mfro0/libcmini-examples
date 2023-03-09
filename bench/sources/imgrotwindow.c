@@ -39,10 +39,11 @@ static void timer_imgrotwindow(struct window *wi);
 static void delete_imgrotwindow(struct window *wi);
 static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, short wh);
 
-static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations);
-static void y_shear(struct window *wi, MFDB *src, short shear_y);
-static void x_shear(struct window *wi, MFDB *src, short shear_x);
-static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle);
+static struct image *integral_rotate_image(struct window *wi, struct image *src, short rotations);
+static struct image *y_shear(struct window *wi, struct image *src, short shear_y);
+static struct image *x_shear(struct window *wi, struct image *src, short shear_x);
+static struct image *shear_rotate_image(struct window *wi, struct image *src, short angle);
+static void delete_image(struct image *image);
 
 static char *object_type(short type)
 {
@@ -203,9 +204,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
         short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
 
-        dbg("2\n");
         vro_cpyfm(vh, ALL_BLACK, pxy, NULL, &dst_mfdb);
-        dbg("3\n");
 
         pxy[2] = src_mfdb.fd_w - 1;
         pxy[3] = src_mfdb.fd_h - 1;
@@ -252,6 +251,11 @@ static void delete_imgrotwindow(struct window *wi)
     delete_window(wi);
 }
 
+struct image {  
+    MFDB mfdb;
+    short imgdata[];
+};
+
 /*
  * draw window
  */
@@ -267,7 +271,7 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     MFDB dst = { 0 };
 
 
-    MFDB *new_image = shear_rotate_image(wi, &iw->image_mfdb, iw->angle);
+    struct image *new_image = shear_rotate_image(wi, &iw->image_mfdb, iw->angle);
 
     /* first, clear the window */
     if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
@@ -277,8 +281,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     dbg("new_image = %p\n", new_image);
     if (new_image)
     {
-        short wicon = new_image->fd_w;
-        short hicon = new_image->fd_h;
+        short wicon = new_image->mfdb.fd_w;
+        short hicon = new_image->mfdb.fd_h;
 
         /*
          * center icon into window's work area
@@ -294,9 +298,8 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 
         vro_cpyfm(vh, S_ONLY,
               pxy,
-              new_image, &dst);
-        free(new_image->fd_addr);
-        free(new_image);
+              &new_image->mfdb, &dst);
+        delete_image(new_image);
     }
 }
 
@@ -309,12 +312,12 @@ static void timer_imgrotwindow(struct window *wi)
     struct imgrotwindow *iw = wi->priv;
     static int timer_count = 0;
 
-    timer_count++;
-    timer_count %= 15;
+    //timer_count++;
+    //timer_count %= 5;
 
     if (iw != NULL)
     {
-        if (timer_count == 14)
+        //if (timer_count == 4)
         {
             do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
             iw->angle += 100;
@@ -325,109 +328,149 @@ static void timer_imgrotwindow(struct window *wi)
     }
 }
 
+static struct image *create_image_like(struct image *like_image)
+{
+    struct image *new_image;
+    
+    new_image = calloc(1, sizeof(struct image) + 
+                       like_image->mfdb.fd_wdwidth * like_image->mfdb.fd_h * like_image->mfdb.fd_h);
+    if (new_image != NULL)
+    {
+        new_image->mfdb = like_image->mfdb;
+        new_image->mfdb.fd_addr = new_image->imgdata;
+    }
+    return new_image;
+}
+
+static struct image *create_image_whp(short width, short height, short nplanes)
+{
+    struct image *new_image;
+    short wdwidth = (width + 15) / 16;
+    
+    new_image = calloc(1, sizeof(struct image) +
+                       wdwidth * height * nplanes * sizeof(short));
+    if (new_image != NULL)
+    {
+        new_image->mfdb.fd_addr = new_image->imgdata;
+        new_image->mfdb.fd_wdwidth = wdwidth;
+        new_image->mfdb.fd_h = height;
+        new_image->mfdb.fd_w = width;
+    }
+    
+    return new_image;
+}
+
+static struct image *create_image_mfdb(MFDB *mfdb)
+{
+    struct image *new_image;
+    new_image = calloc(1, sizeof(struct image) + mfdb->fd_wdwidth * mfdb->fd_h * mfdb->fd_nplanes * sizeof(short));
+}
+static void delete_image(struct image *image)
+{
+    free(image);
+}
+
 /*
  * return an image that is rotated <rotations> * 90 degrees
  */
-static MFDB *integral_rotate_image(struct window *wi, MFDB *src, short rotations)
+static struct image *integral_rotate_image(struct window *wi, struct image *src, short rotations)
 {
-    MFDB *dst = calloc(1, sizeof(MFDB));
+    struct image *dst = create_image_like(src);
     short vh = wi->vdi_handle;
 
     if (dst)
     {
-        dst->fd_wdwidth = (src->fd_h + 15) / 16;
-        dst->fd_addr = malloc(dst->fd_wdwidth * sizeof(short) * gl_nplanes * src->fd_h);
-        dst->fd_w = src->fd_h;
-        dst->fd_h = src->fd_w;
-        dst->fd_nplanes = gl_nplanes;
         short pxy[8];
-
-        if (dst->fd_addr)
+        
+        switch (rotations)
         {
-            switch (rotations)
-            {
-                case 0:
-                default:
-                    dbg("0\r\n");
-                    pxy[0] = pxy[1] = pxy[4] = pxy[5] = 0;
-                    pxy[2] = pxy[6] = src->fd_w - 1;
-                    pxy[3] = pxy[7] = src->fd_h - 1;
-                    vro_cpyfm(vh, S_ONLY, pxy, src, dst);
-                    break;
-
-                case 1: /* 90 degrees counter clockwise */
-                    dbg("1\r\n");
-                    /* swap rows and reverse columns */
-                    for (short i = 0; i < src->fd_h; i++)   /* rows */
+            case 0:
+            default:
+                dbg("0\r\n");
+                pxy[0] = pxy[1] = pxy[4] = pxy[5] = 0;
+                pxy[2] = pxy[6] = src->mfdb.fd_w - 1;
+                pxy[3] = pxy[7] = src->mfdb.fd_h - 1;
+                vro_cpyfm(vh, S_ONLY, pxy, &src->mfdb, &dst->mfdb);
+                break;
+                
+            case 1: /* 90 degrees counter clockwise */
+                dbg("1\r\n");
+                dst->mfdb.fd_w = src->mfdb.fd_h;
+                dst->mfdb.fd_h = src->mfdb.fd_w;
+                dst->mfdb.fd_wdwidth = (dst->mfdb.fd_w + 15) / 16;
+                /* swap rows and reverse columns */
+                for (short i = 0; i < src->mfdb.fd_h; i++)   /* rows */
+                {
+                    for (short j = 0; j < src->mfdb.fd_w; j++) /* columns */
                     {
-                        for (short j = 0; j < src->fd_w; j++) /* columns */
-                        {
-                            pxy[0] = i;
-                            pxy[1] = j;
-                            pxy[2] = i;
-                            pxy[3] = j;
-                            pxy[4] = j;
-                            pxy[5] = src->fd_w - i - 1;
-                            pxy[6] = j;
-                            pxy[7] = src->fd_w - i - 1;
-
-                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
-                        }
+                        pxy[0] = i;
+                        pxy[1] = j;
+                        pxy[2] = i;
+                        pxy[3] = j;
+                        pxy[4] = j;
+                        pxy[5] = src->mfdb.fd_w - i - 1;
+                        pxy[6] = j;
+                        pxy[7] = src->mfdb.fd_w - i - 1;
+                        
+                        vro_cpyfm(vh, S_ONLY, pxy, &src->mfdb, &dst->mfdb);
                     }
-                    break;
-
-                case 2:
-                    /* 180 degrees counter clockwise (aka upside-down) */
-                    dbg("2\r\n");
-                    for (short i = 0; i < src->fd_h; i++)
+                }
+                break;
+                
+            case 2:
+                /* 180 degrees counter clockwise (aka upside-down) */
+                dbg("2\r\n");
+                for (short i = 0; i < src->mfdb.fd_h; i++)
+                {
+                    for (short j = 0; j < src->mfdb.fd_w; j++)
                     {
-                        for (short j = 0; j < src->fd_w; j++)
-                        {
-                            pxy[0] = j;
-                            pxy[1] = i;
-                            pxy[2] = j;
-                            pxy[3] = i;
-                            pxy[4] = src->fd_w - j - 1;
-                            pxy[5] = src->fd_w - i - 1;
-                            pxy[6] = src->fd_h - j - 1;
-                            pxy[7] = src->fd_w - i - 1;
-
-                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
-                        }
+                        pxy[0] = j;
+                        pxy[1] = i;
+                        pxy[2] = j;
+                        pxy[3] = i;
+                        pxy[4] = src->mfdb.fd_w - j - 1;
+                        pxy[5] = src->mfdb.fd_w - i - 1;
+                        pxy[6] = src->mfdb.fd_h - j - 1;
+                        pxy[7] = src->mfdb.fd_w - i - 1;
+                        
+                        vro_cpyfm(vh, S_ONLY, pxy, &src->mfdb, &dst->mfdb);
                     }
-                    break;
-
-                case 3:
-                    /* 270 degrees counter clockwise */
-                    for (short i = 0; i < src->fd_w; i++)
+                }
+                break;
+                
+            case 3:
+                /* 270 degrees counter clockwise */
+                dst->mfdb.fd_w = src->mfdb.fd_h;
+                dst->mfdb.fd_h = src->mfdb.fd_w;
+                dst->mfdb.fd_wdwidth = (dst->mfdb.fd_w + 15) / 16;
+                for (short i = 0; i < src->mfdb.fd_w; i++)
+                {
+                    for (short j = 0; j < src->mfdb.fd_h; j++)
                     {
-                        for (short j = 0; j < src->fd_h; j++)
-                        {
-                            pxy[0] = i;
-                            pxy[1] = j;
-                            pxy[2] = i;
-                            pxy[3] = j;
-                            pxy[4] = src->fd_h - j - 1;
-                            pxy[5] = i;
-                            pxy[6] = src->fd_h - j - 1;
-                            pxy[7] = i;
-
-                            vro_cpyfm(vh, S_ONLY, pxy, src, dst);
-                        }
+                        pxy[0] = i;
+                        pxy[1] = j;
+                        pxy[2] = i;
+                        pxy[3] = j;
+                        pxy[4] = src->mfdb.fd_h - j - 1;
+                        pxy[5] = i;
+                        pxy[6] = src->mfdb.fd_h - j - 1;
+                        pxy[7] = i;
+                        
+                        vro_cpyfm(vh, S_ONLY, pxy, &src->mfdb, &dst->mfdb);
                     }
-                    break;
-            }
-
-            return dst;
+                }
+                break;
         }
+        return dst;
     }
-    return (MFDB *) NULL;
+    return NULL;
 }
 
-static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
+static struct image *shear_rotate_image(struct window *wi, struct image *src, short angle)
 {
     short rotations;
-    MFDB *integral_img;
+    struct image *integral_img;
+    struct image *x_sheared_img;
 
     /*
      * adjust rotation angle so that we need to shear-rotate by a maximum of +/- 45°
@@ -449,36 +492,40 @@ static MFDB *shear_rotate_image(struct window *wi, MFDB *src, short angle)
     short shear_x = -itan(angle);
     short shear_y = isin(angle);
 
+    return integral_img;
+    
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
 
-    return integral_img;
-
-    x_shear(wi, integral_img, shear_x);
+    x_sheared_img = x_shear(wi, integral_img, shear_x);
+    free(integral_img);
+    return x_sheared_img;
+    
     y_shear(wi, integral_img, shear_y);
     x_shear(wi, integral_img, shear_x);
 
     return integral_img;
 }
 
-static void x_shear(struct window *wi, MFDB *src, short shear_x)
+static struct image *x_shear(struct window *wi, struct image *src, short shear_x)
 {
     short pxy[8];
+    struct image *sheared = create_image_like(src);
 
     /* we assume a half width border left and right */
-    short border_width = src->fd_w / 2;
+    short border_width = src->mfdb.fd_w / 2;
 
 
-    for (int i = 0; i < src->fd_h / 4; i++)
+    for (int i = 0; i < src->mfdb.fd_h / 4; i++)
     {
 
-        short mid_x = src->fd_w / 2;
+        short mid_x = src->mfdb.fd_w / 2;
         short width = mid_x;
 
         short left = mid_x - width / 2;
         short right = left + width - 1;
 
-        short mid_y = src->fd_h / 2;
+        short mid_y = src->mfdb.fd_h / 2;
 
         dbg("shear_x = %d, shift = %d\r\n", shear_x, shear_x * i / SHRT_MAX);
 
@@ -491,16 +538,18 @@ static void x_shear(struct window *wi, MFDB *src, short shear_x)
         pxy[5] = mid_y + i;
         pxy[6] = pxy[4] + width - 1;
         pxy[7] = mid_y + i;
-        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, src, src);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &src->mfdb);
 
         pxy[1] = pxy[3] = pxy[5] = pxy[7] = mid_y - i;
         pxy[4] = -pxy[4];
         pxy[6] = pxy[4] + width - 1;
-        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, src, src);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &src->mfdb);
     }
+    
+    return sheared;
 }
 
-static void y_shear(struct window *wi, MFDB *src, short shear_y)
+static struct image *y_shear(struct window *wi, struct image *src, short shear_y)
 {
 }
 
