@@ -43,6 +43,7 @@ static struct image *integral_rotate_image(struct window *wi, struct image *src,
 static struct image *y_shear(struct window *wi, struct image *src, short shear_y);
 static struct image *x_shear(struct window *wi, struct image *src, short shear_x);
 static struct image *shear_rotate_image(struct window *wi, struct image *src, short angle);
+static struct image *create_image_mfdb(MFDB *mfdb);
 static void delete_image(struct image *image);
 
 static char *object_type(short type)
@@ -263,43 +264,48 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
 {
     short vh = wi->vdi_handle;
     struct imgrotwindow *iw = (struct imgrotwindow *) wi->priv;
-
-    (void) wx; (void) wy; (void) ww; (void) wh;
-
-    dbg("\n");
-
-    MFDB dst = { 0 };
-
-
-    struct image *new_image = shear_rotate_image(wi, &iw->image_mfdb, iw->angle);
-
-    /* first, clear the window */
-    if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
-
-    /* draw our (possibly rotated) icon */
+    struct image *img;
     
-    dbg("new_image = %p\n", new_image);
-    if (new_image)
+    (void) wx; (void) wy; (void) ww; (void) wh;
+    
+    dbg("\n");
+    
+    MFDB dst = { 0 };
+    
+    img = create_image_mfdb(&iw->image_mfdb);
+    if (img != NULL)
     {
-        short wicon = new_image->mfdb.fd_w;
-        short hicon = new_image->mfdb.fd_h;
-
-        /*
+        struct image *new_image = shear_rotate_image(wi, img, iw->angle);
+        
+        /* first, clear the window */
+        if (wi->clear) wi->clear(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
+        
+        /* draw our (possibly rotated) icon */
+        
+        dbg("new_image = %p\n", new_image);
+        if (new_image)
+        {
+            short wicon = new_image->mfdb.fd_w;
+            short hicon = new_image->mfdb.fd_h;
+            
+            /*
          * center icon into window's work area
          */
-        short pxy[8] =
-        {
-            0, 0, wicon - 1, hicon - 1,
-            wi->work.g_x + wi->work.g_w / 2 - wicon / 2,
-            wi->work.g_y + wi->work.g_h / 2 - hicon / 2,
-            wi->work.g_x + wi->work.g_w / 2 + wicon / 2 - 1,
-            wi->work.g_y + wi->work.g_h / 2 + hicon / 2 - 1
-        };
-
-        vro_cpyfm(vh, S_ONLY,
-              pxy,
-              &new_image->mfdb, &dst);
-        delete_image(new_image);
+            short pxy[8] =
+            {
+                0, 0, wicon - 1, hicon - 1,
+                wi->work.g_x + wi->work.g_w / 2 - wicon / 2,
+                wi->work.g_y + wi->work.g_h / 2 - hicon / 2,
+                wi->work.g_x + wi->work.g_w / 2 + wicon / 2 - 1,
+                wi->work.g_y + wi->work.g_h / 2 + hicon / 2 - 1
+            };
+            
+            vro_cpyfm(vh, S_ONLY,
+                      pxy,
+                      &new_image->mfdb, &dst);
+            delete_image(new_image);
+        }
+        delete_image(img);
     }
 }
 
@@ -364,6 +370,10 @@ static struct image *create_image_mfdb(MFDB *mfdb)
 {
     struct image *new_image;
     new_image = calloc(1, sizeof(struct image) + mfdb->fd_wdwidth * mfdb->fd_h * mfdb->fd_nplanes * sizeof(short));
+    new_image->mfdb = *mfdb;
+    memcpy(new_image->imgdata, mfdb->fd_addr, mfdb->fd_wdwidth * mfdb->fd_h * mfdb->fd_nplanes * sizeof(short));
+    
+    return new_image;
 }
 static void delete_image(struct image *image)
 {
