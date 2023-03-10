@@ -502,8 +502,6 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
     short shear_x = -itan(angle);
     short shear_y = isin(angle);
 
-    return integral_img;
-    
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
 
@@ -548,12 +546,12 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
         pxy[5] = mid_y + i;
         pxy[6] = pxy[4] + width - 1;
         pxy[7] = mid_y + i;
-        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &src->mfdb);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &sheared->mfdb);
 
         pxy[1] = pxy[3] = pxy[5] = pxy[7] = mid_y - i;
         pxy[4] = -pxy[4];
         pxy[6] = pxy[4] + width - 1;
-        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &src->mfdb);
+        vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &sheared->mfdb);
     }
     
     return sheared;
