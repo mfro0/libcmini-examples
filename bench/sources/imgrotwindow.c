@@ -207,7 +207,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
         short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
 
-        vro_cpyfm(vh, ALL_BLACK, pxy, NULL, &dst_mfdb);
+        vro_cpyfm(vh, ALL_WHITE, pxy, NULL, &dst_mfdb);
 
         pxy[2] = src_mfdb.fd_w - 1;
         pxy[3] = src_mfdb.fd_h - 1;
@@ -526,15 +526,15 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
     //short shear_x = rest_angle < 0 ? -itan(-rest_angle / 2) : -itan(rest_angle / 2);
     //short shear_y = rest_angle < 0 ? isin(-rest_angle) : isin(rest_angle);
     
-    short shear_x = (short) (-tan(rest_angle / 10.0 / 2.0 * 3.1415926 / 180.0) * SHRT_MAX);
-    short shear_y = (short) (sin(rest_angle / 10.0 * 3.1415926 / 180.0) * SHRT_MAX);
+    short shear_x = (short) (-tan(rest_angle / 10.0 / 2.0 * M_PI / 180.0) * SHRT_MAX);
+    short shear_y = (short) (sin(rest_angle / 10.0 * M_PI / 180.0) * SHRT_MAX);
     
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
 
     x_sheared_img = x_shear(wi, integral_img, shear_x);
     free(integral_img);
-    
+
     y_sheared_img = y_shear(wi, x_sheared_img, shear_y);
     free(x_sheared_img);
             
@@ -549,10 +549,10 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
  */
 static struct image *x_shear(struct window *wi, struct image *src, short shear_x)
 {
-    short winc = (short) abs((long) src->mfdb.fd_h * shear_x / SHRT_MAX);
+    short winc = (short) ((long) src->mfdb.fd_h * shear_x / SHRT_MAX);
     // dbg("winc=%d\r\n", winc);
     
-    short new_width = src->mfdb.fd_w + winc;
+    short new_width = src->mfdb.fd_w + abs(winc);
     short new_height = src->mfdb.fd_h;
     struct image *sheared = create_image_whp(new_width, new_height, src->mfdb.fd_nplanes);
     short pxy[8] = {0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
@@ -566,7 +566,9 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
         for (int i = 0; i < src->mfdb.fd_h; i++)
         {
             
-            short shift = (short)((long) i * (long) shear_x / SHRT_MAX);
+            short skew = shear_x > 0 ?
+                             (short)((long) i * (long) shear_x / SHRT_MAX) :
+                             -(short)((long) (src->mfdb.fd_w - 1 - i) * (long) shear_x / SHRT_MAX);
             short left = 0;
             short right = src->mfdb.fd_w - 1;
             
@@ -575,7 +577,7 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
             pxy[2] = right;
             pxy[3] = i;
             
-            pxy[4] = winc + shift;
+            pxy[4] = abs(winc) - skew;
             pxy[5] = i;
             pxy[6] = pxy[4] + src->mfdb.fd_w - 1;
             pxy[7] = i;
@@ -587,11 +589,10 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
 
 static struct image *y_shear(struct window *wi, struct image *src, short shear_y)
 {    
-    short hinc = (short) abs((long) src->mfdb.fd_w * shear_y / SHRT_MAX);
-    // dbg("hinc=%d\r\n", hinc);
+    short hinc = (short) ((long) src->mfdb.fd_w * shear_y / SHRT_MAX);
     
     short new_width = src->mfdb.fd_w;
-    short new_height = src->mfdb.fd_h + hinc;
+    short new_height = src->mfdb.fd_h + abs(hinc);
     struct image *sheared = create_image_whp(new_width, new_height, src->mfdb.fd_nplanes);
     short pxy[8] = {0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
     
@@ -604,18 +605,19 @@ static struct image *y_shear(struct window *wi, struct image *src, short shear_y
         for (int i = 0; i < src->mfdb.fd_w; i++)
         {
             
-            short shift = (short)((long) i * (long) shear_y / SHRT_MAX);
+            short skew = shear_y > 0 ? (short)((long) i * (long) shear_y / SHRT_MAX) :
+                                       -(short)((long) (src->mfdb.fd_h - 1 - i) * (long) shear_y / SHRT_MAX);
             short top = 0;
             short bottom = src->mfdb.fd_h - 1;
             
-            pxy[0] = src->mfdb.fd_w - 1 - i;
+            pxy[0] = i;
             pxy[1] = top;
-            pxy[2] = src->mfdb.fd_w - 1 - i;
+            pxy[2] = i;
             pxy[3] = bottom;
             
-            pxy[4] = src->mfdb.fd_w - 1 - i;
-            pxy[5] = hinc - shift; 
-            pxy[6] = src->mfdb.fd_w - 1 - i;
+            pxy[4] = i;
+            pxy[5] = abs(hinc) - skew; 
+            pxy[6] = i;
             pxy[7] = pxy[5] + src->mfdb.fd_h - 1;
             vro_cpyfm(wi->vdi_handle, S_ONLY, pxy, &src->mfdb, &sheared->mfdb);
         }
