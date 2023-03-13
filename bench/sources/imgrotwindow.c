@@ -331,6 +331,8 @@ static void timer_imgrotwindow(struct window *wi)
         {
             do_redraw(wi, wi->work.g_x, wi->work.g_y, wi->work.g_w, wi->work.g_h);
             iw->angle += 50;
+            //if (iw->angle > 450)
+            //    iw->angle = -450;
             iw->angle %= 3600;
 
             dbg("iw->angle = %d\n", iw->angle);
@@ -521,9 +523,12 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
     /*
      * make sure to call the simple trigonometric functions with positive angle only
      */
-    short shear_x = rest_angle < 0 ? -itan(-rest_angle / 2) : -itan(rest_angle / 2);
-    short shear_y = rest_angle < 0 ? isin(-rest_angle) : isin(rest_angle);
-
+    //short shear_x = rest_angle < 0 ? -itan(-rest_angle / 2) : -itan(rest_angle / 2);
+    //short shear_y = rest_angle < 0 ? isin(-rest_angle) : isin(rest_angle);
+    
+    short shear_x = (short) (-tan(rest_angle / 10.0 / 2.0 * 3.1415926 / 180.0) * SHRT_MAX);
+    short shear_y = (short) (sin(rest_angle / 10.0 * 3.1415926 / 180.0) * SHRT_MAX);
+    
     if (shear_x == 0 && shear_y == 0)
         return integral_img;
 
