@@ -79,7 +79,8 @@
 #define POPU_DARKMAGENTA 42  /* BOX in Baum POPUPS */
 
 #define ICNS             4   /* Formular/Dialog */
-#define COLICON          1   /* USERDEF in Baum ICNS */
+#define COLICON1         1   /* USERDEF in Baum ICNS */
+#define COLICON          2   /* USERDEF in Baum ICNS */
 
 #define ALERT1           0   /* Alert String */
 

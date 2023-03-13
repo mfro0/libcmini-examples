@@ -142,7 +142,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         }
 
 
-        CICONBLK *iconblk = icon_tree[COLICON].ob_spec.ciconblk;
+        CICONBLK *iconblk = icon_tree[COLICON1].ob_spec.ciconblk;
         CICON *icon;
 
         // dbg("dlg[COLICON].ob_type=%s\n", object_type(icon_tree[COLICON].ob_type));
@@ -365,6 +365,8 @@ static struct image *create_image_whp(short width, short height, short nplanes)
     struct image *new_image;
     short wdwidth = (width + 15) / 16;
     
+    dbg("width=%d, height=%d, nplanes=%d\r\n", width, height, nplanes);
+    
     new_image = calloc(1, sizeof(struct image) +
                        (size_t) wdwidth * height * nplanes * sizeof(short));
     if (new_image != NULL)
@@ -394,6 +396,7 @@ static struct image *create_image_mfdb(MFDB *mfdb)
     assert(new_image != NULL);
     return new_image;
 }
+
 static void delete_image(struct image *image)
 {
     free(image);
@@ -568,7 +571,7 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
             
             short skew = shear_x > 0 ?
                              (short)((long) i * (long) shear_x / SHRT_MAX) :
-                             -(short)((long) (src->mfdb.fd_w - 1 - i) * (long) shear_x / SHRT_MAX);
+                             -(short)((long) (src->mfdb.fd_h - i) * (long) shear_x / SHRT_MAX);
             short left = 0;
             short right = src->mfdb.fd_w - 1;
             
@@ -606,7 +609,7 @@ static struct image *y_shear(struct window *wi, struct image *src, short shear_y
         {
             
             short skew = shear_y > 0 ? (short)((long) i * (long) shear_y / SHRT_MAX) :
-                                       -(short)((long) (src->mfdb.fd_h - 1 - i) * (long) shear_y / SHRT_MAX);
+                                       -(short)((long) (src->mfdb.fd_w - i) * (long) shear_y / SHRT_MAX);
             short top = 0;
             short bottom = src->mfdb.fd_h - 1;
             
