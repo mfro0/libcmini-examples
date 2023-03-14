@@ -207,7 +207,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
         short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
 
-        vro_cpyfm(vh, ALL_WHITE, pxy, NULL, &dst_mfdb);
+        vro_cpyfm(vh, dst_mfdb.fd_nplanes <= 8 ? ALL_WHITE : ALL_BLACK, pxy, NULL, &dst_mfdb);
 
         pxy[2] = src_mfdb.fd_w - 1;
         pxy[3] = src_mfdb.fd_h - 1;
@@ -568,7 +568,7 @@ static struct image *x_shear(struct window *wi, struct image *src, short shear_x
     
     assert(sheared != NULL);
     
-    vro_cpyfm(wi->vdi_handle, ALL_WHITE, pxy, &src->mfdb, &sheared->mfdb);
+    vro_cpyfm(wi->vdi_handle, sheared->mfdb.fd_nplanes <= 8 ? ALL_WHITE : ALL_BLACK, pxy, &src->mfdb, &sheared->mfdb);
     
     if (sheared != NULL)
     {
@@ -608,7 +608,7 @@ static struct image *y_shear(struct window *wi, struct image *src, short shear_y
     
     assert(sheared != NULL);
     
-    vro_cpyfm(wi->vdi_handle, ALL_WHITE, pxy, &src->mfdb, &sheared->mfdb);
+    vro_cpyfm(wi->vdi_handle, sheared->mfdb.fd_nplanes <= 8 ? ALL_WHITE : ALL_BLACK, pxy, &src->mfdb, &sheared->mfdb);
     
     if (sheared != NULL)
     {
