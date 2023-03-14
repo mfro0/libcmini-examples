@@ -512,8 +512,8 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
      * adjust rotation angle so that we need to shear-rotate by a maximum amount of +/- 45°
      */
     rest_angle = angle % 3600;
-    n_90rot = angle / 900;
-    rest_angle = angle % 900;
+    n_90rot = rest_angle / 900;
+    rest_angle = rest_angle % 900;
     if (rest_angle > 450)
     {
         rest_angle = rest_angle - 900;
