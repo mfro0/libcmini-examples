@@ -542,12 +542,14 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
         return integral_img;
 
     x_sheared_img = x_shear(wi, integral_img, shear_x);
-    free(integral_img);
-
+    delete_image(integral_img);
+    
     y_sheared_img = y_shear(wi, x_sheared_img, shear_y);
-    free(x_sheared_img);
-            
+    delete_image(x_sheared_img);
+                
     x_sheared_img = x_shear(wi, y_sheared_img, shear_x);
+    delete_image(y_sheared_img);
+    
     return x_sheared_img;
 }
 
