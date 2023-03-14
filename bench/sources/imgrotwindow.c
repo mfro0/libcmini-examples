@@ -13,7 +13,7 @@
 #include <math.h>
 #include <assert.h>
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #ifdef __mcoldfire__
 #define dbg(format, arg...) do { fprintf(stderr, "DEBUG: (%s):" format, __FUNCTION__, ##arg); } while (0)
