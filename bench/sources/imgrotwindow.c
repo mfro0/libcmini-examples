@@ -8,7 +8,6 @@
 #include <limits.h>
 
 #include "imgrotwindow.h"
-#include "intmath.h"
 #include "bench.h"
 #include <math.h>
 #include <assert.h>
@@ -145,9 +144,9 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         CICONBLK *iconblk = icon_tree[COLICON].ob_spec.ciconblk;
         CICON *icon;
 
-        // dbg("dlg[COLICON].ob_type=%s\n", object_type(icon_tree[COLICON].ob_type));
-        // dbg("iconblk->mainlist=%p\n", iconblk->mainlist);
-        // ("iconblk->monoblk=%p\n", iconblk->monoblk);
+        dbg("dlg[COLICON].ob_type=%s\n", object_type(icon_tree[COLICON].ob_type));
+        dbg("iconblk->mainlist=%p\n", iconblk->mainlist);
+        dbg("iconblk->monoblk=%p\n", iconblk->monoblk);
 
         icon = iconblk->mainlist;
         if (icon == NULL)
@@ -184,8 +183,8 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             .fd_r3 = 0
         };
 
-        // dbg("src_mfdb.fd_nplanes = %d\n", src_mfdb.fd_nplanes);
-        // dbg("src_mfdb.fd_addr = %p\n", src_mfdb.fd_addr);
+        dbg("src_mfdb.fd_nplanes = %d\n", src_mfdb.fd_nplanes);
+        dbg("src_mfdb.fd_addr = %p\n", src_mfdb.fd_addr);
 
         MFDB dst_mfdb = src_mfdb;
 
@@ -203,7 +202,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             wi->del(wi);
             return NULL;
         }
-        // dbg("allocated new address at %p, new dimension=%d,%d\n", dst_mfdb.fd_addr, dst_mfdb.fd_w, dst_mfdb.fd_h);
+        dbg("allocated new address at %p, new dimension=%d,%d\n", dst_mfdb.fd_addr, dst_mfdb.fd_w, dst_mfdb.fd_h);
 
         short pxy[8] = { 0, 0, new_width - 1, new_height - 1, 0, 0, new_width - 1, new_height - 1 };
 
@@ -216,8 +215,8 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         pxy[6] = dst_mfdb.fd_w - pxy[4] - 1;
         pxy[7] = dst_mfdb.fd_h - pxy[5] - 1;
 
-        // dbg("copy from (%d,%d)(%d,%d) to (%d,%d)(%d,%d)\n", pxy[0], pxy[1], pxy[2], pxy[3],
-        //                                                    pxy[4], pxy[5], pxy[6], pxy[7]);
+        dbg("copy from (%d,%d)(%d,%d) to (%d,%d)(%d,%d)\n", pxy[0], pxy[1], pxy[2], pxy[3],
+                                                            pxy[4], pxy[5], pxy[6], pxy[7]);
 
         vro_cpyfm(vh, S_ONLY, pxy, &src_mfdb, &dst_mfdb);
         if (iw->iconblk == NULL)
@@ -230,7 +229,7 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
         iw->image_mfdb = dst_mfdb;
 
-        // dbg("finished\n");
+        dbg("finished\n");
 
     }
 
@@ -239,7 +238,6 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
 
 static void delete_imgrotwindow(struct window *wi)
 {
-    // dbg("\n");
     /* free window-private memory */
     if (wi && wi->priv)
     {
@@ -270,8 +268,6 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
     
     (void) wx; (void) wy; (void) ww; (void) wh;
     
-    // dbg("\n");
-    
     MFDB dst = { 0 };
     
     img = create_image_mfdb(&iw->image_mfdb);
@@ -284,13 +280,12 @@ static void draw_imgrotwindow(struct window *wi, short wx, short wy, short ww, s
         
         /* draw our (possibly rotated) icon */
         
-        // dbg("new_image = %p\n", new_image);
         if (new_image)
         {
             short wicon = new_image->mfdb.fd_w;
             short hicon = new_image->mfdb.fd_h;
             
-            // dbg("wicon=%d, hicon=%d\r\n", wicon, hicon);
+            dbg("wicon=%d, hicon=%d\r\n", wicon, hicon);
             
             /*
              * center icon into window's work area
@@ -503,7 +498,7 @@ static struct image *integral_rotate_image(struct window *wi, struct image *src,
 
 static struct image *shear_rotate_image(struct window *wi, struct image *src, short angle)
 {
-    short n_90rot;
+    short n90rot;
     short rest_angle;
     struct image *integral_img;
     struct image *x_sheared_img, *y_sheared_img;
@@ -512,15 +507,15 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
      * adjust rotation angle so that we need to shear-rotate by a maximum amount of +/- 45°
      */
     rest_angle = angle % 3600;
-    n_90rot = rest_angle / 900;
+    n90rot = rest_angle / 900;
     rest_angle = rest_angle % 900;
     if (rest_angle > 450)
     {
         rest_angle = rest_angle - 900;
-        n_90rot = (n_90rot + 1) % 4;
+        n90rot = (n90rot + 1) % 4;
     }
     
-    integral_img = integral_rotate_image(wi, src, n_90rot);
+    integral_img = integral_rotate_image(wi, src, n90rot);
 
     if (integral_img == NULL)
     {
@@ -529,8 +524,9 @@ static struct image *shear_rotate_image(struct window *wi, struct image *src, sh
     }
 
     dbg("angle=%d, n_90rot=%d, rest_angle=%d\r\n", angle, n_90rot, rest_angle);
+
     /*
-     * make sure to call the simple trigonometric functions with positive angle only
+     * doesn't work for negative angles (which we need)
      */
     //short shear_x = rest_angle < 0 ? -itan(-rest_angle / 2) : -itan(rest_angle / 2);
     //short shear_y = rest_angle < 0 ? isin(-rest_angle) : isin(rest_angle);
