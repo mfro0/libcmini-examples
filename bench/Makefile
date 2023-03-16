@@ -69,6 +69,7 @@ CSRCS=\
 	$(SRCDIR)/intmath.c \
 	$(SRCDIR)/dialog.c \
 	$(SRCDIR)/rsrc.c \
+	$(SRCDIR)/imgtools.c \
 	$(SRCDIR)/grafwindow.c \
 	$(SRCDIR)/offscreen.c \
 	$(SRCDIR)/testwindow.c \
