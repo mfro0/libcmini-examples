@@ -154,7 +154,6 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
                 .fd_stand = 0,
                 .fd_r1 = 0,
                 .fd_r2 = 0,
-                .fd_r2 = 0,
                 .fd_r3 = 0
             };
             src_mfdb = mfdb;
