@@ -139,50 +139,68 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
         dbg("iconblk->mainlist=%p\n", iconblk->mainlist);
         dbg("iconblk->monoblk=%p\n", iconblk->monoblk);
 
-        icon = iconblk->mainlist;
-        if (icon == NULL)
-        {
-            form_alert(1, "[1][No color icon?][CANCEL]");
-            return NULL;
-        }
+        
+        MFDB src_mfdb;
         
         if (gl_nplanes == 1)
         {
+            MFDB mfdb =
+            {
+                .fd_nplanes = 1,
+                .fd_addr = iconblk->monoblk.ib_pdata,
+                .fd_w = iconblk->monoblk.ib_wicon,
+                .fd_h = iconblk->monoblk.ib_hicon,
+                .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
+                .fd_stand = 0,
+                .fd_r1 = 0,
+                .fd_r2 = 0,
+                .fd_r2 = 0,
+                .fd_r3 = 0
+            };
+            src_mfdb = mfdb;
+        }
+        else
+        {
+            icon = iconblk->mainlist;
+            if (icon == NULL)
+            {
+                form_alert(1, "[1][No color icon?][CANCEL]");
+                return NULL;
+            }
+
+            do
+            {
+                if (icon->num_planes == gl_nplanes)
+                    break;
+                icon = iconblk->mainlist->next_res;
+            } while (icon != NULL);
             
+            if (iconblk == NULL || iconblk->mainlist == NULL)
+            {
+                form_alert(1, "[2][Could not get color icon][CANCEL]");
+                wi->del(wi);
+                
+                return NULL;
+            }
+            
+            
+            MFDB mfdb =
+            {
+                .fd_nplanes = icon->num_planes,
+                .fd_addr = icon->col_data,
+                .fd_w = iconblk->monoblk.ib_wicon,
+                .fd_h = iconblk->monoblk.ib_hicon,
+                .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
+                .fd_stand = 0,
+                .fd_r1 = 0,
+                .fd_r2 = 0,
+                .fd_r3 = 0
+            };
+            src_mfdb = mfdb;
+            
+            dbg("src_mfdb.fd_nplanes = %d\n", src_mfdb.fd_nplanes);
+            dbg("src_mfdb.fd_addr = %p\n", src_mfdb.fd_addr);
         }
-        
-        do
-        {
-            if (icon->num_planes == gl_nplanes)
-                break;
-            icon = iconblk->mainlist->next_res;
-        } while (icon != NULL);
-
-        if (iconblk == NULL || iconblk->mainlist == NULL)
-        {
-            form_alert(1, "[2][Could not get color icon][CANCEL]");
-            wi->del(wi);
-
-            return NULL;
-        }
-
-
-        MFDB src_mfdb =
-        {
-            .fd_nplanes = icon->num_planes,
-            .fd_addr = icon->col_data,
-            .fd_w = iconblk->monoblk.ib_wicon,
-            .fd_h = iconblk->monoblk.ib_hicon,
-            .fd_wdwidth = (iconblk->monoblk.ib_wicon + 15) / sizeof(short) / 8,
-            .fd_stand = 0,
-            .fd_r1 = 0,
-            .fd_r2 = 0,
-            .fd_r3 = 0
-        };
-
-        dbg("src_mfdb.fd_nplanes = %d\n", src_mfdb.fd_nplanes);
-        dbg("src_mfdb.fd_addr = %p\n", src_mfdb.fd_addr);
-
         iw->integral_images[0] = create_image_mfdb(&src_mfdb);
 
         for (int i = 1; i < 4; i++)
