@@ -8,6 +8,7 @@ include/fontwindow.h
 include/global.h
 include/grafwindow.h
 include/imgrotwindow.h
+include/imgtools.h
 include/intmath.h
 include/menu.h
 include/offscreen.h
@@ -50,6 +51,7 @@ sources/rcircles_vdi_window.c
 include/rcircles_vdi_window.h
 sources/nf_asm.S
 include/natfeats.h
+sources/imgtools.c
 sources/natfeats.c
 sources/testwindow.c
 include/testwindow.h
