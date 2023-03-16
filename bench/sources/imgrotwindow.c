@@ -45,6 +45,10 @@ static struct image *y_shear(struct window *wi, struct image *src, short shear_y
 static struct image *x_shear(struct window *wi, struct image *src, short shear_x);
 static struct image *shear_rotate_image(struct window *wi, struct image *src, short angle);
 static struct image *create_image_mfdb(MFDB *mfdb);
+static struct image *create_image_like(struct image *);
+static struct image *create_image_whp(short, short, short);
+static void delete_image(struct image *img);
+
 static void delete_image(struct image *image);
 
 static char *object_type(short type)
@@ -154,6 +158,12 @@ struct window *create_imgrotwindow(short wi_kind, char *title)
             form_alert(1, "[1][No color icon?][CANCEL]");
             return NULL;
         }
+        
+        if (gl_nplanes == 1)
+        {
+            
+        }
+        
         do
         {
             if (icon->num_planes == gl_nplanes)

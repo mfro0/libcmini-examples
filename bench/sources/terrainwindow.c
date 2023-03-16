@@ -7,7 +7,6 @@
 #include <stdbool.h>
 
 #include "terrainwindow.h"
-#include "rasterdraw.h"
 
 #include <png.h>
 #include <mint/cookie.h>
@@ -19,73 +18,9 @@
 #define out(format, arg...) do { nf_printf("" format, ##arg); } while (0)
 #else
 #define dbg(format, arg...) do { ; } while (0)
+#define out(format, arg...) do { ; } while (0)
 #endif /* DEBUG */
 
-#ifdef __mcoldfire__
-
-struct MCD_bufDesc_struct {
-   uint32_t flags;         /* flags describing the DMA */
-   uint32_t csumResult;    /* checksum from checksumming performed since last checksum reset */
-   int8_t  *srcAddr;      /* the address to move data from */
-   int8_t  *destAddr;     /* the address to move data to */
-   int8_t  *lastDestAddr; /* the last address written to */
-   uint32_t dmaSize;       /* the number of bytes to transfer independent of the transfer size */
-   struct MCD_bufDesc *next; /* next buffer descriptor in chain */
-   uint32_t info;          /* private information about this descriptor;  DMA does not affect it */
-};
-
-struct MCD_XferProg_struct {
-   int8_t *lastSrcAddr;         /* the most-recent or last, post-increment source address */
-   int8_t *lastDestAddr;        /* the most-recent or last, post-increment destination address */
-   uint32_t dmaSize;            /* the amount of data transferred for the current buffer */
-   struct MCD_bufDesc_struct *currBufDesc;/* pointer to the current buffer descriptor being DMAed */
-};
-
-struct dma_driver_interface
-{
-    int32_t version;
-    int32_t magic;
-    int (*dma_set_initiator)(int initiator);
-    uint32_t (*dma_get_initiator)(int requestor);
-    void (*dma_free_initiator)(int requestor);
-    int (*dma_set_channel)(int requestor, void (*handler)(void));
-    int (*dma_get_channel)(int requestor);
-    void (*dma_free_channel)(int requestor);
-    void (*dma_clear_channel)(int channel);
-    int (*MCD_startDma)(long channel,
-                        int8_t *srcAddr, unsigned int srcIncr, int8_t *destAddr, unsigned int destIncr,
-                        unsigned int dmaSize, unsigned int xferSize, unsigned int initiator, int priority,
-                        unsigned int flags, unsigned int funcDesc);
-    int32_t (*MCD_dmaStatus)(int32_t channel);
-    int32_t (*MCD_XferProgrQuery)(int32_t channel, struct MCD_XferProg_struct *progRep);
-    int32_t (*MCD_killDma)(int32_t channel);
-    int32_t (*MCD_continDma)(int32_t channel);
-    int32_t (*MCD_pauseDma)(int32_t channel);
-    int32_t (*MCD_resumeDma)(int32_t channel);
-    int32_t (*MCD_csumQuery)(int32_t channel, uint32_t *csum);
-    void *(*dma_malloc)(uint32_t amount);
-    int32_t (*dma_free)(void *addr);
-};
-
-void cf_dma_blit(MFDB *screen, MFDB *colormap, short *pxy)
-{
-    long val;
-
-    if (Getcookie('MCD_', &val) == C_FOUND)
-    {
-        struct dma_driver_interface *di = (struct dma_driver_interface *) val;
-        short *screen = Logbase() + 0x40000000;
-
-
-
-    }
-    else
-    {
-        fprintf(stderr, "MCD_ cookie not found\r\n");
-        exit(1);
-    }
-}
-#endif /* __mcoldfire__ */
 
 /* private data for this window type */
 struct terrainwindow
@@ -94,9 +29,6 @@ struct terrainwindow
     short color;
     MFDB heightmap;
     MFDB colormap;
-#ifdef __mcoldfire__
-    struct dma_driver_interface *dma_interface;
-#endif /* __mcoldfire__ */
 };
 
 static void timer_terrainwindow(struct window *wi);
@@ -123,12 +55,12 @@ static char *color_type_string(int color_type)
 }
 static void rd_png_warning(void)
 {
-    dbg("png warning");
+    out("png warning");
 }
 
 static void rd_png_error(void)
 {
-    dbg("png_error");
+    out("png_error");
 }
 
 
