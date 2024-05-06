@@ -19,8 +19,11 @@
  * public interface
  */
 	.globl  _nf_id
+	.globl  nf_id
 	.globl  _nf_call
+	.globl  nf_call
 	.globl  _detect_nf
+	.globl  detect_nf
 
 /* illegal exception vector */
 	.equ vec_illegal, 0x10
@@ -37,6 +40,7 @@
  * otherwise exception handler change bombs
  */
 _detect_nf:
+detect_nf:
 	clr.l   d0			/* assume no NatFeats available */
 	move.l  sp,a1
 	move.l  vec_illegal,a0
@@ -68,6 +72,7 @@ nf_version_name:
  * map native features to NF ID
  */
 _nf_id:
+nf_id:
 	.dc.w   0x7300			/* Conflict with ColdFire instruction mvs.b d0,d1 */
 	rts
 
@@ -75,6 +80,7 @@ _nf_id:
  * call native feature by its ID
  */
 _nf_call:
+nf_call:
 	.dc.w   0x7301			/* Conflict with ColdFire instruction mvs.b d1,d1 */
 	rts
 #endif // NF_ASM_S

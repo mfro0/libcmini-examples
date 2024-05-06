@@ -378,6 +378,8 @@ short handle_menu(OBJECT *menu, short title, short item)
                         if (about_dialog && about_dialog->dialog_do) about_dialog->dialog_do(about_dialog);
                     }
                     break;
+                default:
+                    res = false;
             }
 
         case MMENU_MFILE:
@@ -395,7 +397,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     }
                     break;
 
-                case MMENU_MTEST:
+                /*case MMENU_MTEST:
                     wi = create_testwindow(TESTWINDOW_WINELEMENTS, "EmuTOS test window");
                     if (wi != NULL)
                     {
@@ -404,7 +406,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                         window_open_pos_y += 10;
                     }
                     break;
-
+                */
                 case MMENU_MNCOMPLE:
                     wi = create_complexwindow(COMPLEXWINDOW_WINELEMENTS, "Complex Window");
                     if (wi != NULL)
@@ -552,6 +554,7 @@ short handle_menu(OBJECT *menu, short title, short item)
                     break;
 
                 default:
+                    res = false;
                     ;
             }
             break;

@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
     graf_mouse(ARROW, 0x0L);
     vdi_handle = open_vwork(work_out, ext_out);
 
+    dbg("AES version: %x\r\n", aes_global[0]);
+
     dbg("%dx%d resolution in %d planes\r\n",
         work_out[0], work_out[1], gl_nplanes);
     init_global();
@@ -370,6 +372,7 @@ static void multi(void)
                     break;
 
                 case MN_SELECTED:
+                    dbg("msgbuff[3]=%d, msgbuff[4]=%d\r\n", msgbuff[3], msgbuff[4]);
                     handle_menu(gl_menu, msgbuff[3], msgbuff[4]);
                     menu_tnormal(gl_menu, msgbuff[3], true);
                     break;

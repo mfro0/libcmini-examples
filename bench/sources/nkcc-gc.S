@@ -50,10 +50,15 @@ NK_DEL		=	0x1f		| Delete
 |***************************************************************************
 
 	.globl	_nkc_init		| init NKCC
+	.globl	nkc_init
 	.globl	_nkc_tos2n		| TOS key code converter
+	.globl	nkc_tos2n
 	.globl	_nkc_n2tos		| NKC to TOS key code converter
+	.globl	nkc_n2tos
 	.globl	_nkc_toupper		| convert character to upper case
+	.globl	nkc_toupper
 	.globl	_nkc_tolower		| convert character to lower case
+	.globl	nkc_tolower
 
 |***************************************************************************
 | LOCAL TEXT SECTION
@@ -140,6 +145,7 @@ found1:
 |***************************************************************************
 
 _nkc_init:
+nkc_init:
 |------------- fetch addresses of TOS' key scan code translation tables
 
 	movel	a2,sp@-			| backup registers
@@ -169,6 +175,7 @@ _nkc_init:
 |***************************************************************************
 
 _nkc_tos2n:
+nkc_tos2n:
 	movel	sp@(4), d0		| Parameter via Stack!
 #ifdef __mcoldfire__
 	lea	sp@(-12),sp
@@ -544,6 +551,7 @@ tos306:
 |***************************************************************************
 
 _nkc_n2tos:  
+nkc_n2tos:  
 	movel	sp@(4),d0		| Parameter Åber Stack!
 
 	movew	d0,d1			| normalized key code
@@ -804,6 +812,7 @@ exit3:
 |***************************************************************************
 
 _nkc_toupper:
+nkc_toupper:
 	movel	sp@(4),d1		| Parameter via Stack!
 	lea	toupper,a0		| ^upper case translation table
 #ifdef __mcoldfire__
@@ -821,6 +830,7 @@ _nkc_toupper:
 |***************************************************************************
 
 _nkc_tolower:
+nkc_tolower:
 	movel	sp@(4),d1		| Parameter via Stack!
 	lea	tolower,a0		| ^lower case translation table
 #ifdef __mcoldfire__

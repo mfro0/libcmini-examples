@@ -7,7 +7,7 @@ endif
 
 CROSS=Y
 
-CROSSBINDIR_IS_Y=m68k-atari-mint-
+CROSSBINDIR_IS_Y=m68k-atari-mintelf-
 CROSSBINDIR_IS_N=
 
 CROSSBINDIR=$(CROSSBINDIR_IS_$(CROSS))
@@ -15,7 +15,7 @@ CROSSBINDIR=$(CROSSBINDIR_IS_$(CROSS))
 UNAME := $(shell uname)
 ifeq ($(CROSS), Y)
 ifeq ($(UNAME),Linux)
-PREFIX=m68k-atari-mint
+PREFIX=m68k-atari-mintelf
 HATARI=hatari
 else
 PREFIX=m68k-atari-mint
@@ -30,7 +30,7 @@ DEPEND=depend
 LIBCMINI=../../libcmini
 LIBCMINI_LIB=$(LIBCMINI)/build
 
-INCLUDE=-I$(LIBCMINI)/include -I/usr/m68k-atari-mint/include -nostdlib
+INCLUDE=-I$(LIBCMINI)/include -I/usr/m68k-atari-mintelf/include -nostdlib
 LIBS=-lgem -lpng16 -lz -lm -lcmini -nostdlib -lgcc
 CC=$(PREFIX)/bin/gcc
 
@@ -48,12 +48,11 @@ TEST_APP=$(APP)
 CFLAGS= \
 	-O2 \
 	-g \
-	-nostdinc \
-	-I/usr/lib/gcc/m68k-atari-mint/4.6.4/include \
+	--std=c99 \
 	-DFORCE_GEMLIB_UDEF \
 	-Wl,-Map,mapfile \
-	-std=c99 \
 	-Wall \
+	-Wa,--register-prefix-optional \
 	$(CHARSET_FLAGS)
 
 SRCDIR=sources
@@ -134,7 +133,7 @@ $(1)/objs/%.o:$(SRCDIR)/%.S
 $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
 	$(Q)echo "CC $$<"
-	$(Q)$(CC) $$(CFLAGS) -Wl,-Map -Wl,$(1)/mapfile -o $$@ $(LIBCMINI_LIB)/crt0.o $$($(1)_OBJS) -L$(LIBCMINI_LIB)/$(1) $(LIBS)
+	$(Q)$(CC) $$(CFLAGS) -Wl,-Map -Wl,$(1)/mapfile -o $$@ $(LIBCMINI_LIB)/$(1)/objs/crt0.o $$($(1)_OBJS) -L$(LIBCMINI_LIB)/$(1) -L/usr/$(PREFIX)/lib/$(1) $(LIBS)
 	#$(Q)$(STRIP) $$@
 endef
 $(foreach DIR,$(TRGTDIRS),$(eval $(call CC_TEMPLATE,$(DIR))))

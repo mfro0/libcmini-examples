@@ -90,7 +90,7 @@ static inline void set_linewidth(int width)
 }
 
 typedef enum { REPLACE, TRANSPARENT, XOR, REVERSE_TRANSPARENT } write_mode_t;
-write_mode_t write_mode;
+static write_mode_t write_mode;
 
 static inline void set_writemode(write_mode_t w)
 {
