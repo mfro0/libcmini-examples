@@ -317,6 +317,7 @@ void full_window(struct window *wi)
     wind_get(wi->handle, WF_CURRXYWH, &wi->rect.g_x, &wi->rect.g_y, &wi->rect.g_w, &wi->rect.g_h);
     wind_get(wi->handle, WF_WORKXYWH, &wi->work.g_x, &wi->work.g_y, &wi->work.g_w, &wi->work.g_h);
     wi->fulled ^= 1;
+    scroll_window(wi);
 }
 
 static long time;
@@ -353,6 +354,7 @@ void do_redraw(struct window *wi, short xc, short yc, short wc, short hc)
             set_clipping(vh, t1.g_x, t1.g_y, t1.g_w, t1.g_h, 1);
             dbg("redraw window contents (%d, %d) to (%d, %d)\n",
                 t1.g_x, t1.g_y, t1.g_x + t1.g_w, t1.g_y + t1.g_h);
+            Vsync();
             if (wi->draw) wi->draw(wi, t1.g_x, t1.g_y, t1.g_w, t1.g_h);
         }
         wind_get(wi->handle, WF_NEXTXYWH, &t1.g_x, &t1.g_y, &t1.g_w, &t1.g_h);

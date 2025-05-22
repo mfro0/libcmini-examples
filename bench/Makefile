@@ -42,8 +42,8 @@ NATIVECC=gcc
 APP=bench.app
 TEST_APP=$(APP)
 
-# CHARSET_FLAGS= -finput-charset=ISO-8859-1 \
-#               -fexec-charset=ATARIST
+CHARSET_FLAGS= -finput-charset=ISO-8859-1 \
+               -fexec-charset=ATARIST
 
 CFLAGS= \
 	-O2 \

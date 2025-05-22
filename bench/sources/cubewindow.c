@@ -103,19 +103,21 @@ struct world_point
     float z;
 };
 
+const short W = 50;
+
 /*
  * our world extends from -100, -100, -100 to 100, 100, 100
  */
 static struct world_point cube[] =
 {
-    { -100.0, -100.0, -100.0 },
-    { -100.0, -100.0,  100.0 },
-    { -100.0,  100.0, -100.0 },
-    { -100.0,  100.0,  100.0 },
-    {  100.0, -100.0, -100.0 },
-    {  100.0, -100.0,  100.0 },
-    {  100.0,  100.0, -100.0 },
-    {  100.0,  100.0,  100.0 }
+    { -W, -W, -W },
+    { -W, -W,  W },
+    { -W,  W, -W },
+    { -W,  W,  W },
+    {  W, -W, -W },
+    {  W, -W,  W },
+    {  W,  W, -W },
+    {  W,  W,  W }
 };
 #define NUM_NODES     sizeof(cube) / sizeof(struct world_point)
 
@@ -196,6 +198,7 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
     int i;
     short pxy[4];
     short vh = wi->vdi_handle;
+    const short MAG = 100;
 
     struct cubewindow *cw = (struct cubewindow *) wi->priv;
 
@@ -215,10 +218,10 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
         struct world_point *p0 = &cube[edges[i][0]];
         struct world_point *p1 = &cube[edges[i][1]];
 
-        pxy[0] = x + w / 2 + p0->x * 200 / (p0->z / 4 + 200);
-        pxy[1] = y + h / 2 + p0->y * 200 / (p0->z / 4 + 200);
-        pxy[2] = x + w / 2 + p1->x * 200 / (p1->z / 4 + 200);
-        pxy[3] = y + h / 2 + p1->y * 200 / (p1->z / 4 + 200);
+        pxy[0] = x + w / 2 + p0->x * MAG / (p0->z / 4 + MAG);
+        pxy[1] = y + h / 2 + p0->y * MAG / (p0->z / 4 + MAG);
+        pxy[2] = x + w / 2 + p1->x * MAG / (p1->z / 4 + MAG);
+        pxy[3] = y + h / 2 + p1->y * MAG / (p1->z / 4 + MAG);
         v_pline(vh, 2, pxy);
     }
 
@@ -228,8 +231,8 @@ static void draw_cubewindow(struct window *wi, short wx, short wy, short ww, sho
     {
         struct world_point *node = &cube[i];
 
-        v_circle(vh, x + w / 2 + node->x * 200 / (node->z / 4 + 200),
-                             y + h / 2 + node->y * 200 / (node->z / 4 + 200), NODE_RADIUS);
+        v_circle(vh, x + w / 2 + node->x * MAG / (node->z / 4 + MAG),
+                             y + h / 2 + node->y * MAG / (node->z / 4 + MAG), NODE_RADIUS);
     }
     dbg("end");
 }

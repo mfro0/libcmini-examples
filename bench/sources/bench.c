@@ -234,7 +234,7 @@ static void multi(void)
     short keystate;
     short keyreturn;
     short mbreturn;
-    long msec = 100;
+    long msec = 20;
     struct window *wi = NULL;
 
     do

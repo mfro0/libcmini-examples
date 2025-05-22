@@ -1,6 +1,6 @@
 CROSS=Y
 
-CROSSBINDIR_IS_Y=m68k-atari-mint-
+CROSSBINDIR_IS_Y=m68k-atari-mintelf-
 CROSSBINDIR_IS_N=
 
 CROSSBINDIR=$(CROSSBINDIR_IS_$(CROSS))
@@ -82,7 +82,8 @@ $(1)/objs/%.o:$(SRCDIR)/%.c
 
 $(1)/objs/%.o:$(SRCDIR)/%.S
 	$$(Q)echo "CC $$<"
-	$$(Q)$(CC) $$(CFLAGS) $(INCLUDE) -c $$< -o $$@
+	$$(Q)$(CC) $$(CFLAGS) -Wa,--register-prefix-optional -fleading-underscore $(INCLUDE) -c $$< -o $$@
+
 
 $(1)_OBJS=$(patsubst %,$(1)/objs/%,$(OBJS))
 $(1)/$(APP): $$($(1)_OBJS)
